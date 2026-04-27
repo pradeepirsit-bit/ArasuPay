@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArasuPay: TN Govt HR Dashboard Pro</title>
+    <style>
+        /* Professional Minimalist Theme */
+        :root {
+            --bg-page: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --border-light: #e5e7eb;
+            --border-focus: #3b82f6;
+            --brand-dark: #111827;
+            --brand-action: #2563eb;
+            --error-red: #dc2626;
+            --success-green: #059669;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: 0 auto;
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+
+        .header { padding: 30px; border-bottom: 1px solid var(--border-light); text-align: center; background-color: #fff; }
+        .header h1 { margin: 0; font-size: 1.75rem; font-weight: 600; letter-spacing: -0.025em; }
+        .header p { margin: 8px 0 0 0; color: var(--text-muted); font-size: 0.95rem; }
+        
+        .global-context {
+            background-color: #f8fafc; padding: 15px 30px; border-bottom: 1px solid var(--border-light);
+            display: flex; justify-content: center; align-items: center; gap: 15px;
+        }
+        .global-context label { font-weight: 600; color: var(--brand-dark); font-size: 0.95rem;}
+
+        .section { padding: 30px; border-bottom: 1px solid var(--border-light); }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        @media (max-width: 768px) { .grid-2col { grid-template-columns: 1fr; gap: 20px; } }
+
+        h2 { font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid var(--border-light); padding-bottom: 10px; }
+        h3 { font-size: 1rem; font-weight: 600; margin-top: 0; color: var(--text-main); }
+
+        .form-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .form-group label { font-size: 0.95rem; font-weight: 500; color: var(--text-main); }
+        
+        input, select { width: 160px; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.95rem; text-align: right; box-sizing: border-box; }
+        input[type="date"] { text-align: left; width: auto; }
+        input:focus, select:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        
+        .readonly-highlight { background-color: #f8fafc; color: var(--brand-action); font-weight: 600; border-color: #cbd5e1; }
+        .inline-group { display: flex; align-items: center; gap: 8px; width: 160px; justify-content: flex-end; }
+        .inline-group input { width: 70px; }
+        .helper-text { display: block; text-align: right; font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+        .error-text { color: var(--error-red); font-size: 0.85rem; font-weight: 500; text-align: right; display: none; margin-top: 4px; }
+        .input-error { border-color: var(--error-red) !important; background-color: #fef2f2; }
+
+        .btn-primary { background-color: var(--brand-dark); color: white; border: none; padding: 14px 24px; font-size: 1rem; font-weight: 500; border-radius: 8px; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn-primary:hover { background-color: #374151; }
+        .btn-secondary { background-color: #f3f4f6; color: var(--brand-dark); border: 1px solid #d1d5db; padding: 10px 20px; font-size: 0.95rem; font-weight: 500; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        .btn-secondary:hover { background-color: #e5e7eb; }
+
+        .summary-bar { background-color: #f8fafc; display: flex; justify-content: space-around; padding: 20px; border-radius: 8px; border: 1px solid var(--border-light); margin-top: 10px; }
+        .summary-item { text-align: center; }
+        .summary-item span { display: block; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;}
+        .summary-item strong { display: block; font-size: 1.5rem; color: var(--text-main); margin-top: 4px; }
+        .summary-item.net strong { color: var(--success-green); }
+
+        /* 1-Day Split UI */
+        .one-day-panel { display: none; background: #fff; border: 1px solid var(--border-light); border-radius: 8px; padding: 20px; margin-top: 15px; }
+        .split-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; margin-top: 15px;}
+        .split-item { text-align: center; padding: 10px; background: #f8fafc; border-radius: 6px; border: 1px solid #e5e7eb;}
+        .split-item span { display: block; font-size: 0.8rem; color: var(--text-muted); }
+        .split-item strong { display: block; font-size: 1.1rem; color: var(--brand-action); margin-top: 4px; }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { background-color: #f9fafb; color: var(--text-muted); font-weight: 500; text-transform: uppercase; font-size: 0.75rem; padding: 12px 16px; text-align: right; border-bottom: 1px solid var(--border-light); border-top: 1px solid var(--border-light); }
+        th:first-child, td:first-child { text-align: left; }
+        td { padding: 14px 16px; border-bottom: 1px solid #f3f4f6; text-align: right; font-variant-numeric: tabular-nums; }
+        .deduction-cell { color: var(--error-red); }
+        .net-cell { font-weight: 600; color: var(--success-green); }
+        .total-row td { font-weight: 600; background-color: #f9fafb; border-top: 2px solid var(--border-light); border-bottom: 2px solid var(--border-light); }
+        
+        .divider { height: 1px; background-color: var(--border-light); margin: 20px 0; }
+
+        /* Fixation Cards */
+        .fixation-cards { display: none; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        @media (max-width: 600px) { .fixation-cards { grid-template-columns: 1fr; } }
+        .fix-card { padding: 20px; border-radius: 8px; border: 1px solid var(--border-light); background: #fff; }
+        .fix-card.best { border-color: var(--success-green); background: #f0fdf4; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.1); }
+        .fix-card h4 { margin-top: 0; font-size: 1.1rem; color: var(--brand-dark); border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;}
+        .fix-card.best h4 { color: var(--success-green); border-bottom-color: #bbf7d0;}
+        .fix-line { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.95rem; }
+        .fix-line strong { font-size: 1.1rem; }
+        .badge { background: var(--success-green); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-left: 10px; vertical-align: middle;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>ArasuPay: TN Govt HR Dashboard Pro</h1>
+        <p>Empowering those who serve with clear, precise payroll calculations.</p>
+    </div>
+
+    <div class="global-context">
+        <label>Viewing Context:</label>
+        <select id="globalMonth" style="text-align: left; width: 250px; background-color: #fff;">
+            <option value="31" selected>January (31 Days)</option>
+            <option value="28">February - Standard (28 Days)</option>
+            <option value="29">February - Leap Year (29 Days)</option>
+            <option value="31">March (31 Days)</option>
+            <option value="30">April (30 Days)</option>
+            <option value="31">May (31 Days)</option>
+            <option value="30">June (30 Days)</option>
+            <option value="31">July (31 Days)</option>
+            <option value="31">August (31 Days)</option>
+            <option value="30">September (30 Days)</option>
+            <option value="31">October (31 Days)</option>
+            <option value="30">November (30 Days)</option>
+            <option value="31">December (31 Days)</option>
+        </select>
+    </div>
+
+    <div class="section grid-2col">
+        <div>
+            <h2>Standard Earnings</h2>
+            <div class="form-group"><label>Pay Level</label><select id="payLevel" class="level-select"></select></div>
+            <div class="form-group"><label>Matrix Cell</label><select id="payCell" class="cell-select"></select></div>
+            <div class="form-group"><label>Computed Basic Pay</label><input type="text" id="basicPay" class="readonly-highlight" value="0" readonly></div>
+            
+            <div class="divider"></div>
+            
+            <div class="form-group">
+                <label>Dearness Allowance (DA)</label>
+                <div class="inline-group"><input type="number" id="daPercent" value="50" min="0"> <span>%</span></div>
+            </div>
+            <span class="helper-text" id="daAmountDisplay">₹ 0</span>
+            
+            <div class="form-group"><label>HRA (₹)</label><input type="number" id="hra" value="1800"></div>
+            <div class="form-group"><label>Medical Allowance (₹)</label><input type="number" id="ma" value="300"></div>
+            <div class="form-group"><label>Other Allowances (₹)</label><input type="number" id="otherEarnings" value="600"></div>
+        </div>
+
+        <div>
+            <h2>Standard Deductions</h2>
+            <div class="form-group"><label>Pension Scheme</label><select id="pensionType"><option value="CPS">CPS (10%)</option><option value="GPF">GPF (Min 12%)</option></select></div>
+            <div class="form-group"><label id="pensionLabel">Pension Amount</label><input type="number" id="pensionAmount" class="readonly-highlight" value="0" readonly></div>
+            <div id="gpfError" class="error-text">Minimum 12% Required</div>
+            
+            <div class="divider"></div>
+            <div class="form-group"><label style="color: var(--text-muted);">Total FA Taken</label><input type="number" id="faTotal" value="0"></div>
+            <div class="form-group"><label style="color: var(--text-muted);">FA Installment</label><select id="faInstallment"><option value="0">None</option><option value="1">1 of 10</option><option value="2">2 of 10</option><option value="3">3 of 10</option><option value="4">4 of 10</option><option value="5">5 of 10</option><option value="6">6 of 10</option><option value="7">7 of 10</option><option value="8">8 of 10</option><option value="9">9 of 10</option><option value="10">10 of 10</option></select></div>
+            <div class="form-group"><label style="color: var(--text-muted);">This Month EMI</label><input type="text" id="faDeduction" value="0" readonly style="background: #f9fafb;"></div>
+
+            <div class="divider"></div>
+            <div class="form-group"><label>NHIS (₹)</label><input type="number" id="nhis" value="300"></div>
+            <div class="form-group"><label>FBF (₹)</label><input type="number" id="fbf" value="110"></div>
+            <div class="form-group"><label>Other Deductions (₹)</label><input type="number" id="otherDeductions" value="0"></div>
+        </div>
+    </div>
+
+    <div class="section" style="padding-top: 10px;">
+        <div class="summary-bar">
+            <div class="summary-item"><span>Gross Pay</span><strong id="grossTotal">₹0</strong></div>
+            <div class="summary-item"><span>Total Deductions</span><strong id="totalDeductions" style="color: var(--error-red);">₹0</strong></div>
+            <div class="summary-item net"><span>Net Monthly Salary</span><strong id="netPay">₹0</strong></div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="btn-secondary" onclick="toggleOneDay()" id="btnOneDay">Show 1-Day Salary Calculation</button>
+        </div>
+
+        <div class="one-day-panel" id="oneDayPanel">
+            <h3 style="margin-bottom: 5px; text-align: center;">1-Day Fractional Breakdown</h3>
+            <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 0;">Based on <strong id="lblContextDays">31</strong> days in selected month. Values rounded UP.</p>
+            <div class="split-grid">
+                <div class="split-item"><span>Basic Pay</span><strong id="dBasic">₹0</strong></div>
+                <div class="split-item"><span>DA</span><strong id="dDA">₹0</strong></div>
+                <div class="split-item"><span>HRA</span><strong id="dHRA">₹0</strong></div>
+                <div class="split-item"><span>MA / Other</span><strong id="dOther">₹0</strong></div>
+                <div class="split-item" style="background: #ecfdf5; border-color: #a7f3d0;"><span>Net per Day</span><strong style="color: var(--success-green);" id="dNet">₹0</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Month-by-Month Arrear Calculator</h2>
+        <div style="display: flex; gap: 30px; margin-bottom: 20px; background: #f8fafc; padding: 20px; border-radius: 8px;">
+            <div style="flex:1;"><label style="display:block; font-size: 0.85rem; color: var(--text-muted);">START DATE</label><input type="date" id="arrStart" style="width: 100%;"></div>
+            <div style="flex:1;"><label style="display:block; font-size: 0.85rem; color: var(--text-muted);">END DATE</label><input type="date" id="arrEnd" style="width: 100%;"></div>
+        </div>
+
+        <div class="grid-2col" style="margin-bottom: 25px;">
+            <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px;">
+                <h3 style="color: var(--brand-action);">Due (Promoted Pay)</h3>
+                <div class="form-group"><label>Pay Level</label><select id="arrDueLevel" class="level-select"></select></div>
+                <div class="form-group"><label>Matrix Cell</label><select id="arrDueCell" class="cell-select"></select></div>
+                <div class="form-group"><label>HRA (₹)</label><input type="number" id="arrDueHRA" value="1800"></div>
+                <div class="form-group"><label>CCA (₹)</label><input type="number" id="arrDueCCA" value="600"></div>
+            </div>
+            
+            <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #fafaf9;">
+                <h3 style="color: #57534e;">Drawn (Current Pay)</h3>
+                <div class="form-group"><label>Pay Level</label><select id="arrDrawnLevel" class="level-select"></select></div>
+                <div class="form-group"><label>Matrix Cell</label><select id="arrDrawnCell" class="cell-select"></select></div>
+                <div class="form-group"><label>HRA (₹)</label><input type="number" id="arrDrawnHRA" value="1800"></div>
+                <div class="form-group"><label>CCA (₹)</label><input type="number" id="arrDrawnCCA" value="600"></div>
+            </div>
+        </div>
+        <button class="btn-primary" onclick="generateArrearTable()">Generate Detailed Arrear Table</button>
+
+        <div class="arrear-table-wrapper" id="arrearWrapper">
+            <h3 style="margin-bottom: 15px; display: flex; justify-content: space-between;">
+                <span>Detailed Monthly Breakdown</span>
+                <span id="pensionHeaderLabel" style="font-size: 0.85rem; color: var(--text-muted); font-weight: normal;">*Pension computed on Basic+DA diff</span>
+            </h3>
+            <table id="arrearTable">
+                <thead><tr><th>Month</th><th>Days</th><th>Basic</th><th>DA</th><th>HRA</th><th>CCA</th><th>Gross</th><th>Pension</th><th>Net Arrear</th></tr></thead>
+                <tbody id="arrearBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section" style="border-bottom: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h2 style="border: none; margin-bottom: 5px; padding-bottom: 0;">Promotion Fixation Chooser (FR 22 B)</h2>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0;">Simulate Option A (Immediate) vs Option B (Deferred).</p>
+            </div>
+            <button class="btn-secondary" onclick="toggleFixation()" id="btnFixation" style="width: auto;">Show Fixation Chooser</button>
+        </div>
+
+        <div id="fixationPanel" style="display: none;">
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid var(--border-light); margin-bottom: 20px;">
+                <div class="form-group"><label>Your Current Pay Level</label><select id="fixCurLevel" class="level-select"></select></div>
+                <div class="form-group"><label>Your Current Cell</label><select id="fixCurCell" class="cell-select"></select></div>
+                <div class="divider"></div>
+                <div class="form-group"><label>New Promoted Level</label><select id="fixProLevel" class="level-select"></select></div>
+                <button class="btn-primary" style="margin-top: 10px;" onclick="calculateFixation()">Compare Options</button>
+            </div>
+
+            <div class="fixation-cards" id="fixCards">
+                <div class="fix-card" id="cardA">
+                    <h4>Option A (Immediate Fixation)</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -5px;">Adds one increment to current pay, then fixes in higher level.</p>
+                    <div class="fix-line"><span>Notional Lower Pay:</span><span id="fixA_Notional">₹0</span></div>
+                    <div class="fix-line" style="margin-top: 15px; border-top: 1px dashed #e5e7eb; padding-top: 15px; color: var(--brand-action);">
+                        <span>Fixed Promoted Pay:</span><strong id="fixA_Final">₹0</strong>
+                    </div>
+                    <div class="fix-line"><span>Lands in Matrix at:</span><span id="fixA_Cell" style="font-weight: 500;">Cell X</span></div>
+                </div>
+
+                <div class="fix-card" id="cardB">
+                    <h4>Option B (Deferred Fixation)</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -5px;">Fixes at equal/min initially. Grants increment on normal date, then refixes.</p>
+                    <div class="fix-line"><span>Initial Fixation:</span><span id="fixB_Init">₹0</span></div>
+                    <div class="fix-line" style="margin-top: 15px; border-top: 1px dashed #e5e7eb; padding-top: 15px; color: var(--brand-action);">
+                        <span>Final Fixation (After Incr):</span><strong id="fixB_Final">₹0</strong>
+                    </div>
+                    <div class="fix-line"><span>Lands in Matrix at:</span><span id="fixB_Cell" style="font-weight: 500;">Cell X</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Data & Init ---
+    const levels = [
+        {val: 15700, text: "Level 1 (₹15,700)"}, {val: 15900, text: "Level 2 (₹15,900)"},
+        {val: 18000, text: "Level 4 (₹18,000)"}, {val: 19500, text: "Level 8 (₹19,500)"},
+        {val: 20600, text: "Level 10 (₹20,600)"}, {val: 35400, text: "Level 11 (₹35,400)"},
+        {val: 36900, text: "Level 16 (₹36,900)"}, {val: 37700, text: "Level 18 (₹37,700)"},
+        {val: 56100, text: "Level 22 (₹56,100)"}, {val: 59300, text: "Level 28 (₹59,300)"}
+    ];
+
+    document.querySelectorAll('.level-select').forEach(select => {
+        levels.forEach(l => {
+            let opt = document.createElement('option'); opt.value = l.val; opt.text = l.text;
+            if(l.val === 36900) opt.selected = true; select.appendChild(opt);
+        });
+    });
+
+    document.querySelectorAll('.cell-select').forEach(select => {
+        for(let i=1; i<=40; i++){
+            let opt = document.createElement('option'); opt.value = i; opt.text = "Cell " + i; select.appendChild(opt);
+        }
+    });
+
+    const currentYear = new Date().getFullYear();
+    document.getElementById('arrStart').value = `${currentYear}-01-15`;
+    document.getElementById('arrEnd').value = `${currentYear}-03-10`;
+
+    // --- Formatters & Helpers ---
+    const formatCurr = (num) => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(num);
+    const getMatrixPay = (base, cell) => {
+        let p = parseInt(base);
+        for (let i = 1; i < parseInt(cell); i++) p = Math.ceil((p * 1.03) / 100) * 100;
+        return p;
+    };
+    
+    const findFixationStage = (targetAmount, targetLevelBase) => {
+        let p = parseInt(targetLevelBase);
+        let c = 1;
+        while (p < targetAmount && c < 40) {
+            p = Math.ceil((p * 1.03) / 100) * 100;
+            c++;
+        }
+        return { pay: p, cell: c };
+    };
+
+    // --- Main Salary Logic ---
+    function calculateMainSalary() {
+        const basic = getMatrixPay(document.getElementById('payLevel').value, document.getElementById('payCell').value);
+        document.getElementById('basicPay').value = formatCurr(basic);
+
+        const daPct = parseFloat(document.getElementById('daPercent').value) || 0;
+        const daAmt = Math.ceil(basic * (daPct / 100));
+        document.getElementById('daAmountDisplay').innerText = `₹ ${formatCurr(daAmt)}`;
+
+        const hra = parseFloat(document.getElementById('hra').value) || 0;
+        const ma = parseFloat(document.getElementById('ma').value) || 0;
+        const other = parseFloat(document.getElementById('otherEarnings').value) || 0;
+        const gross = basic + daAmt + hra + ma + other;
+
+        const penType = document.getElementById('pensionType').value;
+        const penInput = document.getElementById('pensionAmount');
+        const gpfErr = document.getElementById('gpfError');
+        let penDed = 0; let err = false;
+
+        if (penType === 'CPS') {
+            document.getElementById('pensionLabel').innerText = "CPS (10% Auto)";
+            penInput.readOnly = true; penInput.classList.add('readonly-highlight');
+            penDed = Math.ceil((basic + daAmt) * 0.10);
+            penInput.value = penDed;
+            penInput.classList.remove('input-error'); gpfErr.style.display = 'none';
+        } else {
+            document.getElementById('pensionLabel').innerText = "GPF (Min 12%)";
+            penInput.readOnly = false; penInput.classList.remove('readonly-highlight');
+            const minGpf = Math.ceil((basic + daAmt) * 0.12);
+            let uGpf = parseFloat(penInput.value) || 0;
+            if (uGpf < minGpf && penInput.value !== "") {
+                gpfErr.innerText = `Minimum 12% Required: ₹${formatCurr(minGpf)}`;
+                gpfErr.style.display = 'block'; penInput.classList.add('input-error'); err = true;
+            } else {
+                gpfErr.style.display = 'none'; penInput.classList.remove('input-error');
+                if (penInput.value === "") { penInput.value = minGpf; uGpf = minGpf; }
+            }
+            penDed = uGpf;
+        }
+
+        const faTot = parseFloat(document.getElementById('faTotal').value) || 0;
+        const faInst = parseInt(document.getElementById('faInstallment').value) || 0;
+        const faDed = (faInst > 0 && faInst <= 10 && faTot > 0) ? Math.ceil(faTot / 10) : 0;
+        document.getElementById('faDeduction').value = faDed;
+
+        const nhis = parseFloat(document.getElementById('nhis').value) || 0;
+        const fbf = parseFloat(document.getElementById('fbf').value) || 0;
+        const oDed = parseFloat(document.getElementById('otherDeductions').value) || 0;
+        const totDed = penDed + faDed + nhis + fbf + oDed;
+        const net = err ? 0 : gross - totDed;
+
+        document.getElementById('grossTotal').innerText = `₹ ${formatCurr(gross)}`;
+        document.getElementById('totalDeductions').innerText = err ? "ERROR" : `₹ ${formatCurr(totDed)}`;
+        document.getElementById('netPay').innerText = err ? "ERROR" : `₹ ${formatCurr(net)}`;
+
+        // Update 1-Day Values silently if panel is open
+        const days = parseInt(document.getElementById('globalMonth').value);
+        document.getElementById('lblContextDays').innerText = days;
+        if(!err) {
+            document.getElementById('dBasic').innerText = `₹${formatCurr(Math.ceil(basic/days))}`;
+            document.getElementById('dDA').innerText = `₹${formatCurr(Math.ceil(daAmt/days))}`;
+            document.getElementById('dHRA').innerText = `₹${formatCurr(Math.ceil(hra/days))}`;
+            document.getElementById('dOther').innerText = `₹${formatCurr(Math.ceil((ma+other)/days))}`;
+            document.getElementById('dNet').innerText = `₹${formatCurr(Math.ceil(net/days))}`;
+        }
+    }
+
+    // --- Toggles ---
+    function toggleOneDay() {
+        const panel = document.getElementById('oneDayPanel');
+        const btn = document.getElementById('btnOneDay');
+        if(panel.style.display === 'block') {
+            panel.style.display = 'none';
+            btn.innerText = 'Show 1-Day Salary Calculation';
+        } else {
+            panel.style.display = 'block';
+            btn.innerText = 'Hide 1-Day Calculation';
+            calculateMainSalary();
+        }
+    }
+
+    function toggleFixation() {
+        const panel = document.getElementById('fixationPanel');
+        const btn = document.getElementById('btnFixation');
+        if(panel.style.display === 'block') {
+            panel.style.display = 'none';
+            btn.innerText = 'Show Fixation Chooser';
+        } else {
+            panel.style.display = 'block';
+            btn.innerText = 'Hide Fixation Chooser';
+        }
+    }
+
+    // --- Arrear Logic ---
+    function generateArrearTable() {
+        const start = new Date(document.getElementById('arrStart').value);
+        const end = new Date(document.getElementById('arrEnd').value);
+        if (isNaN(start) || isNaN(end) || end < start) return alert("Valid dates required.");
+
+        const globalDA = parseFloat(document.getElementById('daPercent').value) || 0;
+        const isCPS = document.getElementById('pensionType').value === 'CPS';
+        document.getElementById('pensionHeaderLabel').innerText = isCPS ? "*Pension Ded: CPS (10%)" : "*Pension Ded: GPF (12% Min)";
+
+        const dueBasic = getMatrixPay(document.getElementById('arrDueLevel').value, document.getElementById('arrDueCell').value);
+        const dueDA = Math.ceil(dueBasic * (globalDA / 100));
+        const dueHRA = parseFloat(document.getElementById('arrDueHRA').value) || 0;
+        const dueCCA = parseFloat(document.getElementById('arrDueCCA').value) || 0;
+
+        const drawnBasic = getMatrixPay(document.getElementById('arrDrawnLevel').value, document.getElementById('arrDrawnCell').value);
+        const drawnDA = Math.ceil(drawnBasic * (globalDA / 100));
+        const drawnHRA = parseFloat(document.getElementById('arrDrawnHRA').value) || 0;
+        const drawnCCA = parseFloat(document.getElementById('arrDrawnCCA').value) || 0;
+
+        const mDiffBasic = dueBasic - drawnBasic;
+        const mDiffDA = dueDA - drawnDA;
+        const mDiffHRA = dueHRA - drawnHRA;
+        const mDiffCCA = dueCCA - drawnCCA;
+
+        const tbody = document.getElementById('arrearBody');
+        tbody.innerHTML = '';
+        let totals = { days: 0, basic: 0, da: 0, hra: 0, cca: 0, gross: 0, pen: 0, net: 0 };
+        
+        let current = new Date(start.getFullYear(), start.getMonth(), 1);
+        const endLimit = new Date(end.getFullYear(), end.getMonth(), 1);
+
+        while (current <= endLimit) {
+            const year = current.getFullYear();
+            const month = current.getMonth();
+            const maxDays = new Date(year, month + 1, 0).getDate();
+            
+            let activeStart = (year === start.getFullYear() && month === start.getMonth()) ? start.getDate() : 1;
+            let activeEnd = (year === end.getFullYear() && month === end.getMonth()) ? end.getDate() : maxDays;
+            const activeDays = activeEnd - activeStart + 1;
+
+            const pBasic = Math.ceil((mDiffBasic / maxDays) * activeDays);
+            const pDA = Math.ceil((mDiffDA / maxDays) * activeDays);
+            const pHRA = Math.ceil((mDiffHRA / maxDays) * activeDays);
+            const pCCA = Math.ceil((mDiffCCA / maxDays) * activeDays);
+            const pGross = pBasic + pDA + pHRA + pCCA;
+            const pPen = Math.ceil((pBasic + pDA) * (isCPS ? 0.10 : 0.12));
+            const pNet = pGross - pPen;
+
+            totals.days += activeDays; totals.basic += pBasic; totals.da += pDA; totals.hra += pHRA; totals.cca += pCCA; totals.gross += pGross; totals.pen += pPen; totals.net += pNet;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][month]} ${year}</td>
+                <td>${activeDays}</td><td>${formatCurr(pBasic)}</td><td>${formatCurr(pDA)}</td><td>${formatCurr(pHRA)}</td><td>${formatCurr(pCCA)}</td>
+                <td><strong>${formatCurr(pGross)}</strong></td><td class="deduction-cell">- ${formatCurr(pPen)}</td><td class="net-cell">${formatCurr(pNet)}</td>`;
+            tbody.appendChild(tr);
+            current.setMonth(current.getMonth() + 1);
+        }
+
+        const trTotal = document.createElement('tr');
+        trTotal.className = 'total-row';
+        trTotal.innerHTML = `<td>GRAND TOTAL</td><td>${totals.days} Days</td><td>₹ ${formatCurr(totals.basic)}</td><td>₹ ${formatCurr(totals.da)}</td>
+            <td>₹ ${formatCurr(totals.hra)}</td><td>₹ ${formatCurr(totals.cca)}</td><td>₹ ${formatCurr(totals.gross)}</td>
+            <td class="deduction-cell">- ₹ ${formatCurr(totals.pen)}</td><td class="net-cell" style="font-size: 1.1rem;">₹ ${formatCurr(totals.net)}</td>`;
+        tbody.appendChild(trTotal);
+        document.getElementById('arrearWrapper').style.display = 'block';
+    }
+
+    // --- Fixation Chooser Logic ---
+    function calculateFixation() {
+        const curLevel = parseInt(document.getElementById('fixCurLevel').value);
+        const curCell = parseInt(document.getElementById('fixCurCell').value);
+        const proLevel = parseInt(document.getElementById('fixProLevel').value);
+
+        if (proLevel <= curLevel) {
+            alert("Promoted Level must be higher than Current Level to simulate fixation.");
+            return;
+        }
+
+        const notionalPay = getMatrixPay(curLevel, curCell + 1);
+        const fixA = findFixationStage(notionalPay, proLevel);
+
+        const currentPay = getMatrixPay(curLevel, curCell);
+        const initialFixB = findFixationStage(currentPay, proLevel);
+        const finalFixB = findFixationStage(getMatrixPay(curLevel, curCell + 1), proLevel);
+
+        document.getElementById('fixA_Notional').innerText = `₹ ${formatCurr(notionalPay)}`;
+        document.getElementById('fixA_Final').innerText = `₹ ${formatCurr(fixA.pay)}`;
+        document.getElementById('fixA_Cell').innerText = `Cell ${fixA.cell}`;
+
+        document.getElementById('fixB_Init').innerText = `₹ ${formatCurr(initialFixB.pay)} (Cell ${initialFixB.cell})`;
+        document.getElementById('fixB_Final').innerText = `₹ ${formatCurr(finalFixB.pay)}`;
+        document.getElementById('fixB_Cell').innerText = `Cell ${finalFixB.cell}`;
+
+        const cardA = document.getElementById('cardA');
+        const cardB = document.getElementById('cardB');
+        cardA.classList.remove('best'); cardB.classList.remove('best');
+        document.querySelectorAll('.badge').forEach(e => e.remove());
+
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.innerText = 'Highest Pay';
+
+        if (fixA.pay > finalFixB.pay) {
+            cardA.classList.add('best');
+            document.getElementById('fixA_Final').appendChild(badge);
+        } else if (finalFixB.pay > fixA.pay) {
+            cardB.classList.add('best');
+            document.getElementById('fixB_Final').appendChild(badge);
+        } else {
+            badge.innerText = 'Equal Pay';
+            const badge2 = badge.cloneNode(true);
+            cardA.classList.add('best'); cardB.classList.add('best');
+            document.getElementById('fixA_Final').appendChild(badge);
+            document.getElementById('fixB_Final').appendChild(badge2);
+        }
+
+        document.getElementById('fixCards').style.display = 'grid';
+    }
+
+    // Attach listeners
+    document.querySelectorAll('.grid-2col input, .grid-2col select, #globalMonth').forEach(el => el.addEventListener('input', calculateMainSalary));
+    calculateMainSalary();
+</script>
+</body>
+</html>
