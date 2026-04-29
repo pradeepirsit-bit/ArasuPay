@@ -44,10 +44,14 @@
         .helper-text { display: block; text-align: right; font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
         .error-text { color: var(--error-red); font-size: 0.85rem; font-weight: 500; text-align: right; display: none; margin-top: 4px; }
 
-        .btn-primary { background-color: var(--brand-dark); color: white; border: none; padding: 14px 24px; font-size: 1rem; font-weight: 500; border-radius: 8px; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 10px;}
+        .btn-primary { background-color: var(--brand-dark); color: white; border: none; padding: 14px 24px; font-size: 1rem; font-weight: 500; border-radius: 8px; cursor: pointer; width: 100%; transition: 0.2s;}
         .btn-primary:hover { background-color: #374151; }
         .btn-secondary { background-color: #f3f4f6; color: var(--brand-dark); border: 1px solid #d1d5db; padding: 8px 16px; font-size: 0.9rem; font-weight: 500; border-radius: 6px; cursor: pointer; transition: 0.2s; }
         .btn-secondary:hover { background-color: #e5e7eb; }
+        
+        .btn-export { background-color: var(--success-green); color: white; border: none; padding: 14px 24px; font-size: 1rem; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.2s; white-space: nowrap;}
+        .btn-export:hover { background-color: #047857; }
+
         .btn-mini { background-color: #e0f2fe; color: #0284c7; border: 1px dashed #7dd3fc; padding: 6px 12px; font-size: 0.85rem; border-radius: 4px; cursor: pointer; margin-top: 10px; width: 100%; font-weight: bold;}
         .btn-mini:hover { background-color: #bae6fd; }
 
@@ -78,6 +82,8 @@
         
         .section-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid var(--border-light); padding-bottom: 15px;}
         .divider { height: 1px; background-color: var(--border-light); margin: 20px 0; }
+        
+        .action-bar { display: flex; gap: 10px; margin-top: 20px; align-items: stretch; flex-wrap: wrap;}
     </style>
 </head>
 <body>
@@ -85,7 +91,7 @@
 <div class="container">
     <div class="header">
         <h1>ArasuPay: Advanced HR Dashboard</h1>
-        <p>Featuring Dynamic LOP Date Postponement & Multi-Year Increments</p>
+        <p>Featuring Dynamic LOP Postponement & 1-Click Treasury Exports</p>
     </div>
 
     <div class="global-context">
@@ -178,7 +184,6 @@
                 <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #fafaf9;">
                     <h3 style="color: #57534e;">Base Pay (Before Increments)</h3>
                     <div class="form-group"><label>Old Basic Pay (₹)</label><input type="number" id="incOldBasic" class="readonly-highlight" readonly></div>
-                    <p style="font-size:0.8rem; color:var(--text-muted); text-align:right; margin:0;">*Fetched from Main Earnings</p>
                     
                     <div style="margin-top: 30px;">
                         <h4 style="margin: 0 0 10px 0; color: #dc2626;">Loss of Pay / Strike Entries</h4>
@@ -196,10 +201,18 @@
                         </div>
                     </div>
                     <button class="btn-mini" onclick="addIncStage()">+ Add Next Year Increment</button>
-                    <p style="font-size:0.8rem; color:var(--text-muted); margin-top:10px;">*HRA & CCA differences are assumed as 0 for standard increments.</p>
                 </div>
             </div>
-            <button class="btn-primary" onclick="generateAdvancedArrear('inc')">Calculate Exact Increment Arrear</button>
+            
+            <div class="action-bar">
+                <button class="btn-primary" onclick="generateAdvancedArrear('inc')" style="flex: 2; margin-top:0;">Calculate Increment Arrear</button>
+                <select id="exportFormat_inc" style="flex: 1; max-width: 150px;">
+                    <option value="csv">Excel / CSV</option>
+                    <option value="word">Word Doc</option>
+                </select>
+                <button class="btn-export" onclick="triggerExport('inc')" style="flex: 1;">⬇ Export File</button>
+            </div>
+
             <div id="incWrapper" style="display: none; overflow-x: auto;">
                 <table id="incTable">
                     <thead><tr><th>Month</th><th>Days</th><th>Basic Diff</th><th>DA Diff</th><th>HRA Diff</th><th>CCA Diff</th><th>Gross Diff</th><th>Pension Ded</th><th>Net Arrear</th></tr></thead>
@@ -245,7 +258,16 @@
                     <div class="form-group"><label>CCA (₹)</label><input type="number" id="promoDueCCA" value="600"></div>
                 </div>
             </div>
-            <button class="btn-primary" onclick="generateAdvancedArrear('promo')">Calculate Promotion Arrear</button>
+            
+            <div class="action-bar">
+                <button class="btn-primary" onclick="generateAdvancedArrear('promo')" style="flex: 2; margin-top:0;">Calculate Promotion Arrear</button>
+                <select id="exportFormat_promo" style="flex: 1; max-width: 150px;">
+                    <option value="csv">Excel / CSV</option>
+                    <option value="word">Word Doc</option>
+                </select>
+                <button class="btn-export" onclick="triggerExport('promo')" style="flex: 1;">⬇ Export File</button>
+            </div>
+
             <div id="promoWrapper" style="display: none; overflow-x: auto;">
                 <table id="promoTable">
                     <thead><tr><th>Month</th><th>Days</th><th>Basic Diff</th><th>DA Diff</th><th>HRA Diff</th><th>CCA Diff</th><th>Gross Diff</th><th>Pension Ded</th><th>Net Arrear</th></tr></thead>
@@ -254,17 +276,19 @@
             </div>
         </div>
     </div>
+
 </div>
 
 <script>
+    // --- Global Export Data Store ---
+    window.arrearExportData = { inc: [], promo: [] };
+
     // --- Initialization ---
     const formatCurr = (num) => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(num);
-    
     const today = new Date();
     document.getElementById('incStart').value = `${today.getFullYear()}-07-01`;
     document.getElementById('incEnd').value = `${today.getFullYear()}-12-31`;
     document.querySelector('.inc-date').value = `${today.getFullYear()}-07-01`;
-    
     document.getElementById('promoStart').value = `${today.getFullYear()}-01-15`;
     document.getElementById('promoEnd').value = `${today.getFullYear()}-03-10`;
 
@@ -276,39 +300,30 @@
 
     // --- Dynamic UI Builders ---
     function addLopRow(containerId) {
-        const div = document.createElement('div');
-        div.className = 'dynamic-row lop-row';
-        div.innerHTML = `
-            <div style="display:flex; align-items:center; gap:5px; width: 100%;">
+        const div = document.createElement('div'); div.className = 'dynamic-row lop-row';
+        div.innerHTML = `<div style="display:flex; align-items:center; gap:5px; width: 100%;">
                 <input type="date" class="lop-from" title="LOP Start Date">
                 <span style="font-size:0.8rem; color:#666;">to</span>
                 <input type="date" class="lop-to" title="LOP End Date">
                 <button class="btn-remove" onclick="this.parentElement.parentElement.remove()">X</button>
-            </div>
-        `;
+            </div>`;
         document.getElementById(containerId).appendChild(div);
     }
-
     function addIncStage() {
-        const div = document.createElement('div');
-        div.className = 'dynamic-row inc-row';
-        div.innerHTML = `
-            <input type="date" class="inc-date" title="Original Effective Date">
+        const div = document.createElement('div'); div.className = 'dynamic-row inc-row';
+        div.innerHTML = `<input type="date" class="inc-date" title="Original Effective Date">
             <input type="number" class="inc-pay" placeholder="New Basic (₹)">
-            <button class="btn-remove" onclick="this.parentElement.remove()">X</button>
-        `;
+            <button class="btn-remove" onclick="this.parentElement.remove()">X</button>`;
         document.getElementById('incStagesContainer').appendChild(div);
     }
 
-    // --- Main Salary Loop ---
+    // --- Main Salary Logic ---
     function calculateMainSalary() {
         const basic = parseFloat(document.getElementById('basicPay').value) || 0;
         document.getElementById('incOldBasic').value = basic;
-
         const daPct = parseFloat(document.getElementById('daPercent').value) || 0;
         const daAmt = Math.ceil(basic * (daPct / 100));
         document.getElementById('daAmountDisplay').innerText = `₹ ${formatCurr(daAmt)}`;
-
         const hra = parseFloat(document.getElementById('hra').value) || 0;
         const ma = parseFloat(document.getElementById('ma').value) || 0;
         const other = parseFloat(document.getElementById('otherEarnings').value) || 0;
@@ -344,7 +359,6 @@
         const faInst = parseInt(document.getElementById('faInstallment').value) || 0;
         const faDed = (faInst > 0 && faInst <= 10 && faTot > 0) ? Math.ceil(faTot / 10) : 0;
         document.getElementById('faDeduction').value = faDed;
-
         const nhis = parseFloat(document.getElementById('nhis').value) || 0;
         const fbf = parseFloat(document.getElementById('fbf').value) || 0;
         const oDed = parseFloat(document.getElementById('otherDeductions').value) || 0;
@@ -367,7 +381,7 @@
         }
     }
 
-    // --- Advanced Arrear Math Engine ---
+    // --- Advanced Arrear Engine (Calculates UI & Export Data) ---
     function generateAdvancedArrear(type) {
         const globalDA = parseFloat(document.getElementById('daPercent').value) || 0;
         const isCPS = document.getElementById('pensionType').value === 'CPS';
@@ -375,64 +389,58 @@
         let startStr = document.getElementById(type + 'Start').value;
         let endStr = document.getElementById(type + 'End').value;
         if (!startStr || !endStr) return alert("Please select valid Start and End dates.");
-        
-        let start = new Date(startStr);
-        let end = new Date(endStr);
+        let start = new Date(startStr); let end = new Date(endStr);
         if (end < start) return alert("End date must be after Start date.");
         
-        // 1. Gather LOPs with exact dates
+        // Gather LOPs
         let lops = [];
         document.querySelectorAll(`#${type}LopContainer .lop-row`).forEach(row => {
-            const fStr = row.querySelector('.lop-from').value;
-            const tStr = row.querySelector('.lop-to').value;
+            const fStr = row.querySelector('.lop-from').value; const tStr = row.querySelector('.lop-to').value;
             if (fStr && tStr) {
-                const f = new Date(fStr);
-                const t = new Date(tStr);
-                if (t >= f) {
-                    lops.push({ start: f, end: t, days: Math.ceil((t - f) / (1000 * 60 * 60 * 24)) + 1 });
-                }
+                const f = new Date(fStr); const t = new Date(tStr);
+                if (t >= f) lops.push({ start: f, end: t, days: Math.ceil((t - f) / (1000 * 60 * 60 * 24)) + 1 });
             }
         });
 
-        // 2. Gather Pay Stages
+        // Gather Pay Stages
         let stages = [];
-        let oldBasic, oldHRA = 0, oldCCA = 0;
+        let oldBasic, oldHRA = 0, oldCCA = 0, oldDA = 0;
 
         if (type === 'inc') {
             oldBasic = parseFloat(document.getElementById('incOldBasic').value) || 0;
+            oldDA = Math.ceil(oldBasic * (globalDA / 100));
             const stageRows = document.getElementById('incStagesContainer').children;
             for (let row of stageRows) {
                 const date = new Date(row.querySelector('.inc-date').value);
                 const pay = parseFloat(row.querySelector('.inc-pay').value) || 0;
                 if (!isNaN(date) && pay > 0) {
-                    // Shift date if LOP occurred before original increment date
                     let totalLopShift = 0;
                     lops.forEach(lop => { if (lop.start < date) totalLopShift += lop.days; });
-                    
-                    let adjustedDate = new Date(date);
-                    adjustedDate.setDate(adjustedDate.getDate() + totalLopShift);
+                    let adjustedDate = new Date(date); adjustedDate.setDate(adjustedDate.getDate() + totalLopShift);
                     stages.push({ date: adjustedDate, basic: pay, hra: 0, cca: 0 }); 
                 }
             }
         } else {
-            // Promotion
             oldBasic = parseFloat(document.getElementById('promoDrawnBasic').value) || 0;
+            oldDA = Math.ceil(oldBasic * (globalDA / 100));
             oldHRA = parseFloat(document.getElementById('promoDrawnHRA').value) || 0;
             oldCCA = parseFloat(document.getElementById('promoDrawnCCA').value) || 0;
             
             const dueBasic = parseFloat(document.getElementById('promoDueBasic').value) || 0;
             const dueHRA = parseFloat(document.getElementById('promoDueHRA').value) || 0;
             const dueCCA = parseFloat(document.getElementById('promoDueCCA').value) || 0;
-            
             stages.push({ date: new Date(start), basic: dueBasic, hra: dueHRA, cca: dueCCA });
         }
 
         stages.sort((a, b) => a.date - b.date);
 
-        // 3. Process Month-by-Month Chunking
         const tbody = document.getElementById(type + 'Body');
         tbody.innerHTML = '';
-        let totals = { days: 0, basic: 0, da: 0, hra: 0, cca: 0, gross: 0, pen: 0, net: 0 };
+        
+        // Reset Export Data
+        window.arrearExportData[type] = [];
+        
+        let totals = { days: 0, basic: 0, da: 0, hra: 0, cca: 0, gross: 0, pen: 0, net: 0, expDueGross: 0, expDrawnGross: 0 };
         
         let current = new Date(start.getFullYear(), start.getMonth(), 1);
         const endLimit = new Date(end.getFullYear(), end.getMonth(), 1);
@@ -446,7 +454,6 @@
             let activeStart = (year === start.getFullYear() && month === start.getMonth()) ? start.getDate() : 1;
             let activeEnd = (year === end.getFullYear() && month === end.getMonth()) ? end.getDate() : maxDays;
             
-            // Does a stage change happen in the middle of THIS month?
             let splitDays = [];
             for (let i = 0; i < stages.length; i++) {
                 if (stages[i].date.getFullYear() === year && stages[i].date.getMonth() === month) {
@@ -463,7 +470,6 @@
                 chunks.push({ s: activeStart, e: activeEnd });
             }
 
-            // Process exact chunk overlaps with LOPs
             chunks.forEach((chunk) => {
                 let chunkStart = new Date(year, month, chunk.s);
                 let chunkEnd = new Date(year, month, chunk.e);
@@ -472,27 +478,21 @@
                 lops.forEach(l => {
                     let overlapStart = l.start > chunkStart ? l.start : chunkStart;
                     let overlapEnd = l.end < chunkEnd ? l.end : chunkEnd;
-                    if(overlapStart <= overlapEnd) {
-                        lopThisChunk += Math.ceil((overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)) + 1;
-                    }
+                    if(overlapStart <= overlapEnd) lopThisChunk += Math.ceil((overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)) + 1;
                 });
 
-                let chunkTotalDays = chunk.e - chunk.s + 1;
-                let actualDays = chunkTotalDays - lopThisChunk;
+                let actualDays = (chunk.e - chunk.s + 1) - lopThisChunk;
                 if (actualDays <= 0) return;
 
-                // Find active Due values for chunk
                 let dueB = oldBasic, dueH = type === 'promo' ? oldHRA : 0, dueC = type === 'promo' ? oldCCA : 0;
                 stages.forEach(st => {
-                    if (st.date <= chunkStart) {
-                        dueB = st.basic;
-                        if (type === 'promo') { dueH = st.hra; dueC = st.cca; }
-                    }
+                    if (st.date <= chunkStart) { dueB = st.basic; if (type === 'promo') { dueH = st.hra; dueC = st.cca; } }
                 });
 
-                // Compute Differentials
+                let dueDA = Math.ceil(dueB * (globalDA / 100));
+
                 let dBasic = dueB - oldBasic;
-                let dDA = Math.ceil(dueB * (globalDA / 100)) - Math.ceil(oldBasic * (globalDA / 100));
+                let dDA = dueDA - oldDA;
                 let dHRA = type === 'promo' ? (dueH - oldHRA) : 0;
                 let dCCA = type === 'promo' ? (dueC - oldCCA) : 0;
 
@@ -501,35 +501,84 @@
                 const pHRA = Math.ceil((dHRA / maxDays) * actualDays);
                 const pCCA = Math.ceil((dCCA / maxDays) * actualDays);
                 
-                const pGross = pBasic + pDA + pHRA + pCCA;
+                const pGross = pBasic + pDA + pHRA + pCCA; // This is the Difference Gross
                 const pPen = Math.ceil((pBasic + pDA) * (isCPS ? 0.10 : 0.12));
                 const pNet = pGross - pPen;
 
-                totals.days += actualDays; totals.basic += pBasic; totals.da += pDA; totals.hra += pHRA; totals.cca += pCCA; totals.gross += pGross; totals.pen += pPen; totals.net += pNet;
-
-                const tr = document.createElement('tr');
-                if (splitDays.length > 0) tr.className = 'split-row';
+                // For Export: Calculate Exact Drawn Gross for this chunk
+                let pDrawnBasic = Math.ceil((oldBasic / maxDays) * actualDays);
+                let pDrawnDA = Math.ceil((oldDA / maxDays) * actualDays);
+                let pDrawnHRA = type === 'promo' ? Math.ceil((oldHRA / maxDays) * actualDays) : 0;
+                let pDrawnCCA = type === 'promo' ? Math.ceil((oldCCA / maxDays) * actualDays) : 0;
                 
+                let chunkDrawnGross = pDrawnBasic + pDrawnDA + pDrawnHRA + pDrawnCCA;
+                // To guarantee math matches perfectly for auditing: Due = Drawn + Diff
+                let chunkDueGross = chunkDrawnGross + pGross;
+
+                totals.days += actualDays; totals.basic += pBasic; totals.da += pDA; totals.hra += pHRA; totals.cca += pCCA; 
+                totals.gross += pGross; totals.pen += pPen; totals.net += pNet;
+                totals.expDueGross += chunkDueGross; totals.expDrawnGross += chunkDrawnGross;
+
                 let label = `${monthNames[month]} ${year}`;
                 if (splitDays.length > 0) label += ` (${chunk.s}-${chunk.e})`;
 
-                tr.innerHTML = `<td>${label}</td>
-                    <td>${actualDays}</td><td>${formatCurr(pBasic)}</td><td>${formatCurr(pDA)}</td><td>${formatCurr(pHRA)}</td><td>${formatCurr(pCCA)}</td>
-                    <td><strong>${formatCurr(pGross)}</strong></td><td class="deduction-cell">- ${formatCurr(pPen)}</td><td class="net-cell">${formatCurr(pNet)}</td>`;
+                const tr = document.createElement('tr');
+                if (splitDays.length > 0) tr.className = 'split-row';
+                tr.innerHTML = `<td>${label}</td><td>${actualDays}</td><td>${formatCurr(pBasic)}</td><td>${formatCurr(pDA)}</td><td>${formatCurr(pHRA)}</td><td>${formatCurr(pCCA)}</td><td><strong>${formatCurr(pGross)}</strong></td><td class="deduction-cell">- ${formatCurr(pPen)}</td><td class="net-cell">${formatCurr(pNet)}</td>`;
                 tbody.appendChild(tr);
-            });
 
+                // Push to Export Array
+                window.arrearExportData[type].push({ Month: label, Days: actualDays, DueGross: chunkDueGross, DrawnGross: chunkDrawnGross, DiffGross: pGross, Pension: pPen, Net: pNet });
+            });
             current.setMonth(current.getMonth() + 1);
         }
 
         const trTotal = document.createElement('tr');
         trTotal.className = 'total-row';
-        trTotal.innerHTML = `<td>GRAND TOTAL</td><td>${totals.days} Days</td><td>₹ ${formatCurr(totals.basic)}</td><td>₹ ${formatCurr(totals.da)}</td>
-            <td>₹ ${formatCurr(totals.hra)}</td><td>₹ ${formatCurr(totals.cca)}</td><td>₹ ${formatCurr(totals.gross)}</td>
-            <td class="deduction-cell">- ₹ ${formatCurr(totals.pen)}</td><td class="net-cell" style="font-size: 1.1rem;">₹ ${formatCurr(totals.net)}</td>`;
+        trTotal.innerHTML = `<td>GRAND TOTAL</td><td>${totals.days} Days</td><td>₹ ${formatCurr(totals.basic)}</td><td>₹ ${formatCurr(totals.da)}</td><td>₹ ${formatCurr(totals.hra)}</td><td>₹ ${formatCurr(totals.cca)}</td><td>₹ ${formatCurr(totals.gross)}</td><td class="deduction-cell">- ₹ ${formatCurr(totals.pen)}</td><td class="net-cell" style="font-size: 1.1rem;">₹ ${formatCurr(totals.net)}</td>`;
         tbody.appendChild(trTotal);
         
+        // Add Grand Total to Export Array
+        window.arrearExportData[type].push({ Month: "GRAND TOTAL", Days: totals.days, DueGross: totals.expDueGross, DrawnGross: totals.expDrawnGross, DiffGross: totals.gross, Pension: totals.pen, Net: totals.net });
+        
         document.getElementById(type + 'Wrapper').style.display = 'block';
+    }
+
+    // --- Export Function ---
+    function triggerExport(type) {
+        const data = window.arrearExportData[type];
+        if(!data || data.length === 0) return alert("Please click 'Calculate' first to generate the data before exporting.");
+
+        const format = document.getElementById('exportFormat_' + type).value;
+        const title = type === 'inc' ? 'Increment_Arrear_Statement' : 'Promotion_Arrear_Statement';
+        const penLabel = document.getElementById('pensionType').value;
+
+        if (format === 'csv') {
+            // Excel/CSV Generation
+            let csv = `Month,Days,Due Gross (Rs),Drawn Gross (Rs),Difference Gross (Rs),Pension Ded ${penLabel} (Rs),Net Arrear (Rs)\n`;
+            data.forEach(r => { csv += `"${r.Month}",${r.Days},${r.DueGross},${r.DrawnGross},${r.DiffGross},${r.Pension},${r.Net}\n`; });
+            
+            let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `${title}.csv`;
+            link.click();
+        } else if (format === 'word') {
+            // Word Doc Generation (HTML Table format)
+            let html = `<html><head><meta charset="utf-8"><style>table{border-collapse:collapse;width:100%;font-family:Arial,sans-serif;} th,td{border:1px solid #000;padding:8px;text-align:right;} th{background-color:#f2f2f2;} th:first-child,td:first-child{text-align:left;}</style></head><body><h2>${title.replace(/_/g, ' ')}</h2><table>`;
+            html += `<tr><th>Month</th><th>Days</th><th>Due Gross</th><th>Drawn Gross</th><th>Difference Gross</th><th>Pension Ded (${penLabel})</th><th>Net Arrear</th></tr>`;
+            data.forEach(r => {
+                let bold = r.Month === "GRAND TOTAL" ? "font-weight:bold; background-color:#f9f9f9;" : "";
+                html += `<tr style="${bold}"><td>${r.Month}</td><td>${r.Days}</td><td>${r.DueGross}</td><td>${r.DrawnGross}</td><td>${r.DiffGross}</td><td>${r.Pension}</td><td>${r.Net}</td></tr>`;
+            });
+            html += `</table></body></html>`;
+            
+            let blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `${title}.doc`;
+            link.click();
+        }
     }
 
     document.querySelectorAll('.grid-2col input, .grid-2col select, #globalMonth').forEach(el => el.addEventListener('input', calculateMainSalary));
