@@ -96,7 +96,7 @@
 <div class="container">
     <div class="header">
         <h1>ArasuPay: Advanced HR Dashboard</h1>
-        <p>Featuring Precise Date Engine, Detailed Difference Splits & FAC Allowance Generation</p>
+        <p>Featuring Dynamic DA Time-Engine, 19-Column Splits & Strict Treasury Rules</p>
     </div>
 
     <!-- GLOBAL CONTEXT -->
@@ -127,7 +127,8 @@
                 <div class="form-group"><label>Manual Basic Pay (₹)</label><input type="number" id="basicPay" class="manual-highlight" value="36900"></div>
                 <div class="form-group"><label>Annual Increment Qtr</label><select id="incrementMonth" style="text-align: left;"><option value="Jan">January</option><option value="Apr">April</option><option value="Jul" selected>July</option><option value="Oct">October</option></select></div>
                 <div class="divider"></div>
-                <div class="form-group"><label>DA %</label><div class="inline-group"><input type="number" id="daPercent" value="50"> <span>%</span></div></div>
+                <!-- DA% Now Auto-fetches but remains editable -->
+                <div class="form-group"><label>DA % (Current)</label><div class="inline-group"><input type="number" id="daPercent" title="Auto-fetched based on today's date"> <span>%</span></div></div>
                 <span class="helper-text" id="daAmountDisplay">₹ 0</span>
                 <div class="form-group"><label>HRA (₹)</label><input type="number" id="hra" value="1800"></div>
                 <div class="form-group"><label>CCA (₹)</label><input type="number" id="cca" value="600"></div>
@@ -179,7 +180,7 @@
         <div class="section-header-flex">
             <div>
                 <h2>Annual Increment Arrear Calculator</h2>
-                <p class="section-desc">Automatically filters out zero-difference periods. Starts exactly from Effective Date.</p>
+                <p class="section-desc">DA is automatically fetched per month based on the Date Engine. Starts exactly from Effective Date.</p>
             </div>
             <button class="btn-secondary" onclick="togglePanel('incArrearPanel', 'btnIncArrear', 'Increment Arrear')" id="btnIncArrear">Show Increment Arrear</button>
         </div>
@@ -234,7 +235,7 @@
         <div class="section-header-flex">
             <div>
                 <h2>Promotion Arrear Calculator</h2>
-                <p class="section-desc">Calculates strict differences. Empty/Zero difference periods are automatically hidden.</p>
+                <p class="section-desc">Calculates strict differences. Empty/Zero difference periods are hidden. DA auto-adjusts based on rules.</p>
             </div>
             <button class="btn-secondary" onclick="togglePanel('promoArrearPanel', 'btnPromoArrear', 'Promotion Arrear')" id="btnPromoArrear">Show Promotion Arrear</button>
         </div>
@@ -282,12 +283,12 @@
         </div>
     </div>
 
-    <!-- FULL ADDITIONAL CHARGE (FAC) SECTION MOVED TO BOTTOM -->
+    <!-- FULL ADDITIONAL CHARGE (FAC) SECTION -->
     <div class="section" style="background-color: #faf5ff;">
         <div class="section-header-flex">
             <div>
                 <h2>Full Additional Charge (FAC) Calculator</h2>
-                <p class="section-desc">Applies the "Whichever is Less" rule, Deducts IT (10%) & Cess (4%). Excludes CPS calculation.</p>
+                <p class="section-desc">Applies the "Whichever is Less" rule, Deducts IT (10%) & Cess (4%). Excludes CPS. DA is time-based.</p>
             </div>
             <button class="btn-secondary" onclick="togglePanel('facPanel', 'btnFac', 'FAC Calculator')" id="btnFac">Show FAC Calculator</button>
         </div>
@@ -318,7 +319,7 @@
                     <h3 style="color: var(--brand-action);">FAC Rules Refresher</h3>
                     <ul style="font-size: 0.85rem; color: var(--text-muted); padding-left: 20px; line-height: 1.6;">
                         <li style="margin-bottom: 8px;">Calculates the lesser of: <strong>1/5th (20%) of Regular Basic</strong> OR <strong>Half (50%) of Additional Post Min Pay</strong>.</li>
-                        <li style="margin-bottom: 8px;">Adds current DA % to the lesser value to get the Max FAC Gross per month.</li>
+                        <li style="margin-bottom: 8px;">Adds DA to the lesser value. <em>(DA % auto-shifts based on precise Government timeline dates).</em></li>
                         <li style="margin-bottom: 8px;">Prorates Gross strictly on active calendar days (minus leave).</li>
                         <li style="margin-bottom: 8px;"><strong>Taxes:</strong> 10% Income Tax + 4% IT Cess.</li>
                         <li><strong>CPS:</strong> FAC does NOT attract CPS deductions.</li>
@@ -344,6 +345,23 @@
 </div>
 
 <script>
+    // --- Centralized DA Engine ---
+    // Returns the strict DA percentage based on exact government dates.
+    const getDaPercent = (date) => {
+        if (!date) return 50;
+        const y = date.getFullYear();
+        const m = date.getMonth(); // 0 = Jan, 6 = Jul
+        if (y > 2025 || (y === 2025 && m >= 6)) return 58;
+        if (y === 2025 && m >= 0) return 55;
+        if (y === 2024 && m >= 6) return 53;
+        if (y === 2024 && m >= 0) return 50;
+        if (y === 2023 && m >= 6) return 46;
+        if (y === 2023 && m >= 0) return 42;
+        if (y === 2022 && m >= 6) return 38;
+        if (y === 2022 && m >= 0) return 34;
+        return 34; // default for older periods
+    };
+
     // --- Global Data Store ---
     window.arrearExportData = { inc: [], promo: [], fac: [] };
 
@@ -358,6 +376,9 @@
     const formatCurr = (num) => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(num);
     const today = new Date();
     
+    // Auto-fetch current DA for Main Salary view (Editable)
+    document.getElementById('daPercent').value = getDaPercent(today);
+
     document.getElementById('facStart').value = `${today.getFullYear()}-04-01`;
     document.getElementById('facEnd').value = `${today.getFullYear()}-06-30`;
     
@@ -460,7 +481,7 @@
         }
     }
 
-    // --- FAC Calculator Engine (Whichever is Less Rule + Taxes) ---
+    // --- FAC Calculator Engine (Whichever is Less Rule + Dynamic DA + Taxes) ---
     function generateFacTable() {
         let startStr = document.getElementById('facStart').value;
         let endStr = document.getElementById('facEnd').value;
@@ -482,14 +503,11 @@
         let basic = parseFloat(document.getElementById('facBasic').value) || 0;
         let facPct = parseFloat(document.getElementById('facPercent').value) || 0;
         let facMinPay = parseFloat(document.getElementById('facMinPay').value) || 0;
-        let daPct = parseFloat(document.getElementById('daPercent').value) || 0;
 
-        // Whichever is Less Rule
+        // Whichever is Less Rule (Evaluated once on Basic)
         let basic20 = basic * (facPct / 100);
         let minPay50 = facMinPay * 0.5;
         let eligibleFacBasic = Math.min(basic20, minPay50);
-        let eligibleFacDa = Math.ceil(eligibleFacBasic * (daPct / 100));
-        let maxFacGross = eligibleFacBasic + eligibleFacDa;
 
         const table = document.getElementById('facTable');
         table.innerHTML = `
@@ -499,7 +517,7 @@
                     <th class="th-final">Active Days</th>
                     <th class="th-due">Full Basic Pay<br><span style="font-size:0.7rem;font-weight:normal;">(Prorated)</span></th>
                     <th class="th-due">Eligible FAC Basic<br><span style="font-size:0.7rem;font-weight:normal;">(Lesser Rule)</span></th>
-                    <th class="th-due">FAC DA<br><span style="font-size:0.7rem;font-weight:normal;">(${daPct}%)</span></th>
+                    <th class="th-due">FAC DA<br><span style="font-size:0.7rem;font-weight:normal;">(Auto %)</span></th>
                     <th class="th-due" style="font-weight:bold;">Prorated<br>Gross FAC</th>
                     <th class="th-drawn deduction-cell">Income Tax<br><span style="font-size:0.7rem;font-weight:normal;">(10%)</span></th>
                     <th class="th-drawn deduction-cell">IT Cess<br><span style="font-size:0.7rem;font-weight:normal;">(4%)</span></th>
@@ -541,6 +559,10 @@
             if (actualDays > 0) {
                 hasRenderedRows = true;
                 
+                // Fetch correct DA for this specific month
+                let currentDaPct = getDaPercent(chunkStart);
+                let eligibleFacDa = Math.ceil(eligibleFacBasic * (currentDaPct / 100));
+                
                 // Prorate Full Basic Pay & FAC values
                 let pFullBasic = Math.ceil((basic / maxDays) * actualDays);
                 let pBasic = Math.ceil((eligibleFacBasic / maxDays) * actualDays);
@@ -568,7 +590,7 @@
                     <td>${actualDays}</td>
                     <td>₹${formatCurr(pFullBasic)}</td>
                     <td>₹${formatCurr(pBasic)}</td>
-                    <td>₹${formatCurr(pDa)}</td>
+                    <td>₹${formatCurr(pDa)} <br><span style="font-size:0.75rem; color:#6b7280;">(${currentDaPct}%)</span></td>
                     <td style="font-weight:bold; color:#065f46;">₹${formatCurr(proratedFacGross)}</td>
                     <td class="deduction-cell">- ₹${formatCurr(itDed)}</td>
                     <td class="deduction-cell">- ₹${formatCurr(cessDed)}</td>
@@ -618,9 +640,8 @@
     }
 
 
-    // --- Granular Arrear Engine (19 Columns) ---
+    // --- Granular Arrear Engine (19 Columns + Dynamic Time-based DA) ---
     function generateAdvancedArrear(type) {
-        const globalDA = parseFloat(document.getElementById('daPercent').value) || 0;
         const isCPS = document.getElementById('pensionType').value === 'CPS';
         
         let startStr = document.getElementById(type + 'Start').value;
@@ -641,11 +662,10 @@
         });
 
         let stages = [];
-        let oldBasic, oldHRA = 0, oldCCA = 0, oldDA = 0;
+        let oldBasic, oldHRA = 0, oldCCA = 0;
 
         if (type === 'inc') {
             oldBasic = parseFloat(document.getElementById('incOldBasic').value) || 0;
-            oldDA = Math.ceil(oldBasic * (globalDA / 100));
             oldHRA = parseFloat(document.getElementById('hra').value) || 0;
             oldCCA = parseFloat(document.getElementById('cca').value) || 0;
 
@@ -662,7 +682,6 @@
             }
         } else {
             oldBasic = parseFloat(document.getElementById('promoDrawnBasic').value) || 0;
-            oldDA = Math.ceil(oldBasic * (globalDA / 100));
             oldHRA = parseFloat(document.getElementById('promoDrawnHRA').value) || 0;
             oldCCA = parseFloat(document.getElementById('promoDrawnCCA').value) || 0;
             
@@ -750,10 +769,15 @@
                 stages.forEach(st => {
                     if (st.date <= chunkStart) { dueB = st.basic; dueH = st.hra; dueC = st.cca; }
                 });
-                let dueDA = Math.ceil(dueB * (globalDA / 100));
+                
+                // Fetch Dynamic DA strictly for this Chunk Date
+                let currentDaPct = getDaPercent(chunkStart);
+                
+                let chunkOldDA = Math.ceil(oldBasic * (currentDaPct / 100));
+                let dueDA = Math.ceil(dueB * (currentDaPct / 100));
 
                 let pDrawnBasic = Math.ceil((oldBasic / maxDays) * actualDays);
-                let pDrawnDA = Math.ceil((oldDA / maxDays) * actualDays);
+                let pDrawnDA = Math.ceil((chunkOldDA / maxDays) * actualDays);
                 let pDrawnHRA = Math.ceil((oldHRA / maxDays) * actualDays);
                 let pDrawnCCA = Math.ceil((oldCCA / maxDays) * actualDays);
                 let pDrawnGross = pDrawnBasic + pDrawnDA + pDrawnHRA + pDrawnCCA;
@@ -853,13 +877,13 @@
         if (type === 'fac') {
             const title = 'FAC_Allowance_Statement';
             if (format === 'csv') {
-                let csv = `Month,Active Days,Full Basic Pay (Prorated),Eligible FAC Basic,FAC DA,Prorated Gross FAC,Income Tax (10%),IT Cess (4%),Total Deduction,Net FAC Arrear\n`;
+                let csv = `Month,Active Days,Full Basic Pay (Prorated),Eligible FAC Basic,FAC DA Amount,Prorated Gross FAC,Income Tax (10%),IT Cess (4%),Total Deduction,Net FAC Arrear\n`;
                 data.forEach(r => { csv += `"${r.Month}",${r.Days},${r.FullBasic},${r.Basic},${r.DA},${r.Gross},${r.IT},${r.Cess},${r.TotalDed},${r.Net}\n`; });
                 let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `${title}.csv`; link.click();
             } else if (format === 'word') {
                 let html = `<html><head><meta charset="utf-8"><style>table{border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;} th,td{border:1px solid #000;padding:6px;text-align:right;} th{background-color:#f2f2f2;text-align:center;} th:first-child,td:first-child{text-align:left;}</style></head><body><h2>${title.replace(/_/g, ' ')}</h2><table>`;
-                html += `<tr><th>Month</th><th>Active Days</th><th>Full Basic Pay (Prorated)</th><th>Eligible FAC Basic</th><th>FAC DA</th><th>Prorated Gross FAC</th><th>Income Tax (10%)</th><th>IT Cess (4%)</th><th>Total Deduction</th><th>Net FAC Arrear</th></tr>`;
+                html += `<tr><th>Month</th><th>Active Days</th><th>Full Basic Pay (Prorated)</th><th>Eligible FAC Basic</th><th>FAC DA Amount</th><th>Prorated Gross FAC</th><th>Income Tax (10%)</th><th>IT Cess (4%)</th><th>Total Deduction</th><th>Net FAC Arrear</th></tr>`;
                 data.forEach(r => {
                     let bold = r.Month === "GRAND TOTAL" ? "font-weight:bold; background-color:#f9f9f9;" : "";
                     html += `<tr style="${bold}"><td>${r.Month}</td><td>${r.Days}</td><td>${r.FullBasic}</td><td>${r.Basic}</td><td>${r.DA}</td><td>${r.Gross}</td><td>${r.IT}</td><td>${r.Cess}</td><td>${r.TotalDed}</td><td>${r.Net}</td></tr>`;
