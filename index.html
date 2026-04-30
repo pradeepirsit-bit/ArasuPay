@@ -34,7 +34,7 @@
         .form-group label { font-size: 0.95rem; font-weight: 500; color: var(--text-main); flex: 1; min-width: 150px; }
         
         input, select { width: 160px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.95rem; text-align: right; box-sizing: border-box; }
-        input[type="date"], input[type="month"] { text-align: left; width: 100%; }
+        input[type="date"], input[type="month"], input[type="text"] { text-align: left; width: 100%; }
         input:focus, select:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
         
         .manual-highlight { border: 2px solid var(--brand-action); background-color: #f0fdf4; font-weight: bold; }
@@ -96,7 +96,7 @@
 <div class="container">
     <div class="header">
         <h1>ArasuPay: Advanced HR Dashboard</h1>
-        <p>Featuring Precise Date Engine, Detailed Difference Splits & Full Statement Exports</p>
+        <p>Featuring Precise Date Engine, Detailed Difference Splits & FAC Allowance Generation</p>
     </div>
 
     <!-- GLOBAL CONTEXT -->
@@ -173,7 +173,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- INCREMENT ARREAR SECTION -->
     <div class="section" style="background-color: #fcfcfc;">
         <div class="section-header-flex">
@@ -282,11 +282,70 @@
         </div>
     </div>
 
+    <!-- FULL ADDITIONAL CHARGE (FAC) SECTION MOVED TO BOTTOM -->
+    <div class="section" style="background-color: #faf5ff;">
+        <div class="section-header-flex">
+            <div>
+                <h2>Full Additional Charge (FAC) Calculator</h2>
+                <p class="section-desc">Applies the "Whichever is Less" rule, Deducts IT (10%) & Cess (4%). Excludes CPS calculation.</p>
+            </div>
+            <button class="btn-secondary" onclick="togglePanel('facPanel', 'btnFac', 'FAC Calculator')" id="btnFac">Show FAC Calculator</button>
+        </div>
+
+        <div id="facPanel" style="display: none;">
+            <div style="display: flex; gap: 20px; margin-bottom: 20px; background: #fdf4ff; padding: 20px; border-radius: 8px; border: 1px solid #f5d0fe; flex-wrap: wrap;">
+                <div style="flex:1; min-width: 200px;"><label style="font-size: 0.85rem; font-weight:bold; color: #86198f;">FAC START DATE</label><input type="date" id="facStart"></div>
+                <div style="flex:1; min-width: 200px;"><label style="font-size: 0.85rem; font-weight:bold; color: #86198f;">FAC END DATE</label><input type="date" id="facEnd"></div>
+            </div>
+
+            <div class="grid-2col" style="margin-bottom: 20px;">
+                <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #ffffff;">
+                    <h3 style="color: #57534e;">FAC Parameters</h3>
+                    <div class="form-group"><label>Regular Basic Pay (₹)</label><input type="number" id="facBasic" class="manual-highlight"></div>
+                    <div class="form-group"><label>FAC Fraction (%)</label><input type="number" id="facPercent" value="20" readonly class="readonly-highlight" title="1/5th of Regular Pay"></div>
+                    <div class="divider"></div>
+                    <div class="form-group" style="margin-bottom: 8px;"><label>Additional Post Name</label><input type="text" id="facAddPostName" value="" placeholder="e.g. BDO / Headmaster" style="text-align: left;"></div>
+                    <div class="form-group"><label>Min Pay of Addl. Post (₹)</label><input type="number" id="facMinPay" value="36900"></div>
+                    
+                    <div style="margin-top: 20px;">
+                        <h4 style="margin: 0 0 10px 0; color: #dc2626;">Leave / LOP Entries</h4>
+                        <div id="facLopContainer"></div>
+                        <button class="btn-mini" onclick="addLopRow('facLopContainer')">+ Add Leave / LOP Dates</button>
+                    </div>
+                </div>
+                
+                <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #ffffff;">
+                    <h3 style="color: var(--brand-action);">FAC Rules Refresher</h3>
+                    <ul style="font-size: 0.85rem; color: var(--text-muted); padding-left: 20px; line-height: 1.6;">
+                        <li style="margin-bottom: 8px;">Calculates the lesser of: <strong>1/5th (20%) of Regular Basic</strong> OR <strong>Half (50%) of Additional Post Min Pay</strong>.</li>
+                        <li style="margin-bottom: 8px;">Adds current DA % to the lesser value to get the Max FAC Gross per month.</li>
+                        <li style="margin-bottom: 8px;">Prorates Gross strictly on active calendar days (minus leave).</li>
+                        <li style="margin-bottom: 8px;"><strong>Taxes:</strong> 10% Income Tax + 4% IT Cess.</li>
+                        <li><strong>CPS:</strong> FAC does NOT attract CPS deductions.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="action-bar">
+                <button class="btn-primary" onclick="generateFacTable()" style="flex: 2; margin-top:0;">Calculate FAC Allowance</button>
+                <select id="exportFormat_fac" style="flex: 1; max-width: 150px;">
+                    <option value="csv">Excel / CSV</option>
+                    <option value="word">Word Doc</option>
+                </select>
+                <button class="btn-export" onclick="triggerExport('fac')" style="flex: 1;">⬇ Export Statement</button>
+            </div>
+
+            <div id="facWrapper" style="display: none; overflow-x: auto;">
+                <table id="facTable"></table>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
     // --- Global Data Store ---
-    window.arrearExportData = { inc: [], promo: [] };
+    window.arrearExportData = { inc: [], promo: [], fac: [] };
 
     // --- Strict Local Time Parser to fix Timezone Date Shift Bugs ---
     const parseLocal = (dateStr) => {
@@ -298,9 +357,14 @@
     // --- Initialization ---
     const formatCurr = (num) => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(num);
     const today = new Date();
+    
+    document.getElementById('facStart').value = `${today.getFullYear()}-04-01`;
+    document.getElementById('facEnd').value = `${today.getFullYear()}-06-30`;
+    
     document.getElementById('incStart').value = `${today.getFullYear()}-01-01`;
     document.getElementById('incEnd').value = `${today.getFullYear()}-12-31`;
     document.querySelector('.inc-date').value = `${today.getFullYear()}-07-01`;
+    
     document.getElementById('promoStart').value = `${today.getFullYear()}-01-15`;
     document.getElementById('promoEnd').value = `${today.getFullYear()}-03-10`;
 
@@ -329,6 +393,7 @@
     function calculateMainSalary() {
         const basic = parseFloat(document.getElementById('basicPay').value) || 0;
         document.getElementById('incOldBasic').value = basic;
+        document.getElementById('facBasic').value = basic;
         
         const daPct = parseFloat(document.getElementById('daPercent').value) || 0;
         const daAmt = Math.ceil(basic * (daPct / 100));
@@ -395,6 +460,164 @@
         }
     }
 
+    // --- FAC Calculator Engine (Whichever is Less Rule + Taxes) ---
+    function generateFacTable() {
+        let startStr = document.getElementById('facStart').value;
+        let endStr = document.getElementById('facEnd').value;
+        if (!startStr || !endStr) return alert("Please select valid Start and End dates for FAC.");
+        
+        let start = parseLocal(startStr); 
+        let end = parseLocal(endStr);
+        if (end < start) return alert("FAC End date must be after Start date.");
+
+        let lops = [];
+        document.querySelectorAll(`#facLopContainer .lop-row`).forEach(row => {
+            const fStr = row.querySelector('.lop-from').value; const tStr = row.querySelector('.lop-to').value;
+            if (fStr && tStr) {
+                const f = parseLocal(fStr); const t = parseLocal(tStr);
+                if (t >= f) lops.push({ start: f, end: t, days: Math.ceil((t - f) / (1000 * 60 * 60 * 24)) + 1 });
+            }
+        });
+
+        let basic = parseFloat(document.getElementById('facBasic').value) || 0;
+        let facPct = parseFloat(document.getElementById('facPercent').value) || 0;
+        let facMinPay = parseFloat(document.getElementById('facMinPay').value) || 0;
+        let daPct = parseFloat(document.getElementById('daPercent').value) || 0;
+
+        // Whichever is Less Rule
+        let basic20 = basic * (facPct / 100);
+        let minPay50 = facMinPay * 0.5;
+        let eligibleFacBasic = Math.min(basic20, minPay50);
+        let eligibleFacDa = Math.ceil(eligibleFacBasic * (daPct / 100));
+        let maxFacGross = eligibleFacBasic + eligibleFacDa;
+
+        const table = document.getElementById('facTable');
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th class="th-final">Month</th>
+                    <th class="th-final">Active Days</th>
+                    <th class="th-due">Full Basic Pay<br><span style="font-size:0.7rem;font-weight:normal;">(Prorated)</span></th>
+                    <th class="th-due">Eligible FAC Basic<br><span style="font-size:0.7rem;font-weight:normal;">(Lesser Rule)</span></th>
+                    <th class="th-due">FAC DA<br><span style="font-size:0.7rem;font-weight:normal;">(${daPct}%)</span></th>
+                    <th class="th-due" style="font-weight:bold;">Prorated<br>Gross FAC</th>
+                    <th class="th-drawn deduction-cell">Income Tax<br><span style="font-size:0.7rem;font-weight:normal;">(10%)</span></th>
+                    <th class="th-drawn deduction-cell">IT Cess<br><span style="font-size:0.7rem;font-weight:normal;">(4%)</span></th>
+                    <th class="th-drawn deduction-cell" style="font-weight:bold;">Total<br>Deduction</th>
+                    <th class="th-final" style="font-weight:bold; color:var(--brand-action);">Net FAC<br>Arrear</th>
+                </tr>
+            </thead>
+            <tbody id="facBody"></tbody>
+        `;
+        const tbody = document.getElementById('facBody');
+        window.arrearExportData['fac'] = [];
+        
+        let t = { days: 0, fullBasic: 0, basic: 0, da: 0, gross: 0, it: 0, cess: 0, totalDed: 0, net: 0 };
+        let current = new Date(start.getFullYear(), start.getMonth(), 1);
+        const endLimit = new Date(end.getFullYear(), end.getMonth(), 1);
+        const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        let hasRenderedRows = false;
+
+        while (current <= endLimit) {
+            const year = current.getFullYear();
+            const month = current.getMonth();
+            const maxDays = new Date(year, month + 1, 0).getDate();
+
+            let activeStart = (year === start.getFullYear() && month === start.getMonth()) ? start.getDate() : 1;
+            let activeEnd = (year === end.getFullYear() && month === end.getMonth()) ? end.getDate() : maxDays;
+            
+            let chunkStart = new Date(year, month, activeStart);
+            let chunkEnd = new Date(year, month, activeEnd);
+            
+            let lopThisChunk = 0;
+            lops.forEach(l => {
+                let overlapStart = l.start > chunkStart ? l.start : chunkStart;
+                let overlapEnd = l.end < chunkEnd ? l.end : chunkEnd;
+                if(overlapStart <= overlapEnd) lopThisChunk += Math.ceil((overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)) + 1;
+            });
+
+            let actualDays = (activeEnd - activeStart + 1) - lopThisChunk;
+            
+            if (actualDays > 0) {
+                hasRenderedRows = true;
+                
+                // Prorate Full Basic Pay & FAC values
+                let pFullBasic = Math.ceil((basic / maxDays) * actualDays);
+                let pBasic = Math.ceil((eligibleFacBasic / maxDays) * actualDays);
+                let pDa = Math.ceil((eligibleFacDa / maxDays) * actualDays);
+                let proratedFacGross = pBasic + pDa;
+                
+                // Deductions (No CPS)
+                let itDed = Math.ceil(proratedFacGross * 0.10);
+                let cessDed = Math.ceil(itDed * 0.04);
+                let totalDed = itDed + cessDed;
+                let netFac = proratedFacGross - totalDed;
+                
+                // Sum Totals
+                t.days += actualDays;
+                t.fullBasic += pFullBasic;
+                t.basic += pBasic; t.da += pDa; t.gross += proratedFacGross;
+                t.it += itDed; t.cess += cessDed; t.totalDed += totalDed; t.net += netFac;
+                
+                let label = `${monthNames[month]} ${year}`;
+                if (activeStart > 1 || activeEnd < maxDays) label += ` (${activeStart}-${activeEnd})`;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${label}</td>
+                    <td>${actualDays}</td>
+                    <td>₹${formatCurr(pFullBasic)}</td>
+                    <td>₹${formatCurr(pBasic)}</td>
+                    <td>₹${formatCurr(pDa)}</td>
+                    <td style="font-weight:bold; color:#065f46;">₹${formatCurr(proratedFacGross)}</td>
+                    <td class="deduction-cell">- ₹${formatCurr(itDed)}</td>
+                    <td class="deduction-cell">- ₹${formatCurr(cessDed)}</td>
+                    <td class="deduction-cell" style="font-weight:bold;">- ₹${formatCurr(totalDed)}</td>
+                    <td class="net-cell" style="font-size: 0.95rem;">₹${formatCurr(netFac)}</td>
+                `;
+                tbody.appendChild(tr);
+
+                window.arrearExportData['fac'].push({
+                    Month: label, Days: actualDays, FullBasic: pFullBasic, 
+                    Basic: pBasic, DA: pDa, Gross: proratedFacGross, 
+                    IT: itDed, Cess: cessDed, TotalDed: totalDed, Net: netFac
+                });
+            }
+            current.setMonth(current.getMonth() + 1);
+        }
+
+        if(!hasRenderedRows) {
+            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:20px; color:#6b7280;">No valid active FAC days found for this period.</td></tr>`;
+            document.getElementById('facWrapper').style.display = 'block';
+            return;
+        }
+
+        const trTotal = document.createElement('tr');
+        trTotal.className = 'total-row';
+        trTotal.innerHTML = `
+            <td>GRAND TOTAL</td>
+            <td>${t.days}</td>
+            <td>₹${formatCurr(t.fullBasic)}</td>
+            <td>₹${formatCurr(t.basic)}</td>
+            <td>₹${formatCurr(t.da)}</td>
+            <td style="color:#065f46;">₹${formatCurr(t.gross)}</td>
+            <td class="deduction-cell">- ₹${formatCurr(t.it)}</td>
+            <td class="deduction-cell">- ₹${formatCurr(t.cess)}</td>
+            <td class="deduction-cell" style="font-weight:bold;">- ₹${formatCurr(t.totalDed)}</td>
+            <td class="net-cell" style="font-size:1.1rem;">₹${formatCurr(t.net)}</td>
+        `;
+        tbody.appendChild(trTotal);
+        
+        window.arrearExportData['fac'].push({
+            Month: "GRAND TOTAL", Days: t.days, FullBasic: t.fullBasic,
+            Basic: t.basic, DA: t.da, Gross: t.gross, 
+            IT: t.it, Cess: t.cess, TotalDed: t.totalDed, Net: t.net
+        });
+        
+        document.getElementById('facWrapper').style.display = 'block';
+    }
+
+
     // --- Granular Arrear Engine (19 Columns) ---
     function generateAdvancedArrear(type) {
         const globalDA = parseFloat(document.getElementById('daPercent').value) || 0;
@@ -451,7 +674,6 @@
 
         stages.sort((a, b) => a.date - b.date);
 
-        // Build 19-Column Table Structure
         const table = document.getElementById(type + 'Table');
         table.innerHTML = `
             <thead>
@@ -548,7 +770,6 @@
                 let pDiffCCA = pDueCCA - pDrawnCCA;
                 let pDiffGross = pDueGross - pDrawnGross;
                 
-                // Filter out rows where the increment hasn't started yet
                 if (pDiffBasic === 0 && pDiffDA === 0 && pDiffHRA === 0 && pDiffCCA === 0) return;
 
                 hasRenderedRows = true;
@@ -620,15 +841,39 @@
         document.getElementById(type + 'Wrapper').style.display = 'block';
     }
 
-    // --- Export Engine (19 Columns) ---
+    // --- Export Engine (Multi-Format Support) ---
     function triggerExport(type) {
         const data = window.arrearExportData[type];
         if(!data || data.length === 0) return alert("Please click 'Calculate' first to generate the data before exporting.");
 
         const format = document.getElementById('exportFormat_' + type).value;
-        const title = type === 'inc' ? 'Increment_Arrear_Statement' : 'Promotion_Arrear_Statement';
         const penLabel = document.getElementById('pensionType').value;
 
+        // Handle FAC Export
+        if (type === 'fac') {
+            const title = 'FAC_Allowance_Statement';
+            if (format === 'csv') {
+                let csv = `Month,Active Days,Full Basic Pay (Prorated),Eligible FAC Basic,FAC DA,Prorated Gross FAC,Income Tax (10%),IT Cess (4%),Total Deduction,Net FAC Arrear\n`;
+                data.forEach(r => { csv += `"${r.Month}",${r.Days},${r.FullBasic},${r.Basic},${r.DA},${r.Gross},${r.IT},${r.Cess},${r.TotalDed},${r.Net}\n`; });
+                let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `${title}.csv`; link.click();
+            } else if (format === 'word') {
+                let html = `<html><head><meta charset="utf-8"><style>table{border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;} th,td{border:1px solid #000;padding:6px;text-align:right;} th{background-color:#f2f2f2;text-align:center;} th:first-child,td:first-child{text-align:left;}</style></head><body><h2>${title.replace(/_/g, ' ')}</h2><table>`;
+                html += `<tr><th>Month</th><th>Active Days</th><th>Full Basic Pay (Prorated)</th><th>Eligible FAC Basic</th><th>FAC DA</th><th>Prorated Gross FAC</th><th>Income Tax (10%)</th><th>IT Cess (4%)</th><th>Total Deduction</th><th>Net FAC Arrear</th></tr>`;
+                data.forEach(r => {
+                    let bold = r.Month === "GRAND TOTAL" ? "font-weight:bold; background-color:#f9f9f9;" : "";
+                    html += `<tr style="${bold}"><td>${r.Month}</td><td>${r.Days}</td><td>${r.FullBasic}</td><td>${r.Basic}</td><td>${r.DA}</td><td>${r.Gross}</td><td>${r.IT}</td><td>${r.Cess}</td><td>${r.TotalDed}</td><td>${r.Net}</td></tr>`;
+                });
+                html += `</table></body></html>`;
+                let blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+                let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `${title}.doc`; link.click();
+            }
+            return;
+        }
+
+        // Handle Increment / Promotion Export (19 Columns)
+        const title = type === 'inc' ? 'Increment_Arrear_Statement' : 'Promotion_Arrear_Statement';
+        
         if (format === 'csv') {
             let csv = `Month,Days,Due Basic,Due DA,Due HRA,Due CCA,Due Gross,Drawn Basic,Drawn DA,Drawn HRA,Drawn CCA,Drawn Gross,Diff Basic,Diff DA,Diff HRA,Diff CCA,Diff Gross,Pension Ded (${penLabel}),Net Arrear\n`;
             data.forEach(r => { csv += `"${r.Month}",${r.Days},${r.DueBasic},${r.DueDA},${r.DueHRA},${r.DueCCA},${r.DueGross},${r.DrawnBasic},${r.DrawnDA},${r.DrawnHRA},${r.DrawnCCA},${r.DrawnGross},${r.DiffBasic},${r.DiffDA},${r.DiffHRA},${r.DiffCCA},${r.DiffGross},${r.Pension},${r.Net}\n`; });
