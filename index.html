@@ -13,7 +13,7 @@
         }
 
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-page); color: var(--text-main); margin: 0; padding: 30px 20px; line-height: 1.5; }
-        .container { max-width: 1050px; margin: 0 auto; background-color: var(--bg-card); border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); border: 1px solid var(--border-light); overflow: hidden; }
+        .container { max-width: 1100px; margin: 0 auto; background-color: var(--bg-card); border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); border: 1px solid var(--border-light); overflow: hidden; }
         
         .header { padding: 30px; border-bottom: 1px solid var(--border-light); text-align: center; }
         .header h1 { margin: 0; font-size: 1.75rem; font-weight: 600; letter-spacing: -0.025em; }
@@ -71,18 +71,22 @@
         .split-item span { display: block; font-size: 0.8rem; color: var(--text-muted); }
         .split-item strong { display: block; font-size: 1.1rem; color: var(--brand-action); margin-top: 4px; }
 
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 20px;}
-        th { background-color: #f9fafb; color: var(--text-muted); font-weight: 500; text-transform: uppercase; font-size: 0.75rem; padding: 12px; text-align: right; border-bottom: 1px solid var(--border-light); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 20px;}
+        th { color: var(--text-main); font-weight: 600; font-size: 0.75rem; padding: 10px; text-align: right; border: 1px solid var(--border-light); }
         th:first-child, td:first-child { text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #f3f4f6; text-align: right; }
+        td { padding: 10px; border: 1px solid #f3f4f6; text-align: right; white-space: nowrap;}
+        
+        .th-due { background-color: #ecfdf5; color: #065f46; text-align: center !important;}
+        .th-drawn { background-color: #fef2f2; color: #991b1b; text-align: center !important;}
+        .th-final { background-color: #f8fafc; text-align: center !important;}
+        
         .deduction-cell { color: var(--error-red); }
         .net-cell { font-weight: 600; color: var(--success-green); }
         .total-row td { font-weight: 600; background-color: #f9fafb; border-top: 2px solid var(--border-light); border-bottom: 2px solid var(--border-light); }
-        .split-row td { color: var(--brand-action); font-size: 0.85rem; background: #f0f9ff; }
+        .split-row td { color: var(--brand-action); font-size: 0.8rem; background: #f0f9ff; }
         
         .section-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid var(--border-light); padding-bottom: 15px;}
         .divider { height: 1px; background-color: var(--border-light); margin: 20px 0; }
-        
         .action-bar { display: flex; gap: 10px; margin-top: 20px; align-items: stretch; flex-wrap: wrap;}
     </style>
 </head>
@@ -91,7 +95,7 @@
 <div class="container">
     <div class="header">
         <h1>ArasuPay: Advanced HR Dashboard</h1>
-        <p>Featuring Dynamic LOP Postponement & 1-Click Treasury Exports</p>
+        <p>Featuring Dynamic LOP Postponement & Treasury-Ready Statement Exports</p>
     </div>
 
     <div class="global-context">
@@ -169,7 +173,7 @@
         <div class="section-header-flex">
             <div>
                 <h2>Annual Increment Arrear Calculator</h2>
-                <p class="section-desc">Supports multi-year increments and auto-postponement for LOP/Strikes using exact dates.</p>
+                <p class="section-desc">Supports multi-year increments, LOP shift, and exports full Due/Drawn splits.</p>
             </div>
             <button class="btn-secondary" onclick="togglePanel('incArrearPanel', 'btnIncArrear', 'Increment Arrear')" id="btnIncArrear">Show Increment Arrear</button>
         </div>
@@ -210,14 +214,11 @@
                     <option value="csv">Excel / CSV</option>
                     <option value="word">Word Doc</option>
                 </select>
-                <button class="btn-export" onclick="triggerExport('inc')" style="flex: 1;">⬇ Export File</button>
+                <button class="btn-export" onclick="triggerExport('inc')" style="flex: 1;">⬇ Export Statement</button>
             </div>
 
             <div id="incWrapper" style="display: none; overflow-x: auto;">
-                <table id="incTable">
-                    <thead><tr><th>Month</th><th>Days</th><th>Basic Diff</th><th>DA Diff</th><th>HRA Diff</th><th>CCA Diff</th><th>Gross Diff</th><th>Pension Ded</th><th>Net Arrear</th></tr></thead>
-                    <tbody id="incBody"></tbody>
-                </table>
+                <table id="incTable"></table>
             </div>
         </div>
     </div>
@@ -226,7 +227,7 @@
         <div class="section-header-flex">
             <div>
                 <h2>Promotion Arrear Calculator</h2>
-                <p class="section-desc">Calculates differences where Basic, HRA, and CCA all change, with LOP support.</p>
+                <p class="section-desc">Calculates differences where Basic, HRA, and Allowances all change.</p>
             </div>
             <button class="btn-secondary" onclick="togglePanel('promoArrearPanel', 'btnPromoArrear', 'Promotion Arrear')" id="btnPromoArrear">Show Promotion Arrear</button>
         </div>
@@ -242,7 +243,7 @@
                     <h3 style="color: #57534e;">Drawn (Lower Pay)</h3>
                     <div class="form-group"><label>Basic Pay (₹)</label><input type="number" id="promoDrawnBasic" value="36900"></div>
                     <div class="form-group"><label>HRA (₹)</label><input type="number" id="promoDrawnHRA" value="1800"></div>
-                    <div class="form-group"><label>CCA (₹)</label><input type="number" id="promoDrawnCCA" value="600"></div>
+                    <div class="form-group"><label>CCA/Other (₹)</label><input type="number" id="promoDrawnCCA" value="600"></div>
                     
                     <div style="margin-top: 20px;">
                         <h4 style="margin: 0 0 10px 0; color: #dc2626;">Loss of Pay / Strike</h4>
@@ -255,7 +256,7 @@
                     <h3 style="color: var(--brand-action);">Due (Higher Pay)</h3>
                     <div class="form-group"><label>Basic Pay (₹)</label><input type="number" id="promoDueBasic" value="38000" class="manual-highlight"></div>
                     <div class="form-group"><label>HRA (₹)</label><input type="number" id="promoDueHRA" value="1800"></div>
-                    <div class="form-group"><label>CCA (₹)</label><input type="number" id="promoDueCCA" value="600"></div>
+                    <div class="form-group"><label>CCA/Other (₹)</label><input type="number" id="promoDueCCA" value="600"></div>
                 </div>
             </div>
             
@@ -265,14 +266,11 @@
                     <option value="csv">Excel / CSV</option>
                     <option value="word">Word Doc</option>
                 </select>
-                <button class="btn-export" onclick="triggerExport('promo')" style="flex: 1;">⬇ Export File</button>
+                <button class="btn-export" onclick="triggerExport('promo')" style="flex: 1;">⬇ Export Statement</button>
             </div>
 
             <div id="promoWrapper" style="display: none; overflow-x: auto;">
-                <table id="promoTable">
-                    <thead><tr><th>Month</th><th>Days</th><th>Basic Diff</th><th>DA Diff</th><th>HRA Diff</th><th>CCA Diff</th><th>Gross Diff</th><th>Pension Ded</th><th>Net Arrear</th></tr></thead>
-                    <tbody id="promoBody"></tbody>
-                </table>
+                <table id="promoTable"></table>
             </div>
         </div>
     </div>
@@ -280,7 +278,7 @@
 </div>
 
 <script>
-    // --- Global Export Data Store ---
+    // --- Global Data Store ---
     window.arrearExportData = { inc: [], promo: [] };
 
     // --- Initialization ---
@@ -298,26 +296,20 @@
         else { p.style.display = 'block'; b.innerText = `Hide ${name}`; }
     }
 
-    // --- Dynamic UI Builders ---
     function addLopRow(containerId) {
         const div = document.createElement('div'); div.className = 'dynamic-row lop-row';
         div.innerHTML = `<div style="display:flex; align-items:center; gap:5px; width: 100%;">
-                <input type="date" class="lop-from" title="LOP Start Date">
-                <span style="font-size:0.8rem; color:#666;">to</span>
-                <input type="date" class="lop-to" title="LOP End Date">
+                <input type="date" class="lop-from" title="LOP Start Date"> <span style="font-size:0.8rem; color:#666;">to</span> <input type="date" class="lop-to" title="LOP End Date">
                 <button class="btn-remove" onclick="this.parentElement.parentElement.remove()">X</button>
             </div>`;
         document.getElementById(containerId).appendChild(div);
     }
     function addIncStage() {
         const div = document.createElement('div'); div.className = 'dynamic-row inc-row';
-        div.innerHTML = `<input type="date" class="inc-date" title="Original Effective Date">
-            <input type="number" class="inc-pay" placeholder="New Basic (₹)">
-            <button class="btn-remove" onclick="this.parentElement.remove()">X</button>`;
+        div.innerHTML = `<input type="date" class="inc-date" title="Original Effective Date"> <input type="number" class="inc-pay" placeholder="New Basic (₹)"> <button class="btn-remove" onclick="this.parentElement.remove()">X</button>`;
         document.getElementById('incStagesContainer').appendChild(div);
     }
 
-    // --- Main Salary Logic ---
     function calculateMainSalary() {
         const basic = parseFloat(document.getElementById('basicPay').value) || 0;
         document.getElementById('incOldBasic').value = basic;
@@ -381,7 +373,7 @@
         }
     }
 
-    // --- Advanced Arrear Engine (Calculates UI & Export Data) ---
+    // --- Granular Arrear Engine ---
     function generateAdvancedArrear(type) {
         const globalDA = parseFloat(document.getElementById('daPercent').value) || 0;
         const isCPS = document.getElementById('pensionType').value === 'CPS';
@@ -392,7 +384,6 @@
         let start = new Date(startStr); let end = new Date(endStr);
         if (end < start) return alert("End date must be after Start date.");
         
-        // Gather LOPs
         let lops = [];
         document.querySelectorAll(`#${type}LopContainer .lop-row`).forEach(row => {
             const fStr = row.querySelector('.lop-from').value; const tStr = row.querySelector('.lop-to').value;
@@ -402,13 +393,16 @@
             }
         });
 
-        // Gather Pay Stages
         let stages = [];
         let oldBasic, oldHRA = 0, oldCCA = 0, oldDA = 0;
 
         if (type === 'inc') {
             oldBasic = parseFloat(document.getElementById('incOldBasic').value) || 0;
             oldDA = Math.ceil(oldBasic * (globalDA / 100));
+            // Pull actual HRA & CCA from main earnings to make the Gross calculations realistic
+            oldHRA = parseFloat(document.getElementById('hra').value) || 0;
+            oldCCA = (parseFloat(document.getElementById('ma').value) || 0) + (parseFloat(document.getElementById('otherEarnings').value) || 0);
+
             const stageRows = document.getElementById('incStagesContainer').children;
             for (let row of stageRows) {
                 const date = new Date(row.querySelector('.inc-date').value);
@@ -417,7 +411,7 @@
                     let totalLopShift = 0;
                     lops.forEach(lop => { if (lop.start < date) totalLopShift += lop.days; });
                     let adjustedDate = new Date(date); adjustedDate.setDate(adjustedDate.getDate() + totalLopShift);
-                    stages.push({ date: adjustedDate, basic: pay, hra: 0, cca: 0 }); 
+                    stages.push({ date: adjustedDate, basic: pay, hra: oldHRA, cca: oldCCA }); 
                 }
             }
         } else {
@@ -434,13 +428,31 @@
 
         stages.sort((a, b) => a.date - b.date);
 
+        // Build Table Structure
+        const table = document.getElementById(type + 'Table');
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th rowspan="2" class="th-final">Month</th><th rowspan="2" class="th-final">Days</th>
+                    <th colspan="5" class="th-due">Due (Higher Pay)</th>
+                    <th colspan="5" class="th-drawn">Drawn (Lower Pay)</th>
+                    <th rowspan="2" class="th-final">Diff<br>Gross</th><th rowspan="2" class="th-final">Pension<br>Ded</th><th rowspan="2" class="th-final">Net<br>Arrear</th>
+                </tr>
+                <tr>
+                    <th class="th-due">Basic</th><th class="th-due">DA</th><th class="th-due">HRA</th><th class="th-due">Other</th><th class="th-due" style="font-weight:bold;">Gross</th>
+                    <th class="th-drawn">Basic</th><th class="th-drawn">DA</th><th class="th-drawn">HRA</th><th class="th-drawn">Other</th><th class="th-drawn" style="font-weight:bold;">Gross</th>
+                </tr>
+            </thead>
+            <tbody id="${type}Body"></tbody>
+        `;
         const tbody = document.getElementById(type + 'Body');
-        tbody.innerHTML = '';
         
-        // Reset Export Data
         window.arrearExportData[type] = [];
-        
-        let totals = { days: 0, basic: 0, da: 0, hra: 0, cca: 0, gross: 0, pen: 0, net: 0, expDueGross: 0, expDrawnGross: 0 };
+        let t = { 
+            days: 0, dueB: 0, dueDA: 0, dueHRA: 0, dueCCA: 0, dueGross: 0,
+            drawnB: 0, drawnDA: 0, drawnHRA: 0, drawnCCA: 0, drawnGross: 0,
+            diffGross: 0, pen: 0, net: 0 
+        };
         
         let current = new Date(start.getFullYear(), start.getMonth(), 1);
         const endLimit = new Date(end.getFullYear(), end.getMonth(), 1);
@@ -484,67 +496,80 @@
                 let actualDays = (chunk.e - chunk.s + 1) - lopThisChunk;
                 if (actualDays <= 0) return;
 
-                let dueB = oldBasic, dueH = type === 'promo' ? oldHRA : 0, dueC = type === 'promo' ? oldCCA : 0;
+                let dueB = oldBasic, dueH = oldHRA, dueC = oldCCA;
                 stages.forEach(st => {
-                    if (st.date <= chunkStart) { dueB = st.basic; if (type === 'promo') { dueH = st.hra; dueC = st.cca; } }
+                    if (st.date <= chunkStart) { dueB = st.basic; dueH = st.hra; dueC = st.cca; }
                 });
-
                 let dueDA = Math.ceil(dueB * (globalDA / 100));
 
-                let dBasic = dueB - oldBasic;
-                let dDA = dueDA - oldDA;
-                let dHRA = type === 'promo' ? (dueH - oldHRA) : 0;
-                let dCCA = type === 'promo' ? (dueC - oldCCA) : 0;
-
-                const pBasic = Math.ceil((dBasic / maxDays) * actualDays);
-                const pDA = Math.ceil((dDA / maxDays) * actualDays);
-                const pHRA = Math.ceil((dHRA / maxDays) * actualDays);
-                const pCCA = Math.ceil((dCCA / maxDays) * actualDays);
-                
-                const pGross = pBasic + pDA + pHRA + pCCA; // This is the Difference Gross
-                const pPen = Math.ceil((pBasic + pDA) * (isCPS ? 0.10 : 0.12));
-                const pNet = pGross - pPen;
-
-                // For Export: Calculate Exact Drawn Gross for this chunk
+                // 1. Calculate Prorated Drawn
                 let pDrawnBasic = Math.ceil((oldBasic / maxDays) * actualDays);
                 let pDrawnDA = Math.ceil((oldDA / maxDays) * actualDays);
-                let pDrawnHRA = type === 'promo' ? Math.ceil((oldHRA / maxDays) * actualDays) : 0;
-                let pDrawnCCA = type === 'promo' ? Math.ceil((oldCCA / maxDays) * actualDays) : 0;
-                
-                let chunkDrawnGross = pDrawnBasic + pDrawnDA + pDrawnHRA + pDrawnCCA;
-                // To guarantee math matches perfectly for auditing: Due = Drawn + Diff
-                let chunkDueGross = chunkDrawnGross + pGross;
+                let pDrawnHRA = Math.ceil((oldHRA / maxDays) * actualDays);
+                let pDrawnCCA = Math.ceil((oldCCA / maxDays) * actualDays);
+                let pDrawnGross = pDrawnBasic + pDrawnDA + pDrawnHRA + pDrawnCCA;
 
-                totals.days += actualDays; totals.basic += pBasic; totals.da += pDA; totals.hra += pHRA; totals.cca += pCCA; 
-                totals.gross += pGross; totals.pen += pPen; totals.net += pNet;
-                totals.expDueGross += chunkDueGross; totals.expDrawnGross += chunkDrawnGross;
+                // 2. Calculate Prorated Due
+                let pDueBasic = Math.ceil((dueB / maxDays) * actualDays);
+                let pDueDA = Math.ceil((dueDA / maxDays) * actualDays);
+                let pDueHRA = Math.ceil((dueH / maxDays) * actualDays);
+                let pDueCCA = Math.ceil((dueC / maxDays) * actualDays);
+                let pDueGross = pDueBasic + pDueDA + pDueHRA + pDueCCA;
+
+                // 3. Final Arrear Math
+                let pDiffGross = pDueGross - pDrawnGross;
+                let pDiffBasic = pDueBasic - pDrawnBasic;
+                let pDiffDA = pDueDA - pDrawnDA;
+                
+                let pPen = Math.ceil((pDiffBasic + pDiffDA) * (isCPS ? 0.10 : 0.12));
+                let pNet = pDiffGross - pPen;
+
+                // Totals
+                t.days += actualDays; 
+                t.dueB += pDueBasic; t.dueDA += pDueDA; t.dueHRA += pDueHRA; t.dueCCA += pDueCCA; t.dueGross += pDueGross;
+                t.drawnB += pDrawnBasic; t.drawnDA += pDrawnDA; t.drawnHRA += pDrawnHRA; t.drawnCCA += pDrawnCCA; t.drawnGross += pDrawnGross;
+                t.diffGross += pDiffGross; t.pen += pPen; t.net += pNet;
 
                 let label = `${monthNames[month]} ${year}`;
                 if (splitDays.length > 0) label += ` (${chunk.s}-${chunk.e})`;
 
                 const tr = document.createElement('tr');
                 if (splitDays.length > 0) tr.className = 'split-row';
-                tr.innerHTML = `<td>${label}</td><td>${actualDays}</td><td>${formatCurr(pBasic)}</td><td>${formatCurr(pDA)}</td><td>${formatCurr(pHRA)}</td><td>${formatCurr(pCCA)}</td><td><strong>${formatCurr(pGross)}</strong></td><td class="deduction-cell">- ${formatCurr(pPen)}</td><td class="net-cell">${formatCurr(pNet)}</td>`;
+                tr.innerHTML = `<td>${label}</td><td>${actualDays}</td>
+                    <td>${formatCurr(pDueBasic)}</td><td>${formatCurr(pDueDA)}</td><td>${formatCurr(pDueHRA)}</td><td>${formatCurr(pDueCCA)}</td><td style="font-weight:bold; color:#065f46;">${formatCurr(pDueGross)}</td>
+                    <td>${formatCurr(pDrawnBasic)}</td><td>${formatCurr(pDrawnDA)}</td><td>${formatCurr(pDrawnHRA)}</td><td>${formatCurr(pDrawnCCA)}</td><td style="font-weight:bold; color:#991b1b;">${formatCurr(pDrawnGross)}</td>
+                    <td><strong>${formatCurr(pDiffGross)}</strong></td><td class="deduction-cell">- ${formatCurr(pPen)}</td><td class="net-cell">${formatCurr(pNet)}</td>`;
                 tbody.appendChild(tr);
 
-                // Push to Export Array
-                window.arrearExportData[type].push({ Month: label, Days: actualDays, DueGross: chunkDueGross, DrawnGross: chunkDrawnGross, DiffGross: pGross, Pension: pPen, Net: pNet });
+                window.arrearExportData[type].push({ 
+                    Month: label, Days: actualDays, 
+                    DueBasic: pDueBasic, DueDA: pDueDA, DueHRA: pDueHRA, DueCCA: pDueCCA, DueGross: pDueGross,
+                    DrawnBasic: pDrawnBasic, DrawnDA: pDrawnDA, DrawnHRA: pDrawnHRA, DrawnCCA: pDrawnCCA, DrawnGross: pDrawnGross,
+                    DiffGross: pDiffGross, Pension: pPen, Net: pNet 
+                });
             });
             current.setMonth(current.getMonth() + 1);
         }
 
         const trTotal = document.createElement('tr');
         trTotal.className = 'total-row';
-        trTotal.innerHTML = `<td>GRAND TOTAL</td><td>${totals.days} Days</td><td>₹ ${formatCurr(totals.basic)}</td><td>₹ ${formatCurr(totals.da)}</td><td>₹ ${formatCurr(totals.hra)}</td><td>₹ ${formatCurr(totals.cca)}</td><td>₹ ${formatCurr(totals.gross)}</td><td class="deduction-cell">- ₹ ${formatCurr(totals.pen)}</td><td class="net-cell" style="font-size: 1.1rem;">₹ ${formatCurr(totals.net)}</td>`;
+        trTotal.innerHTML = `<td>GRAND TOTAL</td><td>${t.days}</td>
+            <td>₹${formatCurr(t.dueB)}</td><td>₹${formatCurr(t.dueDA)}</td><td>₹${formatCurr(t.dueHRA)}</td><td>₹${formatCurr(t.dueCCA)}</td><td style="color:#065f46;">₹${formatCurr(t.dueGross)}</td>
+            <td>₹${formatCurr(t.drawnB)}</td><td>₹${formatCurr(t.drawnDA)}</td><td>₹${formatCurr(t.drawnHRA)}</td><td>₹${formatCurr(t.drawnCCA)}</td><td style="color:#991b1b;">₹${formatCurr(t.drawnGross)}</td>
+            <td>₹${formatCurr(t.diffGross)}</td><td class="deduction-cell">- ₹${formatCurr(t.pen)}</td><td class="net-cell" style="font-size:1rem;">₹${formatCurr(t.net)}</td>`;
         tbody.appendChild(trTotal);
         
-        // Add Grand Total to Export Array
-        window.arrearExportData[type].push({ Month: "GRAND TOTAL", Days: totals.days, DueGross: totals.expDueGross, DrawnGross: totals.expDrawnGross, DiffGross: totals.gross, Pension: totals.pen, Net: totals.net });
+        window.arrearExportData[type].push({ 
+            Month: "GRAND TOTAL", Days: t.days, 
+            DueBasic: t.dueB, DueDA: t.dueDA, DueHRA: t.dueHRA, DueCCA: t.dueCCA, DueGross: t.dueGross,
+            DrawnBasic: t.drawnB, DrawnDA: t.drawnDA, DrawnHRA: t.drawnHRA, DrawnCCA: t.drawnCCA, DrawnGross: t.drawnGross,
+            DiffGross: t.diffGross, Pension: t.pen, Net: t.net 
+        });
         
         document.getElementById(type + 'Wrapper').style.display = 'block';
     }
 
-    // --- Export Function ---
+    // --- Export Engine ---
     function triggerExport(type) {
         const data = window.arrearExportData[type];
         if(!data || data.length === 0) return alert("Please click 'Calculate' first to generate the data before exporting.");
@@ -554,30 +579,25 @@
         const penLabel = document.getElementById('pensionType').value;
 
         if (format === 'csv') {
-            // Excel/CSV Generation
-            let csv = `Month,Days,Due Gross (Rs),Drawn Gross (Rs),Difference Gross (Rs),Pension Ded ${penLabel} (Rs),Net Arrear (Rs)\n`;
-            data.forEach(r => { csv += `"${r.Month}",${r.Days},${r.DueGross},${r.DrawnGross},${r.DiffGross},${r.Pension},${r.Net}\n`; });
+            let csv = `Month,Days,Due Basic,Due DA,Due HRA,Due Other,Due Gross,Drawn Basic,Drawn DA,Drawn HRA,Drawn Other,Drawn Gross,Diff Gross,Pension Ded (${penLabel}),Net Arrear\n`;
+            data.forEach(r => { csv += `"${r.Month}",${r.Days},${r.DueBasic},${r.DueDA},${r.DueHRA},${r.DueCCA},${r.DueGross},${r.DrawnBasic},${r.DrawnDA},${r.DrawnHRA},${r.DrawnCCA},${r.DrawnGross},${r.DiffGross},${r.Pension},${r.Net}\n`; });
             
             let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             let link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `${title}.csv`;
-            link.click();
+            link.href = URL.createObjectURL(blob); link.download = `${title}.csv`; link.click();
         } else if (format === 'word') {
-            // Word Doc Generation (HTML Table format)
-            let html = `<html><head><meta charset="utf-8"><style>table{border-collapse:collapse;width:100%;font-family:Arial,sans-serif;} th,td{border:1px solid #000;padding:8px;text-align:right;} th{background-color:#f2f2f2;} th:first-child,td:first-child{text-align:left;}</style></head><body><h2>${title.replace(/_/g, ' ')}</h2><table>`;
-            html += `<tr><th>Month</th><th>Days</th><th>Due Gross</th><th>Drawn Gross</th><th>Difference Gross</th><th>Pension Ded (${penLabel})</th><th>Net Arrear</th></tr>`;
+            let html = `<html><head><meta charset="utf-8"><style>table{border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;} th,td{border:1px solid #000;padding:6px;text-align:right;} th{background-color:#f2f2f2;text-align:center;} th:first-child,td:first-child{text-align:left;}</style></head><body><h2>${title.replace(/_/g, ' ')}</h2><table>`;
+            html += `<tr><th rowspan="2">Month</th><th rowspan="2">Days</th><th colspan="5">Due (Higher Pay)</th><th colspan="5">Drawn (Lower Pay)</th><th rowspan="2">Diff Gross</th><th rowspan="2">Pension (${penLabel})</th><th rowspan="2">Net Arrear</th></tr>`;
+            html += `<tr><th>Basic</th><th>DA</th><th>HRA</th><th>Other</th><th>Gross</th><th>Basic</th><th>DA</th><th>HRA</th><th>Other</th><th>Gross</th></tr>`;
             data.forEach(r => {
                 let bold = r.Month === "GRAND TOTAL" ? "font-weight:bold; background-color:#f9f9f9;" : "";
-                html += `<tr style="${bold}"><td>${r.Month}</td><td>${r.Days}</td><td>${r.DueGross}</td><td>${r.DrawnGross}</td><td>${r.DiffGross}</td><td>${r.Pension}</td><td>${r.Net}</td></tr>`;
+                html += `<tr style="${bold}"><td>${r.Month}</td><td>${r.Days}</td><td>${r.DueBasic}</td><td>${r.DueDA}</td><td>${r.DueHRA}</td><td>${r.DueCCA}</td><td>${r.DueGross}</td><td>${r.DrawnBasic}</td><td>${r.DrawnDA}</td><td>${r.DrawnHRA}</td><td>${r.DrawnCCA}</td><td>${r.DrawnGross}</td><td>${r.DiffGross}</td><td>${r.Pension}</td><td>${r.Net}</td></tr>`;
             });
             html += `</table></body></html>`;
             
             let blob = new Blob(['\ufeff', html], { type: 'application/msword' });
             let link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `${title}.doc`;
-            link.click();
+            link.href = URL.createObjectURL(blob); link.download = `${title}.doc`; link.click();
         }
     }
 
