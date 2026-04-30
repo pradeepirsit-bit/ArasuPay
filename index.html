@@ -90,8 +90,11 @@
         .divider { height: 1px; background-color: var(--border-light); margin: 20px 0; }
         .action-bar { display: flex; gap: 10px; margin-top: 20px; align-items: stretch; flex-wrap: wrap;}
         
-        .radio-group { display: flex; gap: 12px; font-size: 0.85rem; align-items: center; justify-content: flex-end; flex: 1;}
-        .radio-group label { min-width: auto; cursor: pointer; display: flex; align-items: center; gap: 4px; color: var(--brand-action); font-weight: 600;}
+        /* Compact Allowance Controls */
+        .allowance-box { background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 12px; }
+        .radio-group-tight { display: flex; gap: 12px; font-size: 0.85rem; align-items: center; flex-wrap: wrap; margin-top: 5px;}
+        .radio-group-tight label { cursor: pointer; display: flex; align-items: center; gap: 4px; color: var(--brand-action); font-weight: 600;}
+        .compact-radio { font-size: 0.8rem; color: var(--brand-action); display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; margin-bottom: 4px; line-height: 1.3;}
     </style>
 </head>
 <body>
@@ -99,7 +102,7 @@
 <div class="container">
     <div class="header">
         <h1>ArasuPay: Advanced HR Dashboard</h1>
-        <p>Featuring Dynamic DA Time-Engine, Centralized Auto-HRA Matrices & Strict Treasury Rules</p>
+        <p>Featuring Dynamic DA Time-Engine, Centralized Auto-HRA & CCA Matrices & Strict Treasury Rules</p>
     </div>
 
     <!-- GLOBAL CONTEXT -->
@@ -129,25 +132,38 @@
                 <h2>Standard Earnings</h2>
                 <div class="form-group"><label>Manual Basic Pay (₹)</label><input type="number" id="basicPay" class="manual-highlight" value="36900"></div>
                 <div class="form-group"><label>Annual Increment Qtr</label><select id="incrementMonth" style="text-align: left;"><option value="Jan">January</option><option value="Apr">April</option><option value="Jul" selected>July</option><option value="Oct">October</option></select></div>
-                <div class="divider"></div>
-                <!-- DA% Now Auto-fetches but remains editable -->
-                <div class="form-group"><label>DA % (Current)</label><div class="inline-group"><input type="number" id="daPercent" title="Auto-fetched based on today's date"> <span>%</span></div></div>
-                <span class="helper-text" id="daAmountDisplay">₹ 0</span>
                 
-                <!-- NEW HRA SELECTION -->
-                <div class="form-group">
-                    <label>HRA City Grade</label>
-                    <div class="radio-group" id="hraGradeGroup">
+                <div class="form-group" style="margin-top: 15px;"><label>DA % (Current)</label><div class="inline-group"><input type="number" id="daPercent" title="Auto-fetched based on today's date"> <span>%</span></div></div>
+                <span class="helper-text" id="daAmountDisplay" style="margin-bottom: 15px;">₹ 0</span>
+                
+                <!-- NEW COMPACT HRA SELECTION -->
+                <div class="allowance-box">
+                    <div class="form-group" style="margin-bottom: 4px;">
+                        <label style="color: var(--brand-dark); font-weight: 600;">HRA</label>
+                        <input type="number" id="hra" class="readonly-highlight" readonly title="Auto-calculated from Pay Range" style="width: 100px; padding: 4px 8px;">
+                    </div>
+                    <div class="radio-group-tight">
                         <label><input type="radio" name="hraGrade" value="1A"> 1A</label>
                         <label><input type="radio" name="hraGrade" value="1B"> 1B</label>
-                        <label><input type="radio" name="hraGrade" value="2" checked> 2</label>
-                        <label><input type="radio" name="hraGrade" value="3"> 3</label>
-                        <label><input type="radio" name="hraGrade" value="4"> 4</label>
+                        <label><input type="radio" name="hraGrade" value="2" checked> Grade 2</label>
+                        <label><input type="radio" name="hraGrade" value="3"> Grade 3</label>
+                        <label><input type="radio" name="hraGrade" value="4"> Grade 4</label>
                     </div>
                 </div>
-                <div class="form-group"><label>HRA (₹)</label><input type="number" id="hra" class="readonly-highlight" readonly title="Auto-calculated from Pay Range"></div>
                 
-                <div class="form-group"><label>CCA (₹)</label><input type="number" id="cca" value="600"></div>
+                <!-- NEW COMPACT CCA SELECTION -->
+                <div class="allowance-box">
+                    <div class="form-group" style="margin-bottom: 6px;">
+                        <label style="color: var(--brand-dark); font-weight: 600;">CCA</label>
+                        <input type="number" id="cca" class="readonly-highlight" readonly title="Auto-calculated from Pay & City" style="width: 100px; padding: 4px 8px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; padding-left: 2px;">
+                        <label class="compact-radio"><input type="radio" name="ccaGrade" value="chennai" checked> Chennai & Surroundings (32 Kms)</label>
+                        <label class="compact-radio"><input type="radio" name="ccaGrade" value="other"> Coimbatore, Madurai, Salem, Trichy, Tirunelveli, Tiruppur, Erode (16 Kms)</label>
+                        <label class="compact-radio" style="color: var(--text-muted); font-weight: 500;"><input type="radio" name="ccaGrade" value="none"> Not Applicable / Other</label>
+                    </div>
+                </div>
+
                 <div class="form-group"><label>Medical Allow (₹)</label><input type="number" id="ma" value="300"></div>
                 <div class="form-group"><label>Other Allow (₹)</label><input type="number" id="otherEarnings" value="0"></div>
             </div>
@@ -196,7 +212,7 @@
         <div class="section-header-flex">
             <div>
                 <h2>Annual Increment Arrear Calculator</h2>
-                <p class="section-desc">DA & HRA are automatically fetched per month based on Date & Pay Table Engine.</p>
+                <p class="section-desc">DA, HRA, & CCA are automatically fetched per month based on Date & Pay Table Engines.</p>
             </div>
             <button class="btn-secondary" onclick="togglePanel('incArrearPanel', 'btnIncArrear', 'Increment Arrear')" id="btnIncArrear">Show Increment Arrear</button>
         </div>
@@ -251,7 +267,7 @@
         <div class="section-header-flex">
             <div>
                 <h2>Promotion Arrear Calculator</h2>
-                <p class="section-desc">Calculates strict differences. DA & HRA auto-adjust per backend Government matrices.</p>
+                <p class="section-desc">Calculates strict differences. DA, HRA, & CCA auto-adjust per backend Government matrices.</p>
             </div>
             <button class="btn-secondary" onclick="togglePanel('promoArrearPanel', 'btnPromoArrear', 'Promotion Arrear')" id="btnPromoArrear">Show Promotion Arrear</button>
         </div>
@@ -266,8 +282,8 @@
                 <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #fafaf9;">
                     <h3 style="color: #57534e;">Drawn (Lower Pay)</h3>
                     <div class="form-group"><label>Basic Pay (₹)</label><input type="number" id="promoDrawnBasic" value="36900"></div>
-                    <div class="form-group"><label>HRA (₹)</label><input type="number" id="promoDrawnHRA" class="readonly-highlight" readonly title="Auto-calc from Grade"></div>
-                    <div class="form-group"><label>CCA (₹)</label><input type="number" id="promoDrawnCCA" value="600"></div>
+                    <div class="form-group"><label>HRA (₹)</label><input type="number" id="promoDrawnHRA" class="readonly-highlight" readonly title="Auto-calc from Matrix"></div>
+                    <div class="form-group"><label>CCA (₹)</label><input type="number" id="promoDrawnCCA" class="readonly-highlight" readonly title="Auto-calc from Matrix"></div>
                     
                     <div style="margin-top: 20px;">
                         <h4 style="margin: 0 0 10px 0; color: #dc2626;">Loss of Pay / Strike</h4>
@@ -279,8 +295,8 @@
                 <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px;">
                     <h3 style="color: var(--brand-action);">Due (Higher Pay)</h3>
                     <div class="form-group"><label>Basic Pay (₹)</label><input type="number" id="promoDueBasic" value="38000" class="manual-highlight"></div>
-                    <div class="form-group"><label>HRA (₹)</label><input type="number" id="promoDueHRA" class="readonly-highlight" readonly title="Auto-calc from Grade"></div>
-                    <div class="form-group"><label>CCA (₹)</label><input type="number" id="promoDueCCA" value="600"></div>
+                    <div class="form-group"><label>HRA (₹)</label><input type="number" id="promoDueHRA" class="readonly-highlight" readonly title="Auto-calc from Matrix"></div>
+                    <div class="form-group"><label>CCA (₹)</label><input type="number" id="promoDueCCA" class="readonly-highlight" readonly title="Auto-calc from Matrix"></div>
                 </div>
             </div>
             
@@ -407,6 +423,23 @@
         return 0;
     };
 
+    // --- Centralized CCA Engine (Revised Pay Range Matrix) ---
+    const ccaMatrix = [
+        { max: 20600, 'chennai': 360, 'other': 180 },
+        { max: 30800, 'chennai': 500, 'other': 260 },
+        { max: 41100, 'chennai': 800, 'other': 400 },
+        { max: Infinity, 'chennai': 1200, 'other': 720 }
+    ];
+
+    const getCcaAmount = (pay, grade) => {
+        if (!pay || grade === 'none') return 0;
+        const p = parseFloat(pay);
+        for (let tier of ccaMatrix) {
+            if (p <= tier.max) return tier[grade];
+        }
+        return 0;
+    };
+
     // --- Global Data Store ---
     window.arrearExportData = { inc: [], promo: [], fac: [] };
 
@@ -461,23 +494,30 @@
         document.getElementById('incOldBasic').value = basic;
         document.getElementById('facBasic').value = basic;
         
-        // Auto-calculate HRA based on Centralized Engine
-        const selectedGrade = document.querySelector('input[name="hraGrade"]:checked').value;
-        const autoHra = getHraAmount(basic, selectedGrade);
+        // Auto-calculate HRA & CCA based on Centralized Engine
+        const selectedHraGrade = document.querySelector('input[name="hraGrade"]:checked').value;
+        const autoHra = getHraAmount(basic, selectedHraGrade);
         document.getElementById('hra').value = autoHra;
+
+        const selectedCcaGrade = document.querySelector('input[name="ccaGrade"]:checked').value;
+        const autoCca = getCcaAmount(basic, selectedCcaGrade);
+        document.getElementById('cca').value = autoCca;
         
-        // Update Promotion Preview HRA Inputs visually
-        const promoDrawnBasic = document.getElementById('promoDrawnBasic').value;
-        document.getElementById('promoDrawnHRA').value = getHraAmount(promoDrawnBasic, selectedGrade);
-        const promoDueBasic = document.getElementById('promoDueBasic').value;
-        document.getElementById('promoDueHRA').value = getHraAmount(promoDueBasic, selectedGrade);
+        // Update Promotion Previews Visually
+        const promoDrawnBasic = parseFloat(document.getElementById('promoDrawnBasic').value) || 0;
+        document.getElementById('promoDrawnHRA').value = getHraAmount(promoDrawnBasic, selectedHraGrade);
+        document.getElementById('promoDrawnCCA').value = getCcaAmount(promoDrawnBasic, selectedCcaGrade);
+
+        const promoDueBasic = parseFloat(document.getElementById('promoDueBasic').value) || 0;
+        document.getElementById('promoDueHRA').value = getHraAmount(promoDueBasic, selectedHraGrade);
+        document.getElementById('promoDueCCA').value = getCcaAmount(promoDueBasic, selectedCcaGrade);
         
         const daPct = parseFloat(document.getElementById('daPercent').value) || 0;
         const daAmt = Math.ceil(basic * (daPct / 100));
         document.getElementById('daAmountDisplay').innerText = `₹ ${formatCurr(daAmt)}`;
         
         const hra = autoHra;
-        const cca = parseFloat(document.getElementById('cca').value) || 0;
+        const cca = autoCca;
         const ma = parseFloat(document.getElementById('ma').value) || 0;
         const other = parseFloat(document.getElementById('otherEarnings').value) || 0;
         
@@ -691,10 +731,11 @@
     }
 
 
-    // --- Granular Arrear Engine (Dynamic Time-based DA + Pay-based HRA) ---
+    // --- Granular Arrear Engine (Dynamic DA, HRA & CCA) ---
     function generateAdvancedArrear(type) {
         const isCPS = document.getElementById('pensionType').value === 'CPS';
-        const selectedGrade = document.querySelector('input[name="hraGrade"]:checked').value;
+        const selectedHraGrade = document.querySelector('input[name="hraGrade"]:checked').value;
+        const selectedCcaGrade = document.querySelector('input[name="ccaGrade"]:checked').value;
         
         let startStr = document.getElementById(type + 'Start').value;
         let endStr = document.getElementById(type + 'End').value;
@@ -714,11 +755,10 @@
         });
 
         let stages = [];
-        let oldBasic, oldCCA = 0;
+        let oldBasic;
 
         if (type === 'inc') {
             oldBasic = parseFloat(document.getElementById('incOldBasic').value) || 0;
-            oldCCA = parseFloat(document.getElementById('cca').value) || 0;
 
             const stageRows = document.getElementById('incStagesContainer').children;
             for (let row of stageRows) {
@@ -728,16 +768,13 @@
                     let totalLopShift = 0;
                     lops.forEach(lop => { if (lop.start < date) totalLopShift += lop.days; });
                     let adjustedDate = new Date(date); adjustedDate.setDate(adjustedDate.getDate() + totalLopShift);
-                    stages.push({ date: adjustedDate, basic: pay, cca: oldCCA }); 
+                    stages.push({ date: adjustedDate, basic: pay }); 
                 }
             }
         } else {
             oldBasic = parseFloat(document.getElementById('promoDrawnBasic').value) || 0;
-            oldCCA = parseFloat(document.getElementById('promoDrawnCCA').value) || 0;
-            
             const dueBasic = parseFloat(document.getElementById('promoDueBasic').value) || 0;
-            const dueCCA = parseFloat(document.getElementById('promoDueCCA').value) || 0;
-            stages.push({ date: new Date(start), basic: dueBasic, cca: dueCCA });
+            stages.push({ date: new Date(start), basic: dueBasic });
         }
 
         stages.sort((a, b) => a.date - b.date);
@@ -814,30 +851,33 @@
                 let actualDays = (chunk.e - chunk.s + 1) - lopThisChunk;
                 if (actualDays <= 0) return;
 
-                let dueB = oldBasic, dueC = oldCCA;
+                let dueB = oldBasic;
                 stages.forEach(st => {
-                    if (st.date <= chunkStart) { dueB = st.basic; dueC = st.cca; }
+                    if (st.date <= chunkStart) { dueB = st.basic; }
                 });
                 
-                // --- Dynamic Engines: Fetch DA % and auto-calculate HRA for this specific month! ---
+                // --- Dynamic Engines: Fetch DA %, HRA, and CCA for this specific month & pay bracket! ---
                 let currentDaPct = getDaPercent(chunkStart);
                 let chunkOldDA = Math.ceil(oldBasic * (currentDaPct / 100));
                 let dueDA = Math.ceil(dueB * (currentDaPct / 100));
 
-                let chunkOldHra = getHraAmount(oldBasic, selectedGrade);
-                let dueHRA = getHraAmount(dueB, selectedGrade);
+                let chunkOldHra = getHraAmount(oldBasic, selectedHraGrade);
+                let dueHRA = getHraAmount(dueB, selectedHraGrade);
+
+                let chunkOldCca = getCcaAmount(oldBasic, selectedCcaGrade);
+                let dueCCA = getCcaAmount(dueB, selectedCcaGrade);
 
                 // --- Prorating ---
                 let pDrawnBasic = Math.ceil((oldBasic / maxDays) * actualDays);
                 let pDrawnDA = Math.ceil((chunkOldDA / maxDays) * actualDays);
                 let pDrawnHRA = Math.ceil((chunkOldHra / maxDays) * actualDays);
-                let pDrawnCCA = Math.ceil((oldCCA / maxDays) * actualDays);
+                let pDrawnCCA = Math.ceil((chunkOldCca / maxDays) * actualDays);
                 let pDrawnGross = pDrawnBasic + pDrawnDA + pDrawnHRA + pDrawnCCA;
 
                 let pDueBasic = Math.ceil((dueB / maxDays) * actualDays);
                 let pDueDA = Math.ceil((dueDA / maxDays) * actualDays);
                 let pDueHRA = Math.ceil((dueHRA / maxDays) * actualDays);
-                let pDueCCA = Math.ceil((dueC / maxDays) * actualDays);
+                let pDueCCA = Math.ceil((dueCCA / maxDays) * actualDays);
                 let pDueGross = pDueBasic + pDueDA + pDueHRA + pDueCCA;
 
                 let pDiffBasic = pDueBasic - pDrawnBasic;
@@ -975,7 +1015,7 @@
 
     // Attach Event Listeners
     document.querySelectorAll('.grid-2col input[type="number"], .grid-2col select, #globalMonth').forEach(el => el.addEventListener('input', calculateMainSalary));
-    document.querySelectorAll('input[name="hraGrade"]').forEach(el => el.addEventListener('change', calculateMainSalary));
+    document.querySelectorAll('input[name="hraGrade"], input[name="ccaGrade"]').forEach(el => el.addEventListener('change', calculateMainSalary));
     document.querySelectorAll('#promoDrawnBasic, #promoDueBasic').forEach(el => el.addEventListener('input', calculateMainSalary));
     
     // Initial Calc
