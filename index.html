@@ -13,7 +13,7 @@
         }
 
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-page); color: var(--text-main); margin: 0; padding: 30px 20px; line-height: 1.5; }
-        .container { max-width: 1100px; margin: 0 auto; background-color: var(--bg-card); border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); border: 1px solid var(--border-light); overflow: hidden; }
+        .container { max-width: 1150px; margin: 0 auto; background-color: var(--bg-card); border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); border: 1px solid var(--border-light); overflow: hidden; }
         
         .header { padding: 30px; border-bottom: 1px solid var(--border-light); text-align: center; }
         .header h1 { margin: 0; font-size: 1.75rem; font-weight: 600; letter-spacing: -0.025em; }
@@ -71,19 +71,20 @@
         .split-item span { display: block; font-size: 0.75rem; color: var(--text-muted); }
         .split-item strong { display: block; font-size: 1.05rem; color: var(--brand-action); margin-top: 4px; }
 
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 20px;}
-        th { color: var(--text-main); font-weight: 600; font-size: 0.75rem; padding: 10px; text-align: right; border: 1px solid var(--border-light); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 20px;}
+        th { color: var(--text-main); font-weight: 600; font-size: 0.75rem; padding: 8px; text-align: right; border: 1px solid var(--border-light); }
         th:first-child, td:first-child { text-align: left; }
-        td { padding: 10px; border: 1px solid #f3f4f6; text-align: right; white-space: nowrap;}
+        td { padding: 8px; border: 1px solid #f3f4f6; text-align: right; white-space: nowrap;}
         
         .th-due { background-color: #ecfdf5; color: #065f46; text-align: center !important;}
         .th-drawn { background-color: #fef2f2; color: #991b1b; text-align: center !important;}
+        .th-diff { background-color: #fffbeb; color: #b45309; text-align: center !important;}
         .th-final { background-color: #f8fafc; text-align: center !important;}
         
         .deduction-cell { color: var(--error-red); }
         .net-cell { font-weight: 600; color: var(--success-green); }
         .total-row td { font-weight: 600; background-color: #f9fafb; border-top: 2px solid var(--border-light); border-bottom: 2px solid var(--border-light); }
-        .split-row td { color: var(--brand-action); font-size: 0.8rem; background: #f0f9ff; }
+        .split-row td { color: var(--brand-action); font-size: 0.75rem; background: #f0f9ff; }
         
         .section-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid var(--border-light); padding-bottom: 15px;}
         .divider { height: 1px; background-color: var(--border-light); margin: 20px 0; }
@@ -95,7 +96,7 @@
 <div class="container">
     <div class="header">
         <h1>ArasuPay: Advanced HR Dashboard</h1>
-        <p>Featuring Precise Date Engine, CCA Integration & Auto-Filtered Arrear Statements</p>
+        <p>Featuring Precise Date Engine, Detailed Difference Splits & Full Statement Exports</p>
     </div>
 
     <!-- GLOBAL CONTEXT -->
@@ -129,7 +130,6 @@
                 <div class="form-group"><label>DA %</label><div class="inline-group"><input type="number" id="daPercent" value="50"> <span>%</span></div></div>
                 <span class="helper-text" id="daAmountDisplay">₹ 0</span>
                 <div class="form-group"><label>HRA (₹)</label><input type="number" id="hra" value="1800"></div>
-                <!-- CCA Added Here -->
                 <div class="form-group"><label>CCA (₹)</label><input type="number" id="cca" value="600"></div>
                 <div class="form-group"><label>Medical Allow (₹)</label><input type="number" id="ma" value="300"></div>
                 <div class="form-group"><label>Other Allow (₹)</label><input type="number" id="otherEarnings" value="0"></div>
@@ -325,7 +325,7 @@
         document.getElementById('incStagesContainer').appendChild(div);
     }
 
-    // --- Main Salary Logic with CCA ---
+    // --- Main Salary Logic ---
     function calculateMainSalary() {
         const basic = parseFloat(document.getElementById('basicPay').value) || 0;
         document.getElementById('incOldBasic').value = basic;
@@ -395,7 +395,7 @@
         }
     }
 
-    // --- Granular Arrear Engine ---
+    // --- Granular Arrear Engine (19 Columns) ---
     function generateAdvancedArrear(type) {
         const globalDA = parseFloat(document.getElementById('daPercent').value) || 0;
         const isCPS = document.getElementById('pensionType').value === 'CPS';
@@ -451,7 +451,7 @@
 
         stages.sort((a, b) => a.date - b.date);
 
-        // Build Table Structure
+        // Build 19-Column Table Structure
         const table = document.getElementById(type + 'Table');
         table.innerHTML = `
             <thead>
@@ -459,11 +459,13 @@
                     <th rowspan="2" class="th-final">Month</th><th rowspan="2" class="th-final">Days</th>
                     <th colspan="5" class="th-due">Due (Higher Pay)</th>
                     <th colspan="5" class="th-drawn">Drawn (Lower Pay)</th>
-                    <th rowspan="2" class="th-final">Diff<br>Gross</th><th rowspan="2" class="th-final">Pension<br>Ded</th><th rowspan="2" class="th-final">Net<br>Arrear</th>
+                    <th colspan="5" class="th-diff">Difference</th>
+                    <th rowspan="2" class="th-final">Pension<br>Ded</th><th rowspan="2" class="th-final">Net<br>Arrear</th>
                 </tr>
                 <tr>
                     <th class="th-due">Basic</th><th class="th-due">DA</th><th class="th-due">HRA</th><th class="th-due">CCA</th><th class="th-due" style="font-weight:bold;">Gross</th>
                     <th class="th-drawn">Basic</th><th class="th-drawn">DA</th><th class="th-drawn">HRA</th><th class="th-drawn">CCA</th><th class="th-drawn" style="font-weight:bold;">Gross</th>
+                    <th class="th-diff">Basic</th><th class="th-diff">DA</th><th class="th-diff">HRA</th><th class="th-diff">CCA</th><th class="th-diff" style="font-weight:bold;">Gross</th>
                 </tr>
             </thead>
             <tbody id="${type}Body"></tbody>
@@ -472,9 +474,11 @@
         
         window.arrearExportData[type] = [];
         let t = { 
-            days: 0, dueB: 0, dueDA: 0, dueHRA: 0, dueCCA: 0, dueGross: 0,
+            days: 0, 
+            dueB: 0, dueDA: 0, dueHRA: 0, dueCCA: 0, dueGross: 0,
             drawnB: 0, drawnDA: 0, drawnHRA: 0, drawnCCA: 0, drawnGross: 0,
-            diffGross: 0, pen: 0, net: 0 
+            diffB: 0, diffDA: 0, diffHRA: 0, diffCCA: 0, diffGross: 0, 
+            pen: 0, net: 0 
         };
         
         let current = new Date(start.getFullYear(), start.getMonth(), 1);
@@ -538,11 +542,11 @@
                 let pDueCCA = Math.ceil((dueC / maxDays) * actualDays);
                 let pDueGross = pDueBasic + pDueDA + pDueHRA + pDueCCA;
 
-                let pDiffGross = pDueGross - pDrawnGross;
                 let pDiffBasic = pDueBasic - pDrawnBasic;
                 let pDiffDA = pDueDA - pDrawnDA;
                 let pDiffHRA = pDueHRA - pDrawnHRA;
                 let pDiffCCA = pDueCCA - pDrawnCCA;
+                let pDiffGross = pDueGross - pDrawnGross;
                 
                 // Filter out rows where the increment hasn't started yet
                 if (pDiffBasic === 0 && pDiffDA === 0 && pDiffHRA === 0 && pDiffCCA === 0) return;
@@ -556,7 +560,8 @@
                 t.days += actualDays; 
                 t.dueB += pDueBasic; t.dueDA += pDueDA; t.dueHRA += pDueHRA; t.dueCCA += pDueCCA; t.dueGross += pDueGross;
                 t.drawnB += pDrawnBasic; t.drawnDA += pDrawnDA; t.drawnHRA += pDrawnHRA; t.drawnCCA += pDrawnCCA; t.drawnGross += pDrawnGross;
-                t.diffGross += pDiffGross; t.pen += pPen; t.net += pNet;
+                t.diffB += pDiffBasic; t.diffDA += pDiffDA; t.diffHRA += pDiffHRA; t.diffCCA += pDiffCCA; t.diffGross += pDiffGross;
+                t.pen += pPen; t.net += pNet;
 
                 let label = `${monthNames[month]} ${year}`;
                 if (splitDays.length > 0) label += ` (${chunk.s}-${chunk.e})`;
@@ -564,23 +569,29 @@
                 const tr = document.createElement('tr');
                 if (splitDays.length > 0) tr.className = 'split-row';
                 tr.innerHTML = `<td>${label}</td><td>${actualDays}</td>
+                    <!-- Due -->
                     <td>${formatCurr(pDueBasic)}</td><td>${formatCurr(pDueDA)}</td><td>${formatCurr(pDueHRA)}</td><td>${formatCurr(pDueCCA)}</td><td style="font-weight:bold; color:#065f46;">${formatCurr(pDueGross)}</td>
+                    <!-- Drawn -->
                     <td>${formatCurr(pDrawnBasic)}</td><td>${formatCurr(pDrawnDA)}</td><td>${formatCurr(pDrawnHRA)}</td><td>${formatCurr(pDrawnCCA)}</td><td style="font-weight:bold; color:#991b1b;">${formatCurr(pDrawnGross)}</td>
-                    <td><strong>${formatCurr(pDiffGross)}</strong></td><td class="deduction-cell">- ${formatCurr(pPen)}</td><td class="net-cell">${formatCurr(pNet)}</td>`;
+                    <!-- Diff -->
+                    <td>${formatCurr(pDiffBasic)}</td><td>${formatCurr(pDiffDA)}</td><td>${formatCurr(pDiffHRA)}</td><td>${formatCurr(pDiffCCA)}</td><td style="font-weight:bold; color:#b45309;">${formatCurr(pDiffGross)}</td>
+                    
+                    <td class="deduction-cell">- ${formatCurr(pPen)}</td><td class="net-cell">${formatCurr(pNet)}</td>`;
                 tbody.appendChild(tr);
 
                 window.arrearExportData[type].push({ 
                     Month: label, Days: actualDays, 
                     DueBasic: pDueBasic, DueDA: pDueDA, DueHRA: pDueHRA, DueCCA: pDueCCA, DueGross: pDueGross,
                     DrawnBasic: pDrawnBasic, DrawnDA: pDrawnDA, DrawnHRA: pDrawnHRA, DrawnCCA: pDrawnCCA, DrawnGross: pDrawnGross,
-                    DiffGross: pDiffGross, Pension: pPen, Net: pNet 
+                    DiffBasic: pDiffBasic, DiffDA: pDiffDA, DiffHRA: pDiffHRA, DiffCCA: pDiffCCA, DiffGross: pDiffGross, 
+                    Pension: pPen, Net: pNet 
                 });
             });
             current.setMonth(current.getMonth() + 1);
         }
 
         if(!hasRenderedRows) {
-            tbody.innerHTML = `<tr><td colspan="15" style="text-align:center; padding:20px; color:#6b7280;">No arrears found for this period. Ensure effective dates overlap with your start/end dates.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="19" style="text-align:center; padding:20px; color:#6b7280;">No arrears found for this period. Ensure effective dates overlap with your start/end dates.</td></tr>`;
             document.getElementById(type + 'Wrapper').style.display = 'block';
             return;
         }
@@ -588,22 +599,28 @@
         const trTotal = document.createElement('tr');
         trTotal.className = 'total-row';
         trTotal.innerHTML = `<td>GRAND TOTAL</td><td>${t.days}</td>
+            <!-- Due Total -->
             <td>₹${formatCurr(t.dueB)}</td><td>₹${formatCurr(t.dueDA)}</td><td>₹${formatCurr(t.dueHRA)}</td><td>₹${formatCurr(t.dueCCA)}</td><td style="color:#065f46;">₹${formatCurr(t.dueGross)}</td>
+            <!-- Drawn Total -->
             <td>₹${formatCurr(t.drawnB)}</td><td>₹${formatCurr(t.drawnDA)}</td><td>₹${formatCurr(t.drawnHRA)}</td><td>₹${formatCurr(t.drawnCCA)}</td><td style="color:#991b1b;">₹${formatCurr(t.drawnGross)}</td>
-            <td>₹${formatCurr(t.diffGross)}</td><td class="deduction-cell">- ₹${formatCurr(t.pen)}</td><td class="net-cell" style="font-size:1rem;">₹${formatCurr(t.net)}</td>`;
+            <!-- Diff Total -->
+            <td>₹${formatCurr(t.diffB)}</td><td>₹${formatCurr(t.diffDA)}</td><td>₹${formatCurr(t.diffHRA)}</td><td>₹${formatCurr(t.diffCCA)}</td><td style="color:#b45309;">₹${formatCurr(t.diffGross)}</td>
+            
+            <td class="deduction-cell">- ₹${formatCurr(t.pen)}</td><td class="net-cell" style="font-size:1rem;">₹${formatCurr(t.net)}</td>`;
         tbody.appendChild(trTotal);
         
         window.arrearExportData[type].push({ 
             Month: "GRAND TOTAL", Days: t.days, 
             DueBasic: t.dueB, DueDA: t.dueDA, DueHRA: t.dueHRA, DueCCA: t.dueCCA, DueGross: t.dueGross,
             DrawnBasic: t.drawnB, DrawnDA: t.drawnDA, DrawnHRA: t.drawnHRA, DrawnCCA: t.drawnCCA, DrawnGross: t.drawnGross,
-            DiffGross: t.diffGross, Pension: t.pen, Net: t.net 
+            DiffBasic: t.diffB, DiffDA: t.diffDA, DiffHRA: t.diffHRA, DiffCCA: t.diffCCA, DiffGross: t.diffGross, 
+            Pension: t.pen, Net: t.net 
         });
         
         document.getElementById(type + 'Wrapper').style.display = 'block';
     }
 
-    // --- Export Engine ---
+    // --- Export Engine (19 Columns) ---
     function triggerExport(type) {
         const data = window.arrearExportData[type];
         if(!data || data.length === 0) return alert("Please click 'Calculate' first to generate the data before exporting.");
@@ -613,19 +630,19 @@
         const penLabel = document.getElementById('pensionType').value;
 
         if (format === 'csv') {
-            let csv = `Month,Days,Due Basic,Due DA,Due HRA,Due CCA,Due Gross,Drawn Basic,Drawn DA,Drawn HRA,Drawn CCA,Drawn Gross,Diff Gross,Pension Ded (${penLabel}),Net Arrear\n`;
-            data.forEach(r => { csv += `"${r.Month}",${r.Days},${r.DueBasic},${r.DueDA},${r.DueHRA},${r.DueCCA},${r.DueGross},${r.DrawnBasic},${r.DrawnDA},${r.DrawnHRA},${r.DrawnCCA},${r.DrawnGross},${r.DiffGross},${r.Pension},${r.Net}\n`; });
+            let csv = `Month,Days,Due Basic,Due DA,Due HRA,Due CCA,Due Gross,Drawn Basic,Drawn DA,Drawn HRA,Drawn CCA,Drawn Gross,Diff Basic,Diff DA,Diff HRA,Diff CCA,Diff Gross,Pension Ded (${penLabel}),Net Arrear\n`;
+            data.forEach(r => { csv += `"${r.Month}",${r.Days},${r.DueBasic},${r.DueDA},${r.DueHRA},${r.DueCCA},${r.DueGross},${r.DrawnBasic},${r.DrawnDA},${r.DrawnHRA},${r.DrawnCCA},${r.DrawnGross},${r.DiffBasic},${r.DiffDA},${r.DiffHRA},${r.DiffCCA},${r.DiffGross},${r.Pension},${r.Net}\n`; });
             
             let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             let link = document.createElement("a");
             link.href = URL.createObjectURL(blob); link.download = `${title}.csv`; link.click();
         } else if (format === 'word') {
-            let html = `<html><head><meta charset="utf-8"><style>table{border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;} th,td{border:1px solid #000;padding:6px;text-align:right;} th{background-color:#f2f2f2;text-align:center;} th:first-child,td:first-child{text-align:left;}</style></head><body><h2>${title.replace(/_/g, ' ')}</h2><table>`;
-            html += `<tr><th rowspan="2">Month</th><th rowspan="2">Days</th><th colspan="5">Due (Higher Pay)</th><th colspan="5">Drawn (Lower Pay)</th><th rowspan="2">Diff Gross</th><th rowspan="2">Pension (${penLabel})</th><th rowspan="2">Net Arrear</th></tr>`;
-            html += `<tr><th>Basic</th><th>DA</th><th>HRA</th><th>CCA</th><th>Gross</th><th>Basic</th><th>DA</th><th>HRA</th><th>CCA</th><th>Gross</th></tr>`;
+            let html = `<html><head><meta charset="utf-8"><style>table{border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:11px;} th,td{border:1px solid #000;padding:4px;text-align:right;} th{background-color:#f2f2f2;text-align:center;} th:first-child,td:first-child{text-align:left;}</style></head><body><h2>${title.replace(/_/g, ' ')}</h2><table>`;
+            html += `<tr><th rowspan="2">Month</th><th rowspan="2">Days</th><th colspan="5">Due (Higher Pay)</th><th colspan="5">Drawn (Lower Pay)</th><th colspan="5">Difference</th><th rowspan="2">Pension (${penLabel})</th><th rowspan="2">Net Arrear</th></tr>`;
+            html += `<tr><th>Basic</th><th>DA</th><th>HRA</th><th>CCA</th><th>Gross</th><th>Basic</th><th>DA</th><th>HRA</th><th>CCA</th><th>Gross</th><th>Basic</th><th>DA</th><th>HRA</th><th>CCA</th><th>Gross</th></tr>`;
             data.forEach(r => {
                 let bold = r.Month === "GRAND TOTAL" ? "font-weight:bold; background-color:#f9f9f9;" : "";
-                html += `<tr style="${bold}"><td>${r.Month}</td><td>${r.Days}</td><td>${r.DueBasic}</td><td>${r.DueDA}</td><td>${r.DueHRA}</td><td>${r.DueCCA}</td><td>${r.DueGross}</td><td>${r.DrawnBasic}</td><td>${r.DrawnDA}</td><td>${r.DrawnHRA}</td><td>${r.DrawnCCA}</td><td>${r.DrawnGross}</td><td>${r.DiffGross}</td><td>${r.Pension}</td><td>${r.Net}</td></tr>`;
+                html += `<tr style="${bold}"><td>${r.Month}</td><td>${r.Days}</td><td>${r.DueBasic}</td><td>${r.DueDA}</td><td>${r.DueHRA}</td><td>${r.DueCCA}</td><td>${r.DueGross}</td><td>${r.DrawnBasic}</td><td>${r.DrawnDA}</td><td>${r.DrawnHRA}</td><td>${r.DrawnCCA}</td><td>${r.DrawnGross}</td><td>${r.DiffBasic}</td><td>${r.DiffDA}</td><td>${r.DiffHRA}</td><td>${r.DiffCCA}</td><td>${r.DiffGross}</td><td>${r.Pension}</td><td>${r.Net}</td></tr>`;
             });
             html += `</table></body></html>`;
             
