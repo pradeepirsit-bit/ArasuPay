@@ -42,7 +42,11 @@
         .inline-group { display: flex; align-items: center; gap: 8px; width: 160px; justify-content: flex-end; }
         .inline-group input { width: 70px; }
         .helper-text { display: block; text-align: right; font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+        
+        /* Error Validation Styles */
         .error-text { color: var(--error-red); font-size: 0.85rem; font-weight: 500; text-align: right; display: none; margin-top: 4px; }
+        .input-error { border-color: var(--error-red) !important; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important; background-color: #fef2f2 !important;}
+        .pay-error-msg { color: var(--error-red); font-size: 0.75rem; text-align: right; margin-top: 4px; display: none; font-weight: 600;}
 
         .btn-primary { background-color: var(--brand-dark); color: white; border: none; padding: 14px 24px; font-size: 1rem; font-weight: 500; border-radius: 8px; cursor: pointer; width: 100%; transition: 0.2s;}
         .btn-primary:hover { background-color: #374151; }
@@ -102,7 +106,7 @@
 <div class="container">
     <div class="header">
         <h1>ArasuPay: Advanced HR Dashboard</h1>
-        <p>Featuring Dynamic DA Time-Engine, Centralized Auto-HRA & CCA Matrices & Strict Treasury Rules</p>
+        <p>Featuring Dynamic DA Time-Engine, Auto-HRA/CCA Matrices & Strict Govt Pay Validation</p>
     </div>
 
     <!-- GLOBAL CONTEXT -->
@@ -130,13 +134,21 @@
         <div class="grid-2col">
             <div>
                 <h2>Standard Earnings</h2>
-                <div class="form-group"><label>Manual Basic Pay (₹)</label><input type="number" id="basicPay" class="manual-highlight" value="36900"></div>
+                <!-- VALIDATED PAY INPUT -->
+                <div class="form-group">
+                    <label>Manual Basic Pay (₹)</label>
+                    <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                        <input type="number" id="basicPay" class="manual-highlight validate-pay" value="36900" oninput="validateInputAndCalc(this)">
+                        <span class="pay-error-msg">Invalid Matrix Value!</span>
+                    </div>
+                </div>
+                
                 <div class="form-group"><label>Annual Increment Qtr</label><select id="incrementMonth" style="text-align: left;"><option value="Jan">January</option><option value="Apr">April</option><option value="Jul" selected>July</option><option value="Oct">October</option></select></div>
                 
-                <div class="form-group" style="margin-top: 15px;"><label>DA % (Current)</label><div class="inline-group"><input type="number" id="daPercent" title="Auto-fetched based on today's date"> <span>%</span></div></div>
+                <div class="form-group" style="margin-top: 15px;"><label>DA % (Current)</label><div class="inline-group"><input type="number" id="daPercent" title="Auto-fetched based on today's date" oninput="calculateMainSalary()"> <span>%</span></div></div>
                 <span class="helper-text" id="daAmountDisplay" style="margin-bottom: 15px;">₹ 0</span>
                 
-                <!-- NEW COMPACT HRA SELECTION -->
+                <!-- COMPACT HRA SELECTION -->
                 <div class="allowance-box">
                     <div class="form-group" style="margin-bottom: 4px;">
                         <label style="color: var(--brand-dark); font-weight: 600;">HRA</label>
@@ -151,7 +163,7 @@
                     </div>
                 </div>
                 
-                <!-- NEW COMPACT CCA SELECTION -->
+                <!-- COMPACT CCA SELECTION -->
                 <div class="allowance-box">
                     <div class="form-group" style="margin-bottom: 6px;">
                         <label style="color: var(--brand-dark); font-weight: 600;">CCA</label>
@@ -164,22 +176,22 @@
                     </div>
                 </div>
 
-                <div class="form-group"><label>Medical Allow (₹)</label><input type="number" id="ma" value="300"></div>
-                <div class="form-group"><label>Other Allow (₹)</label><input type="number" id="otherEarnings" value="0"></div>
+                <div class="form-group"><label>Medical Allow (₹)</label><input type="number" id="ma" value="300" oninput="calculateMainSalary()"></div>
+                <div class="form-group"><label>Other Allow (₹)</label><input type="number" id="otherEarnings" value="0" oninput="calculateMainSalary()"></div>
             </div>
             <div>
                 <h2>Standard Deductions</h2>
-                <div class="form-group"><label>Pension Scheme</label><select id="pensionType"><option value="CPS">CPS (10%)</option><option value="GPF">GPF (Min 12%)</option></select></div>
-                <div class="form-group"><label id="pensionLabel">Pension Amount</label><input type="number" id="pensionAmount" class="readonly-highlight" value="0" readonly></div>
+                <div class="form-group"><label>Pension Scheme</label><select id="pensionType" oninput="calculateMainSalary()"><option value="CPS">CPS (10%)</option><option value="GPF">GPF (Min 12%)</option></select></div>
+                <div class="form-group"><label id="pensionLabel">Pension Amount</label><input type="number" id="pensionAmount" class="readonly-highlight" value="0" readonly oninput="calculateMainSalary()"></div>
                 <div id="gpfError" class="error-text">Minimum 12% Required</div>
                 <div class="divider"></div>
-                <div class="form-group"><label style="color: var(--text-muted);">Total FA Taken (₹)</label><input type="number" id="faTotal" value="0"></div>
-                <div class="form-group"><label style="color: var(--text-muted);">FA Installment</label><select id="faInstallment"><option value="0">None</option><option value="1">1 of 10</option><option value="2">2 of 10</option><option value="3">3 of 10</option><option value="4">4 of 10</option><option value="5">5 of 10</option><option value="6">6 of 10</option><option value="7">7 of 10</option><option value="8">8 of 10</option><option value="9">9 of 10</option><option value="10">10 of 10</option></select></div>
+                <div class="form-group"><label style="color: var(--text-muted);">Total FA Taken (₹)</label><input type="number" id="faTotal" value="0" oninput="calculateMainSalary()"></div>
+                <div class="form-group"><label style="color: var(--text-muted);">FA Installment</label><select id="faInstallment" oninput="calculateMainSalary()"><option value="0">None</option><option value="1">1 of 10</option><option value="2">2 of 10</option><option value="3">3 of 10</option><option value="4">4 of 10</option><option value="5">5 of 10</option><option value="6">6 of 10</option><option value="7">7 of 10</option><option value="8">8 of 10</option><option value="9">9 of 10</option><option value="10">10 of 10</option></select></div>
                 <div class="form-group"><label style="color: var(--text-muted);">This Month EMI (₹)</label><input type="text" id="faDeduction" value="0" readonly style="background: #f9fafb;"></div>
                 <div class="divider"></div>
-                <div class="form-group"><label>NHIS (₹)</label><input type="number" id="nhis" value="300"></div>
-                <div class="form-group"><label>FBF (₹)</label><input type="number" id="fbf" value="110"></div>
-                <div class="form-group"><label>Other Ded (₹)</label><input type="number" id="otherDeductions" value="0"></div>
+                <div class="form-group"><label>NHIS (₹)</label><input type="number" id="nhis" value="300" oninput="calculateMainSalary()"></div>
+                <div class="form-group"><label>FBF (₹)</label><input type="number" id="fbf" value="110" oninput="calculateMainSalary()"></div>
+                <div class="form-group"><label>Other Ded (₹)</label><input type="number" id="otherDeductions" value="0" oninput="calculateMainSalary()"></div>
             </div>
         </div>
 
@@ -212,7 +224,7 @@
         <div class="section-header-flex">
             <div>
                 <h2>Annual Increment Arrear Calculator</h2>
-                <p class="section-desc">DA, HRA, & CCA are automatically fetched per month based on Date & Pay Table Engines.</p>
+                <p class="section-desc">DA, HRA, & CCA fetch automatically. New Pay scales are strictly validated.</p>
             </div>
             <button class="btn-secondary" onclick="togglePanel('incArrearPanel', 'btnIncArrear', 'Increment Arrear')" id="btnIncArrear">Show Increment Arrear</button>
         </div>
@@ -240,7 +252,10 @@
                     <div id="incStagesContainer">
                         <div class="dynamic-row inc-row">
                             <input type="date" class="inc-date" title="Original Effective Date">
-                            <input type="number" class="inc-pay" value="38000" placeholder="New Basic (₹)" title="New Basic Pay">
+                            <div style="display:flex; flex-direction:column; width:100%;">
+                                <input type="number" class="inc-pay validate-pay" value="38000" placeholder="New Basic (₹)" title="New Basic Pay" oninput="validateInputAndCalc(this)">
+                                <span class="pay-error-msg" style="text-align:left;">Invalid Matrix Value!</span>
+                            </div>
                         </div>
                     </div>
                     <button class="btn-mini" onclick="addIncStage()">+ Add Next Year Increment</button>
@@ -267,7 +282,7 @@
         <div class="section-header-flex">
             <div>
                 <h2>Promotion Arrear Calculator</h2>
-                <p class="section-desc">Calculates strict differences. DA, HRA, & CCA auto-adjust per backend Government matrices.</p>
+                <p class="section-desc">Calculates strict differences. DA, HRA, & CCA auto-adjust per backend Govt matrices.</p>
             </div>
             <button class="btn-secondary" onclick="togglePanel('promoArrearPanel', 'btnPromoArrear', 'Promotion Arrear')" id="btnPromoArrear">Show Promotion Arrear</button>
         </div>
@@ -281,7 +296,13 @@
             <div class="grid-2col" style="margin-bottom: 20px;">
                 <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #fafaf9;">
                     <h3 style="color: #57534e;">Drawn (Lower Pay)</h3>
-                    <div class="form-group"><label>Basic Pay (₹)</label><input type="number" id="promoDrawnBasic" value="36900"></div>
+                    <div class="form-group">
+                        <label>Basic Pay (₹)</label>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <input type="number" id="promoDrawnBasic" class="validate-pay" value="36900" oninput="validateInputAndCalc(this)">
+                            <span class="pay-error-msg">Invalid Matrix Value!</span>
+                        </div>
+                    </div>
                     <div class="form-group"><label>HRA (₹)</label><input type="number" id="promoDrawnHRA" class="readonly-highlight" readonly title="Auto-calc from Matrix"></div>
                     <div class="form-group"><label>CCA (₹)</label><input type="number" id="promoDrawnCCA" class="readonly-highlight" readonly title="Auto-calc from Matrix"></div>
                     
@@ -294,7 +315,13 @@
                 
                 <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px;">
                     <h3 style="color: var(--brand-action);">Due (Higher Pay)</h3>
-                    <div class="form-group"><label>Basic Pay (₹)</label><input type="number" id="promoDueBasic" value="38000" class="manual-highlight"></div>
+                    <div class="form-group">
+                        <label>Basic Pay (₹)</label>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <input type="number" id="promoDueBasic" class="manual-highlight validate-pay" value="38000" oninput="validateInputAndCalc(this)">
+                            <span class="pay-error-msg">Invalid Matrix Value!</span>
+                        </div>
+                    </div>
                     <div class="form-group"><label>HRA (₹)</label><input type="number" id="promoDueHRA" class="readonly-highlight" readonly title="Auto-calc from Matrix"></div>
                     <div class="form-group"><label>CCA (₹)</label><input type="number" id="promoDueCCA" class="readonly-highlight" readonly title="Auto-calc from Matrix"></div>
                 </div>
@@ -320,7 +347,7 @@
         <div class="section-header-flex">
             <div>
                 <h2>Full Additional Charge (FAC) Calculator</h2>
-                <p class="section-desc">Applies the "Whichever is Less" rule, Deducts IT (10%) & Cess (4%). Excludes CPS. DA is time-based.</p>
+                <p class="section-desc">Applies the "Whichever is Less" rule, Deducts IT (10%) & Cess (4%).</p>
             </div>
             <button class="btn-secondary" onclick="togglePanel('facPanel', 'btnFac', 'FAC Calculator')" id="btnFac">Show FAC Calculator</button>
         </div>
@@ -334,7 +361,13 @@
             <div class="grid-2col" style="margin-bottom: 20px;">
                 <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #ffffff;">
                     <h3 style="color: #57534e;">FAC Parameters</h3>
-                    <div class="form-group"><label>Regular Basic Pay (₹)</label><input type="number" id="facBasic" class="manual-highlight"></div>
+                    <div class="form-group">
+                        <label>Regular Basic Pay (₹)</label>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                            <input type="number" id="facBasic" class="manual-highlight validate-pay" oninput="validateInputAndCalc(this)">
+                            <span class="pay-error-msg">Invalid Matrix Value!</span>
+                        </div>
+                    </div>
                     <div class="form-group"><label>FAC Fraction (%)</label><input type="number" id="facPercent" value="20" readonly class="readonly-highlight" title="1/5th of Regular Pay"></div>
                     <div class="divider"></div>
                     <div class="form-group" style="margin-bottom: 8px;"><label>Additional Post Name</label><input type="text" id="facAddPostName" value="" placeholder="e.g. BDO / Headmaster" style="text-align: left;"></div>
@@ -377,6 +410,172 @@
 </div>
 
 <script>
+    // --- Centralized Strict Government Pay Database (PB-1, PB-2, PB-3, PB-4) ---
+    const validPayDb = new Set([
+        // PB-1 (Level 1-10)
+        15700, 15900, 16600, 18000, 18200, 18500, 19000, 19500, 20000, 20600,
+        16200, 16400, 17100, 18500, 18700, 19100, 19600, 20100, 20600, 21200,
+        16700, 16900, 17600, 19100, 19300, 19700, 20200, 20700, 21200, 21800,
+        17200, 17400, 18100, 19700, 19900, 20300, 20800, 21300, 21800, 22500,
+        17700, 17900, 18600, 20300, 20500, 20900, 21400, 21900, 22500, 23200,
+        18200, 18400, 19200, 20900, 21100, 21500, 22000, 22600, 23200, 23900,
+        18700, 19000, 19800, 21500, 21700, 22100, 22700, 23300, 23900, 24600,
+        19300, 19600, 20400, 22100, 22400, 22800, 23400, 24000, 24600, 25300,
+        19900, 20200, 21000, 22800, 23100, 23500, 24100, 24700, 25300, 26100,
+        20500, 20800, 21600, 23500, 23800, 24200, 24800, 25400, 26100, 26900,
+        21100, 21400, 22200, 24200, 24500, 24900, 25500, 26200, 26900, 27700,
+        21700, 22000, 22900, 24900, 25200, 25600, 26300, 27000, 27700, 28500,
+        22400, 22700, 23600, 25600, 26000, 26400, 27100, 27800, 28500, 29400,
+        23100, 23400, 24300, 26400, 26800, 27200, 27900, 28600, 29400, 30300,
+        23800, 24100, 25000, 27200, 27600, 28000, 28700, 29500, 30300, 31200,
+        24500, 24800, 25800, 28000, 28400, 28800, 29600, 30400, 31200, 32100,
+        25200, 25500, 26600, 28800, 29300, 29700, 30500, 31300, 32100, 33100,
+        26000, 26300, 27400, 29700, 30200, 30600, 31400, 32200, 33100, 34100,
+        26800, 27100, 28200, 30600, 31100, 31500, 32300, 33200, 34100, 35100,
+        27600, 27900, 29000, 31500, 32000, 32400, 33300, 34200, 35100, 36200,
+        28400, 28700, 29900, 32400, 33000, 33400, 34300, 35200, 36200, 37300,
+        29300, 29600, 30800, 33400, 34000, 34400, 35300, 36300, 37300, 38400,
+        30200, 30500, 31700, 34400, 35000, 35400, 36400, 37400, 38400, 39600,
+        31100, 31400, 32700, 35400, 36100, 36500, 37500, 38500, 39600, 40800,
+        32000, 32300, 33700, 36500, 37200, 37600, 38600, 39700, 40800, 42000,
+        33000, 33300, 34700, 37600, 38300, 38700, 39800, 40900, 42000, 43300,
+        34000, 34300, 35700, 38700, 39400, 39900, 41000, 42100, 43300, 44600,
+        35000, 35300, 36800, 39900, 40600, 41100, 42200, 43400, 44600, 45900,
+        36100, 36400, 37900, 41100, 41800, 42300, 43500, 44700, 45900, 47300,
+        37200, 37500, 39000, 42300, 43100, 43600, 44800, 46000, 47300, 48700,
+        38300, 38600, 40200, 43600, 44400, 44900, 46100, 47400, 48700, 50200,
+        39400, 39800, 41400, 44900, 45700, 46200, 47500, 48800, 50200, 51700,
+        40600, 41000, 42600, 46200, 47100, 47600, 48900, 50300, 51700, 53300,
+        41800, 42200, 43900, 47600, 48500, 49000, 50400, 51800, 53300, 54900,
+        43100, 43500, 45200, 49000, 50000, 50500, 51900, 53400, 54900, 56500,
+        44400, 44800, 46600, 50500, 51500, 52000, 53500, 55000, 56500, 58200,
+        45700, 46100, 48000, 52000, 53000, 53600, 55100, 56700, 58200, 59900,
+        47100, 47500, 49400, 53600, 54600, 55200, 56800, 58400, 59900, 61700,
+        48500, 48900, 50900, 55200, 56200, 56900, 58500, 60200, 61700, 63600,
+        50000, 50400, 52400, 56900, 57900, 58600, 60300, 62000, 63600, 65500,
+
+        // PB-2 (Level 11-20)
+        35400, 35600, 35900, 36000, 36200, 36400, 36700, 36900, 37200, 37700,
+        36500, 36700, 37000, 37100, 37300, 37500, 37800, 38000, 38300, 38800,
+        37600, 37800, 38100, 38200, 38400, 38600, 38900, 39100, 39400, 40000,
+        38700, 38900, 39200, 39300, 39600, 39800, 40100, 40300, 40600, 41200,
+        39900, 40100, 40400, 40500, 40800, 41000, 41300, 41500, 41800, 42400,
+        41100, 41300, 41600, 41700, 42000, 42200, 42500, 42700, 43100, 43700,
+        42300, 42500, 42800, 43000, 43300, 43500, 43800, 44000, 44400, 45000,
+        43600, 43800, 44100, 44300, 44600, 44800, 45100, 45300, 45700, 46400,
+        44900, 45100, 45400, 45600, 45900, 46100, 46500, 46700, 47100, 47800,
+        46200, 46500, 46800, 47000, 47300, 47500, 47900, 48100, 48500, 49200,
+        47600, 47900, 48200, 48400, 48700, 48900, 49300, 49500, 50000, 50700,
+        49000, 49300, 49600, 49900, 50200, 50400, 50800, 51000, 51500, 52200,
+        50500, 50800, 51100, 51400, 51700, 51900, 52300, 52500, 53000, 53800,
+        52000, 52300, 52600, 52900, 53300, 53500, 53900, 54100, 54600, 55400,
+        53600, 53900, 54200, 54500, 54900, 55100, 55500, 55700, 56200, 57100,
+        55200, 55500, 55800, 56100, 56500, 56800, 57200, 57400, 57900, 58800,
+        56900, 57200, 57500, 57800, 58200, 58500, 58900, 59100, 59600, 60600,
+        58600, 58900, 59200, 59500, 59900, 60300, 60700, 60900, 61400, 62400,
+        60400, 60700, 61000, 61300, 61700, 62100, 62500, 62700, 63200, 64300,
+        62200, 62500, 62800, 63100, 63600, 64000, 64400, 64600, 65100, 66200,
+        64100, 64400, 64700, 65000, 65500, 65900, 66300, 66500, 67100, 68200,
+        66000, 66300, 66600, 67000, 67500, 67900, 68300, 68500, 69100, 70200,
+        68000, 68300, 68600, 69000, 69500, 69900, 70300, 70600, 71200, 72300,
+        70000, 70300, 70700, 71100, 71600, 72000, 72400, 72700, 73300, 74500,
+        72100, 72400, 72800, 73200, 73700, 74200, 74600, 74900, 75500, 76700,
+        74300, 74600, 75000, 75400, 75900, 76400, 76800, 77100, 77800, 79000,
+        76500, 76800, 77300, 77700, 78200, 78700, 79100, 79400, 80100, 81400,
+        78800, 79100, 79600, 80000, 80500, 81100, 81500, 81800, 82500, 83800,
+        81200, 81500, 82000, 82400, 82900, 83500, 83900, 84300, 85000, 86300,
+        83600, 83900, 84500, 84900, 85400, 86000, 86400, 86800, 87600, 88900,
+        86100, 86400, 87000, 87400, 88000, 88600, 89000, 89400, 90200, 91600,
+        88700, 89000, 89600, 90000, 90600, 91300, 91700, 92100, 92900, 94300,
+        91400, 91700, 92300, 92700, 93300, 94000, 94500, 94900, 95700, 97100,
+        94100, 94500, 95100, 95500, 96100, 96800, 97300, 97700, 98600, 100000,
+        96900, 97300, 98000, 98400, 99000, 99700, 100200, 100600, 101600, 103000,
+        99800, 100200, 100900, 101400, 102000, 102700, 103200, 103600, 104600, 106100,
+        102800, 103200, 103900, 104400, 105100, 105800, 106300, 106700, 107700, 109300,
+        105900, 106300, 107000, 107500, 108300, 109000, 109500, 109900, 110900, 112600,
+        109100, 109500, 110200, 110700, 111500, 112300, 112800, 113200, 114200, 116000,
+        112400, 112800, 113500, 114000, 114800, 115700, 116200, 116600, 117600, 119500,
+
+        // PB-3 (Level 21-27)
+        55500, 56100, 56900, 57700, 59300, 61900, 62200,
+        57200, 57800, 58600, 59400, 61100, 63800, 64100,
+        58900, 59500, 60400, 61200, 62900, 65700, 66000,
+        60700, 61300, 62200, 63000, 64800, 67700, 68000,
+        62500, 63100, 64100, 64900, 66700, 69700, 70000,
+        64400, 65000, 66000, 66800, 68700, 71800, 72100,
+        66300, 67000, 68000, 68800, 70800, 74000, 74300,
+        68300, 69000, 70000, 70900, 72900, 76200, 76500,
+        70300, 71100, 72100, 73000, 75100, 78500, 78800,
+        72400, 73200, 74300, 75200, 77400, 80900, 81200,
+        74600, 75400, 76500, 77500, 79700, 83300, 83600,
+        76800, 77700, 78800, 79800, 82100, 85800, 86100,
+        79100, 80000, 81200, 82200, 84600, 88400, 88700,
+        81500, 82400, 83600, 84700, 87100, 91100, 91400,
+        83900, 84900, 86100, 87200, 89700, 93800, 94100,
+        86400, 87400, 88700, 89800, 92400, 96600, 96900,
+        89000, 90000, 91400, 92500, 95200, 99500, 99800,
+        91700, 92700, 94100, 95300, 98100, 102500, 102800,
+        94500, 95500, 96900, 98200, 101000, 105600, 105900,
+        97300, 98400, 99800, 101100, 104000, 108800, 109100,
+        100200, 101400, 102800, 104100, 107100, 112100, 112400,
+        103200, 104400, 105900, 107200, 110300, 115500, 115800,
+        106300, 107500, 109100, 110400, 113600, 119000, 119300,
+        109500, 110700, 112400, 113700, 117000, 122600, 122900,
+        112800, 114000, 115800, 117100, 120500, 126300, 126600,
+        116200, 117400, 119300, 120600, 124100, 130100, 130400,
+        119700, 120900, 122900, 124200, 127800, 134000, 134300,
+        123300, 124500, 126600, 127900, 131600, 138000, 138300,
+        127000, 128200, 130400, 131700, 135500, 142100, 142400,
+        130800, 132000, 134300, 135700, 139600, 146400, 146700,
+        134700, 136000, 138300, 139800, 143800, 150800, 151100,
+        138700, 140100, 142400, 144000, 148100, 155300, 155600,
+        142900, 144300, 146700, 148300, 152500, 160000, 160300,
+        147200, 148600, 151100, 152700, 157100, 164800, 165100,
+        151600, 153100, 155600, 157300, 161800, 169700, 170100,
+        156100, 157700, 160300, 162000, 166700, 174800, 175200,
+        160800, 162400, 165100, 166900, 171700, 180000, 180500,
+        165600, 167300, 170100, 171900, 176900, 185400, 185900,
+        170600, 172300, 175200, 177100, 182200, 191000, 191500,
+        175700, 177500, 180500, 182400, 187700, 196700, 197200,
+
+        // PB-4 (Level 28-32)
+        123100, 123400, 123600, 125200, 128900,
+        126800, 127100, 127300, 129000, 132800,
+        130600, 130900, 131100, 132900, 136800,
+        134500, 134800, 135000, 136900, 140900,
+        138500, 138800, 139100, 141000, 145100,
+        142700, 143000, 143300, 145200, 149500,
+        147000, 147300, 147600, 149600, 154000,
+        151400, 151700, 152000, 154100, 158600,
+        155900, 156300, 156600, 158700, 163400,
+        160600, 161000, 161300, 163500, 168300,
+        165400, 165800, 166100, 168400, 173300,
+        170400, 170800, 171100, 173500, 178500,
+        175500, 175900, 176200, 178700, 183900,
+        180800, 181200, 181500, 184100, 189400,
+        186200, 186600, 186900, 189600, 195100,
+        191800, 192200, 192500, 195300, 201000,
+        197600, 198000, 198300, 201200, 207000,
+        203500, 203900, 204200, 207200, 213200,
+        209600, 210000, 210300, 213400, 219600,
+        215900, 216300, 216600, 219800, 225000
+    ]);
+
+    // Validator Function triggered on Input
+    function validateInputAndCalc(el) {
+        let val = parseFloat(el.value);
+        let errorSpan = el.nextElementSibling;
+        
+        if (val && !validPayDb.has(val)) {
+            el.classList.add('input-error');
+            if(errorSpan) errorSpan.style.display = 'block';
+        } else {
+            el.classList.remove('input-error');
+            if(errorSpan) errorSpan.style.display = 'none';
+        }
+        calculateMainSalary(); 
+    }
+
     // --- Centralized DA Engine ---
     const getDaPercent = (date) => {
         if (!date) return 50;
@@ -484,15 +683,23 @@
     
     function addIncStage() {
         const div = document.createElement('div'); div.className = 'dynamic-row inc-row';
-        div.innerHTML = `<input type="date" class="inc-date" title="Original Effective Date"> <input type="number" class="inc-pay" placeholder="New Basic (₹)"> <button class="btn-remove" onclick="this.parentElement.remove()">X</button>`;
+        div.innerHTML = `<input type="date" class="inc-date" title="Original Effective Date"> 
+            <div style="display:flex; flex-direction:column; width:100%;">
+                <input type="number" class="inc-pay validate-pay" placeholder="New Basic (₹)" oninput="validateInputAndCalc(this)">
+                <span class="pay-error-msg" style="text-align:left;">Invalid Matrix Value!</span>
+            </div>
+            <button class="btn-remove" onclick="this.parentElement.remove(); calculateMainSalary();">X</button>`;
         document.getElementById('incStagesContainer').appendChild(div);
     }
 
     // --- Main Salary Logic ---
     function calculateMainSalary() {
-        const basic = parseFloat(document.getElementById('basicPay').value) || 0;
+        const basicInput = document.getElementById('basicPay');
+        const basic = parseFloat(basicInput.value) || 0;
         document.getElementById('incOldBasic').value = basic;
-        document.getElementById('facBasic').value = basic;
+        
+        // Only update FAC Basic if it doesn't already have its own value, or keep them synced initially
+        if(document.getElementById('facBasic').value === "") document.getElementById('facBasic').value = basic;
         
         // Auto-calculate HRA & CCA based on Centralized Engine
         const selectedHraGrade = document.querySelector('input[name="hraGrade"]:checked').value;
@@ -528,6 +735,9 @@
         const gpfErr = document.getElementById('gpfError');
         let penDed = 0; let err = false;
 
+        // Block totals if Pay is invalid
+        if(basicInput.classList.contains('input-error')) err = true;
+
         if (penType === 'CPS') {
             document.getElementById('pensionLabel').innerText = "CPS (10% Auto)";
             penInput.readOnly = true; penInput.classList.add('readonly-highlight');
@@ -561,7 +771,7 @@
         const totDed = penDed + faDed + nhis + fbf + oDed;
         const net = err ? 0 : gross - totDed;
 
-        document.getElementById('grossTotal').innerText = `₹ ${formatCurr(gross)}`;
+        document.getElementById('grossTotal').innerText = err ? "ERROR" : `₹ ${formatCurr(gross)}`;
         document.getElementById('totalDeductions').innerText = err ? "ERROR" : `₹ ${formatCurr(totDed)}`;
         document.getElementById('netPay').innerText = err ? "ERROR" : `₹ ${formatCurr(net)}`;
 
@@ -574,11 +784,20 @@
             document.getElementById('dCCA').innerText = `₹${formatCurr(Math.ceil(cca/days))}`;
             document.getElementById('dOther').innerText = `₹${formatCurr(Math.ceil((ma+other)/days))}`;
             document.getElementById('dNet').innerText = `₹${formatCurr(Math.ceil(net/days))}`;
+        } else {
+            document.getElementById('dBasic').innerText = "ERROR";
+            document.getElementById('dDA').innerText = "ERROR";
+            document.getElementById('dHRA').innerText = "ERROR";
+            document.getElementById('dCCA').innerText = "ERROR";
+            document.getElementById('dOther').innerText = "ERROR";
+            document.getElementById('dNet').innerText = "ERROR";
         }
     }
 
     // --- FAC Calculator Engine ---
     function generateFacTable() {
+        if (document.querySelector('#facPanel .input-error')) return alert("Cannot calculate: Please correct the invalid Basic Pay value indicated in red.");
+
         let startStr = document.getElementById('facStart').value;
         let endStr = document.getElementById('facEnd').value;
         if (!startStr || !endStr) return alert("Please select valid Start and End dates for FAC.");
@@ -733,6 +952,10 @@
 
     // --- Granular Arrear Engine (Dynamic DA, HRA & CCA) ---
     function generateAdvancedArrear(type) {
+        if (document.querySelector(`#${type}ArrearPanel .input-error`) || document.getElementById('basicPay').classList.contains('input-error')) {
+            return alert("Cannot calculate: Please correct the invalid Basic Pay value(s) indicated in red.");
+        }
+
         const isCPS = document.getElementById('pensionType').value === 'CPS';
         const selectedHraGrade = document.querySelector('input[name="hraGrade"]:checked').value;
         const selectedCcaGrade = document.querySelector('input[name="ccaGrade"]:checked').value;
@@ -1016,7 +1239,6 @@
     // Attach Event Listeners
     document.querySelectorAll('.grid-2col input[type="number"], .grid-2col select, #globalMonth').forEach(el => el.addEventListener('input', calculateMainSalary));
     document.querySelectorAll('input[name="hraGrade"], input[name="ccaGrade"]').forEach(el => el.addEventListener('change', calculateMainSalary));
-    document.querySelectorAll('#promoDrawnBasic, #promoDueBasic').forEach(el => el.addEventListener('input', calculateMainSalary));
     
     // Initial Calc
     calculateMainSalary();
