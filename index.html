@@ -95,9 +95,10 @@
 <div class="container">
     <div class="header">
         <h1>ArasuPay: Advanced HR Dashboard</h1>
-        <p>Featuring Dynamic LOP Postponement & Treasury-Ready Statement Exports</p>
+        <p>Featuring Precise Date Engine & Auto-Filtered Arrear Statements</p>
     </div>
 
+    <!-- GLOBAL CONTEXT -->
     <div class="global-context">
         <label>Viewing Context:</label>
         <select id="globalMonth" style="text-align: left; width: 250px; background-color: #fff;">
@@ -117,6 +118,7 @@
         </select>
     </div>
 
+    <!-- MAIN CALCULATOR -->
     <div class="section">
         <div class="grid-2col">
             <div>
@@ -169,11 +171,12 @@
         </div>
     </div>
 
+    <!-- INCREMENT ARREAR SECTION -->
     <div class="section" style="background-color: #fcfcfc;">
         <div class="section-header-flex">
             <div>
                 <h2>Annual Increment Arrear Calculator</h2>
-                <p class="section-desc">Supports multi-year increments, LOP shift, and exports full Due/Drawn splits.</p>
+                <p class="section-desc">Automatically filters out zero-difference periods. Starts from Effective Date.</p>
             </div>
             <button class="btn-secondary" onclick="togglePanel('incArrearPanel', 'btnIncArrear', 'Increment Arrear')" id="btnIncArrear">Show Increment Arrear</button>
         </div>
@@ -223,18 +226,19 @@
         </div>
     </div>
 
+    <!-- PROMOTION ARREAR SECTION -->
     <div class="section">
         <div class="section-header-flex">
             <div>
                 <h2>Promotion Arrear Calculator</h2>
-                <p class="section-desc">Calculates differences where Basic, HRA, and Allowances all change.</p>
+                <p class="section-desc">Calculates strict differences. Empty/Zero difference periods are automatically hidden.</p>
             </div>
             <button class="btn-secondary" onclick="togglePanel('promoArrearPanel', 'btnPromoArrear', 'Promotion Arrear')" id="btnPromoArrear">Show Promotion Arrear</button>
         </div>
 
         <div id="promoArrearPanel" style="display: none;">
             <div style="display: flex; gap: 20px; margin-bottom: 20px; background: #fff7ed; padding: 20px; border-radius: 8px; border: 1px solid #fed7aa; flex-wrap: wrap;">
-                <div style="flex:1; min-width: 200px;"><label style="font-size: 0.85rem; font-weight:bold; color: #c2410c;">START DATE</label><input type="date" id="promoStart"></div>
+                <div style="flex:1; min-width: 200px;"><label style="font-size: 0.85rem; font-weight:bold; color: #c2410c;">START DATE (Effective)</label><input type="date" id="promoStart"></div>
                 <div style="flex:1; min-width: 200px;"><label style="font-size: 0.85rem; font-weight:bold; color: #c2410c;">END DATE</label><input type="date" id="promoEnd"></div>
             </div>
 
@@ -281,10 +285,17 @@
     // --- Global Data Store ---
     window.arrearExportData = { inc: [], promo: [] };
 
+    // --- Strict Local Time Parser to fix Timezone Date Shift Bugs ---
+    const parseLocal = (dateStr) => {
+        if (!dateStr) return null;
+        const [y, m, d] = dateStr.split('-');
+        return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+    };
+
     // --- Initialization ---
     const formatCurr = (num) => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(num);
     const today = new Date();
-    document.getElementById('incStart').value = `${today.getFullYear()}-07-01`;
+    document.getElementById('incStart').value = `${today.getFullYear()}-01-01`;
     document.getElementById('incEnd').value = `${today.getFullYear()}-12-31`;
     document.querySelector('.inc-date').value = `${today.getFullYear()}-07-01`;
     document.getElementById('promoStart').value = `${today.getFullYear()}-01-15`;
@@ -381,14 +392,17 @@
         let startStr = document.getElementById(type + 'Start').value;
         let endStr = document.getElementById(type + 'End').value;
         if (!startStr || !endStr) return alert("Please select valid Start and End dates.");
-        let start = new Date(startStr); let end = new Date(endStr);
+        
+        // Use parseLocal to prevent UTC conversion bugs 
+        let start = parseLocal(startStr); 
+        let end = parseLocal(endStr);
         if (end < start) return alert("End date must be after Start date.");
         
         let lops = [];
         document.querySelectorAll(`#${type}LopContainer .lop-row`).forEach(row => {
             const fStr = row.querySelector('.lop-from').value; const tStr = row.querySelector('.lop-to').value;
             if (fStr && tStr) {
-                const f = new Date(fStr); const t = new Date(tStr);
+                const f = parseLocal(fStr); const t = parseLocal(tStr);
                 if (t >= f) lops.push({ start: f, end: t, days: Math.ceil((t - f) / (1000 * 60 * 60 * 24)) + 1 });
             }
         });
@@ -399,15 +413,14 @@
         if (type === 'inc') {
             oldBasic = parseFloat(document.getElementById('incOldBasic').value) || 0;
             oldDA = Math.ceil(oldBasic * (globalDA / 100));
-            // Pull actual HRA & CCA from main earnings to make the Gross calculations realistic
             oldHRA = parseFloat(document.getElementById('hra').value) || 0;
             oldCCA = (parseFloat(document.getElementById('ma').value) || 0) + (parseFloat(document.getElementById('otherEarnings').value) || 0);
 
             const stageRows = document.getElementById('incStagesContainer').children;
             for (let row of stageRows) {
-                const date = new Date(row.querySelector('.inc-date').value);
+                const date = parseLocal(row.querySelector('.inc-date').value);
                 const pay = parseFloat(row.querySelector('.inc-pay').value) || 0;
-                if (!isNaN(date) && pay > 0) {
+                if (date && pay > 0) {
                     let totalLopShift = 0;
                     lops.forEach(lop => { if (lop.start < date) totalLopShift += lop.days; });
                     let adjustedDate = new Date(date); adjustedDate.setDate(adjustedDate.getDate() + totalLopShift);
@@ -457,6 +470,7 @@
         let current = new Date(start.getFullYear(), start.getMonth(), 1);
         const endLimit = new Date(end.getFullYear(), end.getMonth(), 1);
         const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        let hasRenderedRows = false;
 
         while (current <= endLimit) {
             const year = current.getFullYear();
@@ -502,25 +516,29 @@
                 });
                 let dueDA = Math.ceil(dueB * (globalDA / 100));
 
-                // 1. Calculate Prorated Drawn
                 let pDrawnBasic = Math.ceil((oldBasic / maxDays) * actualDays);
                 let pDrawnDA = Math.ceil((oldDA / maxDays) * actualDays);
                 let pDrawnHRA = Math.ceil((oldHRA / maxDays) * actualDays);
                 let pDrawnCCA = Math.ceil((oldCCA / maxDays) * actualDays);
                 let pDrawnGross = pDrawnBasic + pDrawnDA + pDrawnHRA + pDrawnCCA;
 
-                // 2. Calculate Prorated Due
                 let pDueBasic = Math.ceil((dueB / maxDays) * actualDays);
                 let pDueDA = Math.ceil((dueDA / maxDays) * actualDays);
                 let pDueHRA = Math.ceil((dueH / maxDays) * actualDays);
                 let pDueCCA = Math.ceil((dueC / maxDays) * actualDays);
                 let pDueGross = pDueBasic + pDueDA + pDueHRA + pDueCCA;
 
-                // 3. Final Arrear Math
                 let pDiffGross = pDueGross - pDrawnGross;
                 let pDiffBasic = pDueBasic - pDrawnBasic;
                 let pDiffDA = pDueDA - pDrawnDA;
+                let pDiffHRA = pDueHRA - pDrawnHRA;
+                let pDiffCCA = pDueCCA - pDrawnCCA;
                 
+                // CORE FIX: Ignore chunks/months where the increment hasn't taken effect (Difference is zero)
+                if (pDiffBasic === 0 && pDiffDA === 0 && pDiffHRA === 0 && pDiffCCA === 0) return;
+
+                hasRenderedRows = true;
+
                 let pPen = Math.ceil((pDiffBasic + pDiffDA) * (isCPS ? 0.10 : 0.12));
                 let pNet = pDiffGross - pPen;
 
@@ -549,6 +567,12 @@
                 });
             });
             current.setMonth(current.getMonth() + 1);
+        }
+
+        if(!hasRenderedRows) {
+            tbody.innerHTML = `<tr><td colspan="15" style="text-align:center; padding:20px; color:#6b7280;">No arrears found for this period. Ensure effective dates overlap with your start/end dates.</td></tr>`;
+            document.getElementById(type + 'Wrapper').style.display = 'block';
+            return;
         }
 
         const trTotal = document.createElement('tr');
