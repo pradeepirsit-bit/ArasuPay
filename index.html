@@ -207,7 +207,7 @@
 
         <div class="one-day-panel" id="oneDayPanel">
             <h3 style="margin-bottom: 5px; text-align: center;">1-Day Fractional Breakdown</h3>
-            <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 0;">Based on <strong id="lblContextDays">31</strong> days in selected month. Values rounded UP.</p>
+            <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 0;">Based on <strong id="lblContextDays">31</strong> days in selected month. Values rounded to nearest rupee.</p>
             <div class="split-grid">
                 <div class="split-item"><span>Basic Pay</span><strong id="dBasic">₹0</strong></div>
                 <div class="split-item"><span>DA</span><strong id="dDA">₹0</strong></div>
@@ -720,7 +720,8 @@
         document.getElementById('promoDueCCA').value = getCcaAmount(promoDueBasic, selectedCcaGrade);
         
         const daPct = parseFloat(document.getElementById('daPercent').value) || 0;
-        const daAmt = Math.ceil(basic * (daPct / 100));
+        // CHANGED TO MATH.ROUND for exact precision
+        const daAmt = Math.round(basic * (daPct / 100));
         document.getElementById('daAmountDisplay').innerText = `₹ ${formatCurr(daAmt)}`;
         
         const hra = autoHra;
@@ -741,13 +742,13 @@
         if (penType === 'CPS') {
             document.getElementById('pensionLabel').innerText = "CPS (10% Auto)";
             penInput.readOnly = true; penInput.classList.add('readonly-highlight');
-            penDed = Math.ceil((basic + daAmt) * 0.10);
+            penDed = Math.round((basic + daAmt) * 0.10); // CHANGED TO MATH.ROUND
             penInput.value = penDed;
             penInput.classList.remove('input-error'); gpfErr.style.display = 'none';
         } else {
             document.getElementById('pensionLabel').innerText = "GPF (Min 12%)";
             penInput.readOnly = false; penInput.classList.remove('readonly-highlight');
-            const minGpf = Math.ceil((basic + daAmt) * 0.12);
+            const minGpf = Math.round((basic + daAmt) * 0.12); // CHANGED TO MATH.ROUND
             let uGpf = parseFloat(penInput.value) || 0;
             if (uGpf < minGpf && penInput.value !== "") {
                 gpfErr.innerText = `Minimum 12% Required: ₹${formatCurr(minGpf)}`;
@@ -761,7 +762,7 @@
 
         const faTot = parseFloat(document.getElementById('faTotal').value) || 0;
         const faInst = parseInt(document.getElementById('faInstallment').value) || 0;
-        const faDed = (faInst > 0 && faInst <= 10 && faTot > 0) ? Math.ceil(faTot / 10) : 0;
+        const faDed = (faInst > 0 && faInst <= 10 && faTot > 0) ? Math.round(faTot / 10) : 0; // CHANGED TO MATH.ROUND
         document.getElementById('faDeduction').value = faDed;
         
         const nhis = parseFloat(document.getElementById('nhis').value) || 0;
@@ -778,12 +779,13 @@
         const days = parseInt(document.getElementById('globalMonth').value);
         document.getElementById('lblContextDays').innerText = days;
         if(!err) {
-            document.getElementById('dBasic').innerText = `₹${formatCurr(Math.ceil(basic/days))}`;
-            document.getElementById('dDA').innerText = `₹${formatCurr(Math.ceil(daAmt/days))}`;
-            document.getElementById('dHRA').innerText = `₹${formatCurr(Math.ceil(hra/days))}`;
-            document.getElementById('dCCA').innerText = `₹${formatCurr(Math.ceil(cca/days))}`;
-            document.getElementById('dOther').innerText = `₹${formatCurr(Math.ceil((ma+other)/days))}`;
-            document.getElementById('dNet').innerText = `₹${formatCurr(Math.ceil(net/days))}`;
+            // CHANGED ALL 1-DAY PRORATING TO MATH.ROUND
+            document.getElementById('dBasic').innerText = `₹${formatCurr(Math.round(basic/days))}`;
+            document.getElementById('dDA').innerText = `₹${formatCurr(Math.round(daAmt/days))}`;
+            document.getElementById('dHRA').innerText = `₹${formatCurr(Math.round(hra/days))}`;
+            document.getElementById('dCCA').innerText = `₹${formatCurr(Math.round(cca/days))}`;
+            document.getElementById('dOther').innerText = `₹${formatCurr(Math.round((ma+other)/days))}`;
+            document.getElementById('dNet').innerText = `₹${formatCurr(Math.round(net/days))}`;
         } else {
             document.getElementById('dBasic').innerText = "ERROR";
             document.getElementById('dDA').innerText = "ERROR";
@@ -811,6 +813,7 @@
             const fStr = row.querySelector('.lop-from').value; const tStr = row.querySelector('.lop-to').value;
             if (fStr && tStr) {
                 const f = parseLocal(fStr); const t = parseLocal(tStr);
+                // Keeping Math.ceil for day math only
                 if (t >= f) lops.push({ start: f, end: t, days: Math.ceil((t - f) / (1000 * 60 * 60 * 24)) + 1 });
             }
         });
@@ -874,15 +877,17 @@
                 hasRenderedRows = true;
                 
                 let currentDaPct = getDaPercent(chunkStart);
-                let eligibleFacDa = Math.ceil(eligibleFacBasic * (currentDaPct / 100));
                 
-                let pFullBasic = Math.ceil((basic / maxDays) * actualDays);
-                let pBasic = Math.ceil((eligibleFacBasic / maxDays) * actualDays);
-                let pDa = Math.ceil((eligibleFacDa / maxDays) * actualDays);
+                // CHANGED ALL FINANCIAL PRORATING TO MATH.ROUND
+                let eligibleFacDa = Math.round(eligibleFacBasic * (currentDaPct / 100));
+                
+                let pFullBasic = Math.round((basic / maxDays) * actualDays);
+                let pBasic = Math.round((eligibleFacBasic / maxDays) * actualDays);
+                let pDa = Math.round((eligibleFacDa / maxDays) * actualDays);
                 let proratedFacGross = pBasic + pDa;
                 
-                let itDed = Math.ceil(proratedFacGross * 0.10);
-                let cessDed = Math.ceil(itDed * 0.04);
+                let itDed = Math.round(proratedFacGross * 0.10);
+                let cessDed = Math.round(itDed * 0.04);
                 let totalDed = itDed + cessDed;
                 let netFac = proratedFacGross - totalDed;
                 
@@ -1081,8 +1086,10 @@
                 
                 // --- Dynamic Engines: Fetch DA %, HRA, and CCA for this specific month & pay bracket! ---
                 let currentDaPct = getDaPercent(chunkStart);
-                let chunkOldDA = Math.ceil(oldBasic * (currentDaPct / 100));
-                let dueDA = Math.ceil(dueB * (currentDaPct / 100));
+                
+                // CHANGED TO MATH.ROUND for perfectly matching full-month exact values across chunks
+                let chunkOldDA = Math.round(oldBasic * (currentDaPct / 100));
+                let dueDA = Math.round(dueB * (currentDaPct / 100));
 
                 let chunkOldHra = getHraAmount(oldBasic, selectedHraGrade);
                 let dueHRA = getHraAmount(dueB, selectedHraGrade);
@@ -1090,17 +1097,17 @@
                 let chunkOldCca = getCcaAmount(oldBasic, selectedCcaGrade);
                 let dueCCA = getCcaAmount(dueB, selectedCcaGrade);
 
-                // --- Prorating ---
-                let pDrawnBasic = Math.ceil((oldBasic / maxDays) * actualDays);
-                let pDrawnDA = Math.ceil((chunkOldDA / maxDays) * actualDays);
-                let pDrawnHRA = Math.ceil((chunkOldHra / maxDays) * actualDays);
-                let pDrawnCCA = Math.ceil((chunkOldCca / maxDays) * actualDays);
+                // --- Prorating (CHANGED FROM CEIL TO ROUND to fix 1001 issue) ---
+                let pDrawnBasic = Math.round((oldBasic / maxDays) * actualDays);
+                let pDrawnDA = Math.round((chunkOldDA / maxDays) * actualDays);
+                let pDrawnHRA = Math.round((chunkOldHra / maxDays) * actualDays);
+                let pDrawnCCA = Math.round((chunkOldCca / maxDays) * actualDays);
                 let pDrawnGross = pDrawnBasic + pDrawnDA + pDrawnHRA + pDrawnCCA;
 
-                let pDueBasic = Math.ceil((dueB / maxDays) * actualDays);
-                let pDueDA = Math.ceil((dueDA / maxDays) * actualDays);
-                let pDueHRA = Math.ceil((dueHRA / maxDays) * actualDays);
-                let pDueCCA = Math.ceil((dueCCA / maxDays) * actualDays);
+                let pDueBasic = Math.round((dueB / maxDays) * actualDays);
+                let pDueDA = Math.round((dueDA / maxDays) * actualDays);
+                let pDueHRA = Math.round((dueHRA / maxDays) * actualDays);
+                let pDueCCA = Math.round((dueCCA / maxDays) * actualDays);
                 let pDueGross = pDueBasic + pDueDA + pDueHRA + pDueCCA;
 
                 let pDiffBasic = pDueBasic - pDrawnBasic;
@@ -1113,7 +1120,8 @@
 
                 hasRenderedRows = true;
 
-                let pPen = Math.ceil((pDiffBasic + pDiffDA) * (isCPS ? 0.10 : 0.12));
+                // CHANGED TO MATH.ROUND
+                let pPen = Math.round((pDiffBasic + pDiffDA) * (isCPS ? 0.10 : 0.12));
                 let pNet = pDiffGross - pPen;
 
                 // Totals
