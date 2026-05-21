@@ -420,6 +420,62 @@
         </div>
     </div>
 
+    <!-- DA ARREAR CALCULATOR SECTION (NEW) -->
+    <div class="section" style="background-color: #fffbeb;">
+        <div class="section-header-flex">
+            <div>
+                <h2>DA Arrear Calculator (1-Month Difference)</h2>
+                <p class="section-desc">Calculate the exact monthly difference when DA % increases. Linked to your main Basic Pay.</p>
+            </div>
+            <button class="btn-secondary" onclick="togglePanel('daArrearPanel', 'btnDaArrear', 'DA Arrear Calculator')" id="btnDaArrear">Show DA Arrear Calculator</button>
+        </div>
+
+        <div id="daArrearPanel" style="display: none;">
+            <div class="grid-2col">
+                <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #ffffff;">
+                    <h3 style="color: #57534e;">DA Inputs</h3>
+                    <div class="form-group">
+                        <label>Basic Pay (₹)</label>
+                        <input type="number" id="daCalcBasic" class="readonly-highlight" readonly placeholder="Linked to Main Basic">
+                    </div>
+                    <div class="form-group">
+                        <label>Old DA (%)</label>
+                        <input type="number" id="daCalcOldPct" value="58" class="manual-highlight" oninput="calculateDaArrear()">
+                    </div>
+                    <div class="form-group">
+                        <label>New DA (%)</label>
+                        <input type="number" id="daCalcNewPct" value="60" class="manual-highlight" oninput="calculateDaArrear()">
+                    </div>
+                </div>
+                
+                <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #ffffff;">
+                    <h3 style="color: var(--brand-action);">1-Month Difference</h3>
+                    <div class="form-group">
+                        <label>Old DA Amount</label>
+                        <span id="daCalcOldAmt" style="font-weight: 600;">₹0</span>
+                    </div>
+                    <div class="form-group">
+                        <label>New DA Amount</label>
+                        <span id="daCalcNewAmt" style="font-weight: 600; color: var(--success-green);">₹0</span>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="form-group">
+                        <label>Gross DA Increase</label>
+                        <span id="daCalcGrossDiff" style="font-weight: bold; color: var(--brand-action);">₹0</span>
+                    </div>
+                    <div class="form-group">
+                        <label id="daCalcPenLabel">Pension Ded.</label>
+                        <span id="daCalcPenDed" style="font-weight: 600; color: var(--error-red);">- ₹0</span>
+                    </div>
+                    <div class="form-group" style="background: #f0fdf4; padding: 10px; border-radius: 6px; border: 1px solid #bbf7d0; margin-top: 10px;">
+                        <label style="color: #166534; font-weight: bold;">Net DA Arrear (Per Month)</label>
+                        <span id="daCalcNetArrear" style="font-weight: bold; color: #166534; font-size: 1.2rem;">₹0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- PAY FIXATION FINDER SECTION -->
     <div class="section" style="background-color: #f0fdf4; border-bottom: none;">
         <div class="section-header-flex">
@@ -785,6 +841,34 @@
         document.getElementById('incStagesContainer').appendChild(div);
     }
 
+    // --- DA Arrear Engine (1-Month Difference) ---
+    function calculateDaArrear() {
+        let basic = parseFloat(document.getElementById('basicPay').value) || 0;
+        document.getElementById('daCalcBasic').value = basic > 0 ? basic : '';
+        
+        let oldPct = parseFloat(document.getElementById('daCalcOldPct').value) || 0;
+        let newPct = parseFloat(document.getElementById('daCalcNewPct').value) || 0;
+        
+        // Exact Rounding per Govt Standards
+        let oldAmt = Math.round(basic * (oldPct / 100));
+        let newAmt = Math.round(basic * (newPct / 100));
+        
+        let grossDiff = newAmt - oldAmt;
+        if (grossDiff < 0) grossDiff = 0; // Guard against reverse inputs
+        
+        let isCPS = document.getElementById('pensionType').value === 'CPS';
+        document.getElementById('daCalcPenLabel').innerText = isCPS ? "CPS Ded (10%)" : "GPF Ded (12%)";
+        
+        let penDed = Math.round(grossDiff * (isCPS ? 0.10 : 0.12));
+        let netArrear = grossDiff - penDed;
+        
+        document.getElementById('daCalcOldAmt').innerText = `₹${formatCurr(oldAmt)}`;
+        document.getElementById('daCalcNewAmt').innerText = `₹${formatCurr(newAmt)}`;
+        document.getElementById('daCalcGrossDiff').innerText = `₹${formatCurr(grossDiff)}`;
+        document.getElementById('daCalcPenDed').innerText = `- ₹${formatCurr(penDed)}`;
+        document.getElementById('daCalcNetArrear').innerText = `₹${formatCurr(netArrear)}`;
+    }
+
     // --- Main Salary Logic ---
     function calculateMainSalary() {
         const basicInput = document.getElementById('basicPay');
@@ -887,6 +971,9 @@
             document.getElementById('dOther').innerText = "ERROR";
             document.getElementById('dNet').innerText = "ERROR";
         }
+        
+        // Keep DA Arrear Calculator Synced
+        calculateDaArrear();
     }
 
     // --- FAC Calculator Engine ---
