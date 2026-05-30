@@ -56,7 +56,7 @@
         .pay-error-msg { color: var(--error-red); font-size: 0.75rem; text-align: right; margin-top: 4px; display: none; font-weight: 600;}
 
         .btn-primary { background-color: var(--brand-action); color: white; border: none; padding: 14px 24px; font-size: 1rem; font-weight: 500; border-radius: 8px; cursor: pointer; width: 100%; transition: 0.2s;}
-        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-primary:hover { background-color: #1d4ed8; opacity: 0.9;}
         .btn-secondary { background-color: #f3f4f6; color: var(--brand-dark); border: 1px solid #d1d5db; padding: 8px 16px; font-size: 0.9rem; font-weight: 500; border-radius: 6px; cursor: pointer; transition: 0.2s; }
         .btn-secondary:hover { background-color: #e5e7eb; }
         
@@ -111,18 +111,15 @@
 <body>
 
 <div class="container">
-    <!-- TOP DISCLAIMER -->
     <div class="disclaimer-banner">
         ⚠️ <strong>Important Notice:</strong> UrudhiFi is currently in the developing stage. It is designed as a supportive tool for TN Govt Employees. Calculations may contain mistakes—always verify with official G.O.s and your accounts department.
     </div>
 
-    <!-- HEADER -->
     <div class="header">
         <h1>UrudhiFi Dashboard</h1>
         <p>Advanced DA Time-Engine, Auto-HRA Matrices & Strict Govt Pay Validation</p>
     </div>
 
-    <!-- GLOBAL CONTEXT -->
     <div class="global-context">
         <label>Viewing Context:</label>
         <select id="globalMonth" style="text-align: left; width: 250px; background-color: #fff;">
@@ -142,12 +139,10 @@
         </select>
     </div>
 
-    <!-- MAIN CALCULATOR -->
     <div class="section">
         <div class="grid-2col">
             <div>
                 <h2>Standard Earnings</h2>
-                <!-- VALIDATED PAY INPUT -->
                 <div class="form-group">
                     <label>Manual Basic Pay (₹)</label>
                     <div style="display:flex; flex-direction:column; align-items:flex-end;">
@@ -161,7 +156,6 @@
                 <div class="form-group" style="margin-top: 15px;"><label>DA % (Current)</label><div class="inline-group"><input type="number" id="daPercent" title="Auto-fetched based on today's date" oninput="calculateMainSalary()"> <span>%</span></div></div>
                 <span class="helper-text" id="daAmountDisplay" style="margin-bottom: 15px;">₹ 0</span>
                 
-                <!-- COMPACT HRA SELECTION -->
                 <div class="allowance-box">
                     <div class="form-group" style="margin-bottom: 4px;">
                         <label style="color: var(--brand-dark); font-weight: 600;">HRA</label>
@@ -176,7 +170,6 @@
                     </div>
                 </div>
                 
-                <!-- COMPACT CCA SELECTION -->
                 <div class="allowance-box">
                     <div class="form-group" style="margin-bottom: 6px;">
                         <label style="color: var(--brand-dark); font-weight: 600;">CCA</label>
@@ -231,8 +224,62 @@
             </div>
         </div>
     </div>
-    
-    <!-- INCREMENT ARREAR SECTION -->
+
+    <div class="section" style="background-color: #fffbeb;">
+        <div class="section-header-flex">
+            <div>
+                <h2>DA Arrear Calculator (1-Month Difference)</h2>
+                <p class="section-desc">Calculate the exact monthly difference when DA % increases. Linked to your main Basic Pay.</p>
+            </div>
+            <button class="btn-secondary" onclick="togglePanel('daArrearPanel', 'btnDaArrear', 'DA Arrear Calculator')" id="btnDaArrear">Show DA Arrear Calculator</button>
+        </div>
+
+        <div id="daArrearPanel" style="display: none;">
+            <div class="grid-2col">
+                <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #ffffff;">
+                    <h3 style="color: #57534e;">DA Inputs</h3>
+                    <div class="form-group">
+                        <label>Basic Pay (₹)</label>
+                        <input type="number" id="daCalcBasic" class="readonly-highlight" readonly placeholder="Linked to Main Basic">
+                    </div>
+                    <div class="form-group">
+                        <label>Old DA (%)</label>
+                        <input type="number" id="daCalcOldPct" value="50" class="manual-highlight" oninput="calculateDaArrear()">
+                    </div>
+                    <div class="form-group">
+                        <label>New DA (%)</label>
+                        <input type="number" id="daCalcNewPct" value="53" class="manual-highlight" oninput="calculateDaArrear()">
+                    </div>
+                </div>
+                
+                <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #ffffff;">
+                    <h3 style="color: var(--brand-action);">1-Month Difference</h3>
+                    <div class="form-group">
+                        <label>Old DA Amount</label>
+                        <span id="daCalcOldAmt" style="font-weight: 600;">₹0</span>
+                    </div>
+                    <div class="form-group">
+                        <label>New DA Amount</label>
+                        <span id="daCalcNewAmt" style="font-weight: 600; color: var(--success-green);">₹0</span>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="form-group">
+                        <label>Gross DA Increase</label>
+                        <span id="daCalcGrossDiff" style="font-weight: bold; color: var(--brand-action);">₹0</span>
+                    </div>
+                    <div class="form-group">
+                        <label id="daCalcPenLabel">Pension Ded.</label>
+                        <span id="daCalcPenDed" style="font-weight: 600; color: var(--error-red);">- ₹0</span>
+                    </div>
+                    <div class="form-group" style="background: #f0fdf4; padding: 10px; border-radius: 6px; border: 1px solid #bbf7d0; margin-top: 10px;">
+                        <label style="color: #166534; font-weight: bold;">Net DA Arrear (Per Month)</label>
+                        <span id="daCalcNetArrear" style="font-weight: bold; color: #166534; font-size: 1.2rem;">₹0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="section" style="background-color: #fcfcfc;">
         <div class="section-header-flex">
             <div>
@@ -290,7 +337,6 @@
         </div>
     </div>
 
-    <!-- PROMOTION ARREAR SECTION -->
     <div class="section">
         <div class="section-header-flex">
             <div>
@@ -327,7 +373,19 @@
                 </div>
                 
                 <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px;">
-                    <h3 style="color: var(--brand-action);">Due (Higher Pay)</h3>
+                    <h3 style="color: var(--brand-action);">Due (Higher Pay / Promoted Post)</h3>
+                    
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Promoted Post Name</label>
+                        <input type="text" id="promoPostName" placeholder="e.g. Superintendent" style="text-align: left;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label>Pay Level (1-32)</label>
+                        <input type="number" id="promoPayLevel" placeholder="e.g. 18" min="1" max="32">
+                    </div>
+                    
+                    <div class="divider" style="margin: 15px 0;"></div>
+                    
                     <div class="form-group">
                         <label>Basic Pay (₹)</label>
                         <div style="display:flex; flex-direction:column; align-items:flex-end;">
@@ -355,7 +413,6 @@
         </div>
     </div>
 
-    <!-- FULL ADDITIONAL CHARGE (FAC) SECTION -->
     <div class="section" style="background-color: #faf5ff;">
         <div class="section-header-flex">
             <div>
@@ -419,74 +476,18 @@
             </div>
         </div>
     </div>
-
-    <!-- DA ARREAR CALCULATOR SECTION (NEW) -->
-    <div class="section" style="background-color: #fffbeb;">
-        <div class="section-header-flex">
-            <div>
-                <h2>DA Arrear Calculator (1-Month Difference)</h2>
-                <p class="section-desc">Calculate the exact monthly difference when DA % increases. Linked to your main Basic Pay.</p>
-            </div>
-            <button class="btn-secondary" onclick="togglePanel('daArrearPanel', 'btnDaArrear', 'DA Arrear Calculator')" id="btnDaArrear">Show DA Arrear Calculator</button>
-        </div>
-
-        <div id="daArrearPanel" style="display: none;">
-            <div class="grid-2col">
-                <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #ffffff;">
-                    <h3 style="color: #57534e;">DA Inputs</h3>
-                    <div class="form-group">
-                        <label>Basic Pay (₹)</label>
-                        <input type="number" id="daCalcBasic" class="readonly-highlight" readonly placeholder="Linked to Main Basic">
-                    </div>
-                    <div class="form-group">
-                        <label>Old DA (%)</label>
-                        <input type="number" id="daCalcOldPct" value="58" class="manual-highlight" oninput="calculateDaArrear()">
-                    </div>
-                    <div class="form-group">
-                        <label>New DA (%)</label>
-                        <input type="number" id="daCalcNewPct" value="60" class="manual-highlight" oninput="calculateDaArrear()">
-                    </div>
-                </div>
-                
-                <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #ffffff;">
-                    <h3 style="color: var(--brand-action);">1-Month Difference</h3>
-                    <div class="form-group">
-                        <label>Old DA Amount</label>
-                        <span id="daCalcOldAmt" style="font-weight: 600;">₹0</span>
-                    </div>
-                    <div class="form-group">
-                        <label>New DA Amount</label>
-                        <span id="daCalcNewAmt" style="font-weight: 600; color: var(--success-green);">₹0</span>
-                    </div>
-                    <div class="divider"></div>
-                    <div class="form-group">
-                        <label>Gross DA Increase</label>
-                        <span id="daCalcGrossDiff" style="font-weight: bold; color: var(--brand-action);">₹0</span>
-                    </div>
-                    <div class="form-group">
-                        <label id="daCalcPenLabel">Pension Ded.</label>
-                        <span id="daCalcPenDed" style="font-weight: 600; color: var(--error-red);">- ₹0</span>
-                    </div>
-                    <div class="form-group" style="background: #f0fdf4; padding: 10px; border-radius: 6px; border: 1px solid #bbf7d0; margin-top: 10px;">
-                        <label style="color: #166534; font-weight: bold;">Net DA Arrear (Per Month)</label>
-                        <span id="daCalcNetArrear" style="font-weight: bold; color: #166534; font-size: 1.2rem;">₹0</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- PAY FIXATION FINDER SECTION -->
-    <div class="section" style="background-color: #f0fdf4; border-bottom: none;">
+    
+    <div class="section" style="background-color: #f0fdf4;">
         <div class="section-header-flex">
             <div>
                 <h2>Pay Fixation Finder: FR 22B vs FR 22(1)(a)(i)</h2>
-                <p class="section-desc">Simulate Direct Promotion Fixation vs. Option Fixation to mathematically prove the most beneficial route over 24 months.</p>
+                <p class="section-desc">Matrix Auto-Fixation Engine to simulate Direct Promotion Fixation vs. Option Fixation.</p>
             </div>
             <button class="btn-secondary" onclick="togglePanel('fixationPanel', 'btnFixation', 'Fixation Finder')" id="btnFixation">Show Fixation Finder</button>
         </div>
 
         <div id="fixationPanel" style="display: none;">
+            
             <div style="display: flex; gap: 20px; margin-bottom: 20px; background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #bbf7d0; flex-wrap: wrap;">
                 <div style="flex:1; min-width: 200px;">
                     <label style="font-size: 0.85rem; font-weight:bold; color: #166534;">PROMOTION DATE</label>
@@ -500,6 +501,36 @@
                         <option value="6" selected>July 1</option>
                         <option value="9">October 1</option>
                     </select>
+                </div>
+            </div>
+
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+                <h3 style="margin-top: 0; color: #0f172a; margin-bottom: 15px;">Matrix Auto-Fixation Engine</h3>
+                <div class="grid-2col" style="gap: 20px; align-items: start;">
+                    <div>
+                        <div class="form-group">
+                            <label style="color: var(--brand-action); font-weight: bold;">Current Basic Pay (Lower Post)</label>
+                            <input type="number" id="fixLowerBasic" placeholder="e.g. 36900" class="validate-pay" oninput="validateInputAndCalc(this)">
+                        </div>
+                        <div class="form-group">
+                            <label>Promoted Post Name</label>
+                            <input type="text" id="fixPromotedPost" placeholder="e.g. Superintendent">
+                        </div>
+                        <div class="form-group">
+                            <label style="color: #991b1b; font-weight: bold;">Promoted Pay Level</label>
+                            <input type="number" id="fixPromotedLevel" placeholder="e.g. 18 (1-32)" min="1" max="32">
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
+                            <button class="btn-primary" onclick="calculateFR22B()" style="background-color: #166534; flex: 1; min-width: 200px;">⚡ Auto-Calc Option 1 (FR 22B)</button>
+                            <button class="btn-primary" onclick="calculateOption2()" style="background-color: #1d4ed8; flex: 1; min-width: 200px;">⚡ Auto-Calc Option 2 [FR 22(1)(a)(i)]</button>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #fff; padding: 15px; border-radius: 6px; border: 1px dashed #cbd5e1; font-size: 0.85rem; color: #475569; min-height: 150px;">
+                        <strong>Engine Execution Log:</strong>
+                        <div id="fr22bLog" style="margin-top: 10px; font-family: monospace; white-space: pre-wrap; line-height: 1.6;">Waiting for calculation trigger...</div>
+                    </div>
                 </div>
             </div>
 
@@ -536,7 +567,7 @@
                 </div>
             </div>
 
-            <button class="btn-primary" onclick="generateFixationComparison()" style="background-color: #166534;">Compare & Find Best Option (24 Month Projection)</button>
+            <button class="btn-primary" onclick="generateFixationComparison()" style="background-color: #0f172a;">Compare & Find Best Option (24 Month Projection)</button>
 
             <div id="fixationResult" style="margin-top: 20px; display: none;">
                 <div id="fixationRecommendation" style="padding: 15px; border-radius: 8px; font-weight: bold; text-align: center; font-size: 1.1rem; margin-bottom: 20px;"></div>
@@ -546,8 +577,7 @@
             </div>
         </div>
     </div>
-    
-    <!-- FOOTER DISCLAIMER -->
+
     <div class="footer-disclaimer">
         <p><strong>UrudhiFi Dashboard</strong> is an independent, non-official utility designed for the welfare of Tamil Nadu Government Employees to assist in projecting salary patterns, arrears, and fixations.</p>
         <p><em>Notice: This tool is currently under active development. While exhaustive Government matrices have been incorporated, calculations may contain errors. Please consult your respective Accounts/Treasury department and refer to official Government Orders for final authorization.</em></p>
@@ -556,9 +586,13 @@
 </div>
 
 <script>
-    // --- Centralized Strict Government Pay Database (PB-1, PB-2, PB-3, PB-4) ---
-    const validPayDb = new Set([
-        // PB-1 (Level 1-10)
+    // =========================================================================
+    // 1. DYNAMIC 2D PAY MATRIX CONSTRUCTOR (Levels 1 to 32, Cells 0 to 39)
+    // =========================================================================
+    window.payMatrix = {};
+    for (let i = 1; i <= 32; i++) window.payMatrix[i] = [];
+
+    const pb1Data = [
         15700, 15900, 16600, 18000, 18200, 18500, 19000, 19500, 20000, 20600,
         16200, 16400, 17100, 18500, 18700, 19100, 19600, 20100, 20600, 21200,
         16700, 16900, 17600, 19100, 19300, 19700, 20200, 20700, 21200, 21800,
@@ -598,9 +632,10 @@
         45700, 46100, 48000, 52000, 53000, 53600, 55100, 56700, 58200, 59900,
         47100, 47500, 49400, 53600, 54600, 55200, 56800, 58400, 59900, 61700,
         48500, 48900, 50900, 55200, 56200, 56900, 58500, 60200, 61700, 63600,
-        50000, 50400, 52400, 56900, 57900, 58600, 60300, 62000, 63600, 65500,
+        50000, 50400, 52400, 56900, 57900, 58600, 60300, 62000, 63600, 65500
+    ];
 
-        // PB-2 (Level 11-20)
+    const pb2Data = [
         35400, 35600, 35900, 36000, 36200, 36400, 36700, 36900, 37200, 37700,
         36500, 36700, 37000, 37100, 37300, 37500, 37800, 38000, 38300, 38800,
         37600, 37800, 38100, 38200, 38400, 38600, 38900, 39100, 39400, 40000,
@@ -640,9 +675,10 @@
         102800, 103200, 103900, 104400, 105100, 105800, 106300, 106700, 107700, 109300,
         105900, 106300, 107000, 107500, 108300, 109000, 109500, 109900, 110900, 112600,
         109100, 109500, 110200, 110700, 111500, 112300, 112800, 113200, 114200, 116000,
-        112400, 112800, 113500, 114000, 114800, 115700, 116200, 116600, 117600, 119500,
+        112400, 112800, 113500, 114000, 114800, 115700, 116200, 116600, 117600, 119500
+    ];
 
-        // PB-3 (Level 21-27)
+    const pb3Data = [
         55500, 56100, 56900, 57700, 59300, 61900, 62200,
         57200, 57800, 58600, 59400, 61100, 63800, 64100,
         58900, 59500, 60400, 61200, 62900, 65700, 66000,
@@ -682,9 +718,10 @@
         160800, 162400, 165100, 166900, 171700, 180000, 180500,
         165600, 167300, 170100, 171900, 176900, 185400, 185900,
         170600, 172300, 175200, 177100, 182200, 191000, 191500,
-        175700, 177500, 180500, 182400, 187700, 196700, 197200,
+        175700, 177500, 180500, 182400, 187700, 196700, 197200
+    ];
 
-        // PB-4 (Level 28-32)
+    const pb4Data = [
         123100, 123400, 123600, 125200, 128900,
         126800, 127100, 127300, 129000, 132800,
         130600, 130900, 131100, 132900, 136800,
@@ -705,19 +742,190 @@
         203500, 203900, 204200, 207200, 213200,
         209600, 210000, 210300, 213400, 219600,
         215900, 216300, 216600, 219800, 225000
-    ]);
+    ];
 
-    // Validator Function triggered on Input
+    let idx = 0;
+    for(let r=0; r<40; r++) { for(let c=1; c<=10; c++) window.payMatrix[c].push(pb1Data[idx++]); }
+    idx = 0;
+    for(let r=0; r<40; r++) { for(let c=11; c<=20; c++) window.payMatrix[c].push(pb2Data[idx++]); }
+    idx = 0;
+    for(let r=0; r<40; r++) { for(let c=21; c<=27; c++) window.payMatrix[c].push(pb3Data[idx++]); }
+    idx = 0;
+    for(let r=0; r<20; r++) { for(let c=28; c<=32; c++) window.payMatrix[c].push(pb4Data[idx++]); }
+
+    // Generate strict validPayDb for the generic input validations
+    const validPayDb = new Set();
+    for (let l = 1; l <= 32; l++) {
+        window.payMatrix[l].forEach(val => validPayDb.add(val));
+    }
+
+
+    // =========================================================================
+    // 2. MATRIX ENGINES (OPTION 1 AND OPTION 2)
+    // =========================================================================
+    
+    // --- Option 1: Direct FR 22B Engine ---
+    function calculateFR22B() {
+        const lowerBasic = parseFloat(document.getElementById('fixLowerBasic').value);
+        const promotedLevel = parseInt(document.getElementById('fixPromotedLevel').value);
+        const log = document.getElementById('fr22bLog');
+
+        if (!lowerBasic || !promotedLevel || promotedLevel < 1 || promotedLevel > 32) {
+            log.innerHTML = `<span style="color:var(--error-red);">Please enter a valid Lower Post Basic Pay and a Promoted Pay Level (1-32).</span>`;
+            return;
+        }
+
+        // STEP 1: Find Lower Level & Cell
+        let currentLevel = -1;
+        let currentCell = -1;
+        for (let l = 1; l <= 32; l++) {
+            let c = window.payMatrix[l].indexOf(lowerBasic);
+            if (c !== -1) {
+                currentLevel = l;
+                currentCell = c;
+                break; // Grabs the first logical match in the matrix
+            }
+        }
+
+        if (currentLevel === -1) {
+            log.innerHTML = `<span style="color:var(--error-red);">Error: Basic Pay ₹${lowerBasic} not found in the Government Matrix.</span>`;
+            return;
+        }
+
+        // STEP 2: Grant ONE notional increment in the lower post
+        if (currentCell + 1 >= window.payMatrix[currentLevel].length) {
+            log.innerHTML = `<span style="color:var(--error-red);">Error: Max cell reached in Level ${currentLevel}. Cannot grant increment.</span>`;
+            return;
+        }
+        let notionalPay = window.payMatrix[currentLevel][currentCell + 1];
+
+        // STEP 3: Move to Promoted Level and Fix Pay (Next Equal or Higher)
+        let fixedPay = -1;
+        let fixedCell = -1;
+        for (let i = 0; i < window.payMatrix[promotedLevel].length; i++) {
+            if (window.payMatrix[promotedLevel][i] >= notionalPay) {
+                fixedPay = window.payMatrix[promotedLevel][i];
+                fixedCell = i;
+                break;
+            }
+        }
+
+        if (fixedPay === -1) {
+            log.innerHTML = `<span style="color:var(--error-red);">Error: Notional Pay ₹${notionalPay} exceeds the maximum cell limit of Level ${promotedLevel}.</span>`;
+            return;
+        }
+
+        // Output to Option 1
+        const opt1Input = document.getElementById('fixOpt1Pay');
+        opt1Input.value = fixedPay;
+        validateInputAndCalc(opt1Input);
+
+        // Update Log
+        log.innerHTML = `<span style="color:#166534;">✅ <b>Option 1 (FR 22B) Execution:</b></span>\n` + 
+                        `<span><b>Step 1:</b> Found base ₹${lowerBasic} at Level ${currentLevel} (Cell ${currentCell + 1})</span>\n` + 
+                        `<span style="color:#0369a1;"><b>Step 2:</b> Applied 1 Notional Increment in lower scale -> ₹${notionalPay}</span>\n` +
+                        `<span style="color:#b45309;"><b>Step 3:</b> Jumped to Level ${promotedLevel}. Found Next Higher/Equal Pay -> <b>₹${fixedPay}</b> (Cell ${fixedCell + 1})</span>\n` +
+                        `\n<i>FR 22B Fixation Success. Amount populated in Option 1 below.</i>`;
+    }
+
+    // --- Option 2: FR 22(1)(a)(i) + Option Engine ---
+    function calculateOption2() {
+        const lowerBasic = parseFloat(document.getElementById('fixLowerBasic').value);
+        const promotedLevel = parseInt(document.getElementById('fixPromotedLevel').value);
+        const log = document.getElementById('fr22bLog');
+
+        if (!lowerBasic || !promotedLevel || promotedLevel < 1 || promotedLevel > 32) {
+            log.innerHTML = `<span style="color:var(--error-red);">Please enter a valid Lower Post Basic Pay and a Promoted Pay Level (1-32).</span>`;
+            return;
+        }
+
+        // STEP 1: Find Lower Level & Cell
+        let currentLevel = -1;
+        let currentCell = -1;
+        for (let l = 1; l <= 32; l++) {
+            let c = window.payMatrix[l].indexOf(lowerBasic);
+            if (c !== -1) {
+                currentLevel = l;
+                currentCell = c;
+                break;
+            }
+        }
+
+        if (currentLevel === -1) {
+            log.innerHTML = `<span style="color:var(--error-red);">Error: Basic Pay ₹${lowerBasic} not found in the Government Matrix.</span>`;
+            return;
+        }
+
+        // PHASE 1: Initial Fixation on Date of Promotion (No Increments)
+        let initialFixedPay = -1;
+        let initialFixedCell = -1;
+        for (let i = 0; i < window.payMatrix[promotedLevel].length; i++) {
+            if (window.payMatrix[promotedLevel][i] >= lowerBasic) {
+                initialFixedPay = window.payMatrix[promotedLevel][i];
+                initialFixedCell = i;
+                break;
+            }
+        }
+
+        if (initialFixedPay === -1) {
+            log.innerHTML = `<span style="color:var(--error-red);">Error: Lower Pay ₹${lowerBasic} exceeds the maximum cell limit of Level ${promotedLevel}.</span>`;
+            return;
+        }
+
+        // PHASE 2: Re-fixation on Month of Increment (TWO Increments in Lower Scale)
+        if (currentCell + 2 >= window.payMatrix[currentLevel].length) {
+            log.innerHTML = `<span style="color:var(--error-red);">Error: Max cell reached in Level ${currentLevel}. Cannot grant 2 increments.</span>`;
+            return;
+        }
+        let notionalPay2 = window.payMatrix[currentLevel][currentCell + 2];
+
+        // Move to new level and fix next higher pay based on TWO increments
+        let refixedPay = -1;
+        let refixedCell = -1;
+        for (let i = 0; i < window.payMatrix[promotedLevel].length; i++) {
+            if (window.payMatrix[promotedLevel][i] >= notionalPay2) {
+                refixedPay = window.payMatrix[promotedLevel][i];
+                refixedCell = i;
+                break;
+            }
+        }
+
+        if (refixedPay === -1) {
+            log.innerHTML = `<span style="color:var(--error-red);">Error: Notional Pay ₹${notionalPay2} exceeds the maximum cell limit of Level ${promotedLevel}.</span>`;
+            return;
+        }
+
+        // Output to Option 2 inputs
+        const opt2InitInput = document.getElementById('fixOpt2Initial');
+        const opt2RefixedInput = document.getElementById('fixOpt2Refixed');
+        
+        opt2InitInput.value = initialFixedPay;
+        opt2RefixedInput.value = refixedPay;
+        
+        validateInputAndCalc(opt2InitInput);
+        validateInputAndCalc(opt2RefixedInput);
+
+        // Update Log
+        log.innerHTML = `<span style="color:#1d4ed8;">✅ <b>Option 2 [FR 22(1)(a)(i)] Execution:</b></span>\n` +
+                        `<span style="color:#166534;"><b>Phase 1 (Initial Fixation):</b> Jumped from ₹${lowerBasic} directly to Level ${promotedLevel} -> <b>₹${initialFixedPay}</b> (Cell ${initialFixedCell + 1})</span>\n` + 
+                        `<span style="color:#0369a1;"><b>Phase 2 (DNI Re-fixation):</b> Applied <b>2 Increments</b> to base ₹${lowerBasic} in Level ${currentLevel} -> ₹${notionalPay2}</span>\n` +
+                        `<span style="color:#b45309;"><b>Final Step:</b> Jumped to Level ${promotedLevel} from ₹${notionalPay2} -> <b>₹${refixedPay}</b> (Cell ${refixedCell + 1})</span>\n` +
+                        `\n<i>Option 2 Fixation Success. Amounts populated in Option 2 below.</i>`;
+    }
+
+    // =========================================================================
+    // Remaining Validations and Core JS
+    // =========================================================================
     function validateInputAndCalc(el) {
         let val = parseFloat(el.value);
         let errorSpan = el.nextElementSibling;
         
         if (val && !validPayDb.has(val)) {
             el.classList.add('input-error');
-            if(errorSpan) errorSpan.style.display = 'block';
+            if(errorSpan && errorSpan.classList.contains('pay-error-msg')) errorSpan.style.display = 'block';
         } else {
             el.classList.remove('input-error');
-            if(errorSpan) errorSpan.style.display = 'none';
+            if(errorSpan && errorSpan.classList.contains('pay-error-msg')) errorSpan.style.display = 'none';
         }
         calculateMainSalary(); 
     }
@@ -726,7 +934,7 @@
     const getDaPercent = (date) => {
         if (!date) return 50;
         const y = date.getFullYear();
-        const m = date.getMonth(); // 0 = Jan, 6 = Jul
+        const m = date.getMonth(); 
         if (y > 2025 || (y === 2025 && m >= 6)) return 58;
         if (y === 2025 && m >= 0) return 55;
         if (y === 2024 && m >= 6) return 53;
@@ -735,7 +943,7 @@
         if (y === 2023 && m >= 0) return 42;
         if (y === 2022 && m >= 6) return 38;
         if (y === 2022 && m >= 0) return 34;
-        return 34; // default for older periods
+        return 34; 
     };
 
     // --- Centralized HRA Engine (Revised Pay Range Matrix) ---
@@ -849,12 +1057,11 @@
         let oldPct = parseFloat(document.getElementById('daCalcOldPct').value) || 0;
         let newPct = parseFloat(document.getElementById('daCalcNewPct').value) || 0;
         
-        // Exact Rounding per Govt Standards
         let oldAmt = Math.round(basic * (oldPct / 100));
         let newAmt = Math.round(basic * (newPct / 100));
         
         let grossDiff = newAmt - oldAmt;
-        if (grossDiff < 0) grossDiff = 0; // Guard against reverse inputs
+        if (grossDiff < 0) grossDiff = 0; 
         
         let isCPS = document.getElementById('pensionType').value === 'CPS';
         document.getElementById('daCalcPenLabel').innerText = isCPS ? "CPS Ded (10%)" : "GPF Ded (12%)";
@@ -875,10 +1082,8 @@
         const basic = parseFloat(basicInput.value) || 0;
         document.getElementById('incOldBasic').value = basic > 0 ? basic : '';
         
-        // Only update FAC Basic if it doesn't already have its own value, or keep them synced initially
         if(document.getElementById('facBasic').value === "" && basic > 0) document.getElementById('facBasic').value = basic;
         
-        // Auto-calculate HRA & CCA based on Centralized Engine
         const selectedHraGrade = document.querySelector('input[name="hraGrade"]:checked').value;
         const autoHra = getHraAmount(basic, selectedHraGrade);
         document.getElementById('hra').value = autoHra;
@@ -887,7 +1092,6 @@
         const autoCca = getCcaAmount(basic, selectedCcaGrade);
         document.getElementById('cca').value = autoCca;
         
-        // Update Promotion Previews Visually
         const promoDrawnBasic = parseFloat(document.getElementById('promoDrawnBasic').value) || 0;
         document.getElementById('promoDrawnHRA').value = getHraAmount(promoDrawnBasic, selectedHraGrade);
         document.getElementById('promoDrawnCCA').value = getCcaAmount(promoDrawnBasic, selectedCcaGrade);
@@ -897,7 +1101,6 @@
         document.getElementById('promoDueCCA').value = getCcaAmount(promoDueBasic, selectedCcaGrade);
         
         const daPct = parseFloat(document.getElementById('daPercent').value) || 0;
-        // CHANGED TO MATH.ROUND for exact precision
         const daAmt = Math.round(basic * (daPct / 100));
         document.getElementById('daAmountDisplay').innerText = `₹ ${formatCurr(daAmt)}`;
         
@@ -913,19 +1116,18 @@
         const gpfErr = document.getElementById('gpfError');
         let penDed = 0; let err = false;
 
-        // Block totals if Pay is invalid
         if(basicInput.classList.contains('input-error')) err = true;
 
         if (penType === 'CPS') {
             document.getElementById('pensionLabel').innerText = "CPS (10% Auto)";
             penInput.readOnly = true; penInput.classList.add('readonly-highlight');
-            penDed = Math.round((basic + daAmt) * 0.10); // CHANGED TO MATH.ROUND
+            penDed = Math.round((basic + daAmt) * 0.10); 
             penInput.value = penDed;
             penInput.classList.remove('input-error'); gpfErr.style.display = 'none';
         } else {
             document.getElementById('pensionLabel').innerText = "GPF (Min 12%)";
             penInput.readOnly = false; penInput.classList.remove('readonly-highlight');
-            const minGpf = Math.round((basic + daAmt) * 0.12); // CHANGED TO MATH.ROUND
+            const minGpf = Math.round((basic + daAmt) * 0.12); 
             let uGpf = parseFloat(penInput.value) || 0;
             if (uGpf < minGpf && penInput.value !== "") {
                 gpfErr.innerText = `Minimum 12% Required: ₹${formatCurr(minGpf)}`;
@@ -939,7 +1141,7 @@
 
         const faTot = parseFloat(document.getElementById('faTotal').value) || 0;
         const faInst = parseInt(document.getElementById('faInstallment').value) || 0;
-        const faDed = (faInst > 0 && faInst <= 10 && faTot > 0) ? Math.round(faTot / 10) : 0; // CHANGED TO MATH.ROUND
+        const faDed = (faInst > 0 && faInst <= 10 && faTot > 0) ? Math.round(faTot / 10) : 0; 
         document.getElementById('faDeduction').value = faDed;
         
         const nhis = parseFloat(document.getElementById('nhis').value) || 0;
@@ -956,7 +1158,6 @@
         const days = parseInt(document.getElementById('globalMonth').value);
         document.getElementById('lblContextDays').innerText = days;
         if(!err) {
-            // CHANGED ALL 1-DAY PRORATING TO MATH.ROUND
             document.getElementById('dBasic').innerText = `₹${formatCurr(Math.round(basic/days))}`;
             document.getElementById('dDA').innerText = `₹${formatCurr(Math.round(daAmt/days))}`;
             document.getElementById('dHRA').innerText = `₹${formatCurr(Math.round(hra/days))}`;
@@ -972,7 +1173,6 @@
             document.getElementById('dNet').innerText = "ERROR";
         }
         
-        // Keep DA Arrear Calculator Synced
         calculateDaArrear();
     }
 
@@ -993,7 +1193,6 @@
             const fStr = row.querySelector('.lop-from').value; const tStr = row.querySelector('.lop-to').value;
             if (fStr && tStr) {
                 const f = parseLocal(fStr); const t = parseLocal(tStr);
-                // Keeping Math.ceil for day math only
                 if (t >= f) lops.push({ start: f, end: t, days: Math.ceil((t - f) / (1000 * 60 * 60 * 24)) + 1 });
             }
         });
@@ -1058,7 +1257,6 @@
                 
                 let currentDaPct = getDaPercent(chunkStart);
                 
-                // CHANGED ALL FINANCIAL PRORATING TO MATH.ROUND
                 let eligibleFacDa = Math.round(eligibleFacBasic * (currentDaPct / 100));
                 
                 let pFullBasic = Math.round((basic / maxDays) * actualDays);
@@ -1151,9 +1349,8 @@
         let startYear = promoDate.getFullYear();
         let startMonth = promoDate.getMonth();
         
-        // Find exactly when the Option 2 DNI hits
         let dniYear = startYear;
-        if (dniMonth <= startMonth) dniYear++; // e.g. promo in May, DNI in Jan -> Next Jan
+        if (dniMonth <= startMonth) dniYear++;
         let dniDate = new Date(dniYear, dniMonth, 1);
 
         const table = document.getElementById('fixationTable');
@@ -1176,7 +1373,7 @@
         const tbody = document.getElementById('fixationBody');
         
         let current = new Date(promoDate.getFullYear(), promoDate.getMonth(), 1);
-        let endLimit = new Date(promoDate.getFullYear(), promoDate.getMonth() + 23, 1); // 24 months total
+        let endLimit = new Date(promoDate.getFullYear(), promoDate.getMonth() + 23, 1);
         const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
         let totalOpt1 = 0; let totalOpt2 = 0;
@@ -1193,27 +1390,22 @@
             let chunkStart = new Date(year, month, activeStart);
             let currentDaPct = getDaPercent(chunkStart);
 
-            // OPTION 1 CALC (Constant for this 24mo block baseline)
             let p1Basic = Math.round((o1Pay / maxDays) * actualDays);
             let da1Full = Math.round(o1Pay * (currentDaPct / 100));
             let p1Da = Math.round((da1Full / maxDays) * actualDays);
             let p1Gross = p1Basic + p1Da;
 
-            // OPTION 2 CALC (Shifts at DNI)
             let p2Basic = 0; let p2Da = 0; let p2Gross = 0;
             
             if (year === dniDate.getFullYear() && month === dniDate.getMonth() && activeStart === 1) {
-                // Exact month the DNI hits. Since DNI is always the 1st of the month, the whole month gets new pay
                 p2Basic = Math.round((o2Refixed / maxDays) * actualDays);
                 let da2Full = Math.round(o2Refixed * (currentDaPct / 100));
                 p2Da = Math.round((da2Full / maxDays) * actualDays);
             } else if (chunkStart >= dniDate) {
-                // Post DNI
                 p2Basic = Math.round((o2Refixed / maxDays) * actualDays);
                 let da2Full = Math.round(o2Refixed * (currentDaPct / 100));
                 p2Da = Math.round((da2Full / maxDays) * actualDays);
             } else {
-                // Pre DNI (Initial Fixation)
                 p2Basic = Math.round((o2Init / maxDays) * actualDays);
                 let da2Full = Math.round(o2Init * (currentDaPct / 100));
                 p2Da = Math.round((da2Full / maxDays) * actualDays);
@@ -1229,7 +1421,6 @@
             let label = `${monthNames[month]} ${year}`;
             if (activeStart > 1) label += ` (${activeStart}-${maxDays})`;
             
-            // Highlight row if it's the DNI month for Option 2
             let isDniHit = (year === dniDate.getFullYear() && month === dniDate.getMonth());
             let rowStyle = isDniHit ? 'background-color: #fef9c3;' : '';
             let dniMarker = isDniHit ? ' <span style="font-size:0.7rem; color:#b45309; font-weight:bold;">(DNI Re-fix)</span>' : '';
@@ -1409,10 +1600,8 @@
                     if (st.date <= chunkStart) { dueB = st.basic; }
                 });
                 
-                // --- Dynamic Engines: Fetch DA %, HRA, and CCA for this specific month & pay bracket! ---
                 let currentDaPct = getDaPercent(chunkStart);
                 
-                // CHANGED TO MATH.ROUND for perfectly matching full-month exact values across chunks
                 let chunkOldDA = Math.round(oldBasic * (currentDaPct / 100));
                 let dueDA = Math.round(dueB * (currentDaPct / 100));
 
@@ -1422,7 +1611,6 @@
                 let chunkOldCca = getCcaAmount(oldBasic, selectedCcaGrade);
                 let dueCCA = getCcaAmount(dueB, selectedCcaGrade);
 
-                // --- Prorating (CHANGED FROM CEIL TO ROUND to fix 1001 issue) ---
                 let pDrawnBasic = Math.round((oldBasic / maxDays) * actualDays);
                 let pDrawnDA = Math.round((chunkOldDA / maxDays) * actualDays);
                 let pDrawnHRA = Math.round((chunkOldHra / maxDays) * actualDays);
@@ -1445,11 +1633,9 @@
 
                 hasRenderedRows = true;
 
-                // CHANGED TO MATH.ROUND
                 let pPen = Math.round((pDiffBasic + pDiffDA) * (isCPS ? 0.10 : 0.12));
                 let pNet = pDiffGross - pPen;
 
-                // Totals
                 t.days += actualDays; 
                 t.dueB += pDueBasic; t.dueDA += pDueDA; t.dueHRA += pDueHRA; t.dueCCA += pDueCCA; t.dueGross += pDueGross;
                 t.drawnB += pDrawnBasic; t.drawnDA += pDrawnDA; t.drawnHRA += pDrawnHRA; t.drawnCCA += pDrawnCCA; t.drawnGross += pDrawnGross;
@@ -1462,11 +1648,8 @@
                 const tr = document.createElement('tr');
                 if (splitDays.length > 0) tr.className = 'split-row';
                 tr.innerHTML = `<td>${label}</td><td>${actualDays}</td>
-                    <!-- Due -->
                     <td>${formatCurr(pDueBasic)}</td><td>${formatCurr(pDueDA)}</td><td>${formatCurr(pDueHRA)}</td><td>${formatCurr(pDueCCA)}</td><td style="font-weight:bold; color:#065f46;">${formatCurr(pDueGross)}</td>
-                    <!-- Drawn -->
                     <td>${formatCurr(pDrawnBasic)}</td><td>${formatCurr(pDrawnDA)}</td><td>${formatCurr(pDrawnHRA)}</td><td>${formatCurr(pDrawnCCA)}</td><td style="font-weight:bold; color:#991b1b;">${formatCurr(pDrawnGross)}</td>
-                    <!-- Diff -->
                     <td>${formatCurr(pDiffBasic)}</td><td>${formatCurr(pDiffDA)}</td><td>${formatCurr(pDiffHRA)}</td><td>${formatCurr(pDiffCCA)}</td><td style="font-weight:bold; color:#b45309;">${formatCurr(pDiffGross)}</td>
                     
                     <td class="deduction-cell">- ${formatCurr(pPen)}</td><td class="net-cell">${formatCurr(pNet)}</td>`;
@@ -1492,11 +1675,8 @@
         const trTotal = document.createElement('tr');
         trTotal.className = 'total-row';
         trTotal.innerHTML = `<td>GRAND TOTAL</td><td>${t.days}</td>
-            <!-- Due Total -->
             <td>₹${formatCurr(t.dueB)}</td><td>₹${formatCurr(t.dueDA)}</td><td>₹${formatCurr(t.dueHRA)}</td><td>₹${formatCurr(t.dueCCA)}</td><td style="color:#065f46;">₹${formatCurr(t.dueGross)}</td>
-            <!-- Drawn Total -->
             <td>₹${formatCurr(t.drawnB)}</td><td>₹${formatCurr(t.drawnDA)}</td><td>₹${formatCurr(t.drawnHRA)}</td><td>₹${formatCurr(t.drawnCCA)}</td><td style="color:#991b1b;">₹${formatCurr(t.drawnGross)}</td>
-            <!-- Diff Total -->
             <td>₹${formatCurr(t.diffB)}</td><td>₹${formatCurr(t.diffDA)}</td><td>₹${formatCurr(t.diffHRA)}</td><td>₹${formatCurr(t.diffCCA)}</td><td style="color:#b45309;">₹${formatCurr(t.diffGross)}</td>
             
             <td class="deduction-cell">- ₹${formatCurr(t.pen)}</td><td class="net-cell" style="font-size:1rem;">₹${formatCurr(t.net)}</td>`;
@@ -1521,7 +1701,6 @@
         const format = document.getElementById('exportFormat_' + type).value;
         const penLabel = document.getElementById('pensionType').value;
 
-        // Handle FAC Export
         if (type === 'fac') {
             const title = 'FAC_Allowance_Statement';
             if (format === 'csv') {
@@ -1543,7 +1722,6 @@
             return;
         }
 
-        // Handle Increment / Promotion Export (19 Columns)
         const title = type === 'inc' ? 'Increment_Arrear_Statement' : 'Promotion_Arrear_Statement';
         
         if (format === 'csv') {
