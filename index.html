@@ -561,6 +561,29 @@
                 margin: 0 10px 15px 10px;
             }
         }
+
+        /* Extra alignment helpers for calculators */
+        .calc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        @media (max-width: 768px) {
+            .calc-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+        .calc-card {
+            border: 1px solid var(--border-light);
+            padding: 20px;
+            border-radius: 8px;
+            background: #ffffff;
+        }
+        .calc-card h3 {
+            margin-top: 0;
+            color: var(--brand-dark);
+        }
     </style>
 </head>
 <body>
@@ -705,15 +728,126 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- ADVANCED CALCULATORS (Removed DA Arrear & Increment Arrear)   -->
+        <!-- ADVANCED CALCULATORS (all arrear tools aligned)              -->
         <!-- ============================================================ -->
         <div class="advanced-wrapper">
             <div class="split-banner">
                 ⚙️ ADVANCED CALCULATORS &amp; FIXATION
-                <span>Promotion Arrear • FAC • Fixation Finder</span>
+                <span>DA Arrear • Increment Arrear • Promotion Arrear • FAC • Fixation Finder</span>
             </div>
 
-            <!-- Promotion Arrear -->
+            <!-- 1. DA Arrear Calculator -->
+            <div class="section" style="background-color: #fffbeb;">
+                <div class="section-header-flex">
+                    <div>
+                        <h2>DA Arrear Calculator (1-Month Difference)</h2>
+                        <p class="section-desc">Calculate the exact monthly difference when DA % increases. Linked to your main Basic Pay.</p>
+                    </div>
+                    <button class="btn-secondary" onclick="togglePanel('daArrearPanel', 'btnDaArrear', 'DA Arrear Calculator')" id="btnDaArrear">Show DA Arrear Calculator</button>
+                </div>
+
+                <div id="daArrearPanel" style="display: none;">
+                    <div class="calc-grid">
+                        <div class="calc-card">
+                            <h3>DA Inputs</h3>
+                            <div class="form-group">
+                                <label>Basic Pay (₹)</label>
+                                <input type="number" id="daCalcBasic" class="readonly-highlight" readonly placeholder="Linked to Main Basic" />
+                            </div>
+                            <div class="form-group">
+                                <label>Old DA (%)</label>
+                                <input type="number" id="daCalcOldPct" value="50" class="manual-highlight" oninput="calculateDaArrear()" />
+                            </div>
+                            <div class="form-group">
+                                <label>New DA (%)</label>
+                                <input type="number" id="daCalcNewPct" value="53" class="manual-highlight" oninput="calculateDaArrear()" />
+                            </div>
+                        </div>
+                        <div class="calc-card">
+                            <h3 style="color: var(--brand-action);">1-Month Difference</h3>
+                            <div class="form-group">
+                                <label>Old DA Amount</label>
+                                <span id="daCalcOldAmt" style="font-weight: 600;">₹0</span>
+                            </div>
+                            <div class="form-group">
+                                <label>New DA Amount</label>
+                                <span id="daCalcNewAmt" style="font-weight: 600; color: var(--success-green);">₹0</span>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="form-group">
+                                <label>Gross DA Increase</label>
+                                <span id="daCalcGrossDiff" style="font-weight: bold; color: var(--brand-action);">₹0</span>
+                            </div>
+                            <div class="form-group">
+                                <label id="daCalcPenLabel">Pension Ded.</label>
+                                <span id="daCalcPenDed" style="font-weight: 600; color: var(--error-red);">- ₹0</span>
+                            </div>
+                            <div class="form-group" style="background: #f0fdf4; padding: 10px; border-radius: 6px; border: 1px solid #bbf7d0; margin-top: 10px;">
+                                <label style="color: #166534; font-weight: bold;">Net DA Arrear (Per Month)</label>
+                                <span id="daCalcNetArrear" style="font-weight: bold; color: #166534; font-size: 1.2rem;">₹0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Annual Increment Arrear Calculator -->
+            <div class="section" style="background-color: #fcfcfc;">
+                <div class="section-header-flex">
+                    <div>
+                        <h2>Annual Increment Arrear Calculator</h2>
+                        <p class="section-desc">DA, HRA, &amp; CCA fetch automatically. New Pay scales are strictly validated.</p>
+                    </div>
+                    <button class="btn-secondary" onclick="togglePanel('incArrearPanel', 'btnIncArrear', 'Increment Arrear')" id="btnIncArrear">Show Increment Arrear</button>
+                </div>
+
+                <div id="incArrearPanel" style="display: none;">
+                    <div style="display: flex; gap: 20px; margin-bottom: 20px; background: #f0f9ff; padding: 20px; border-radius: 8px; border: 1px solid #bae6fd; flex-wrap: wrap;">
+                        <div style="flex:1; min-width: 200px;"><label style="font-size: 0.85rem; font-weight:bold; color: #0369a1;">ARREAR START DATE</label><input type="date" id="incStart" /></div>
+                        <div style="flex:1; min-width: 200px;"><label style="font-size: 0.85rem; font-weight:bold; color: #0369a1;">ARREAR END DATE</label><input type="date" id="incEnd" /></div>
+                    </div>
+
+                    <div class="calc-grid">
+                        <div class="calc-card">
+                            <h3 style="color: #57534e;">Base Pay (Before Increments)</h3>
+                            <div class="form-group"><label>Old Basic Pay (₹)</label><input type="number" id="incOldBasic" value="" placeholder="Linked to Main Basic" class="readonly-highlight" readonly /></div>
+                            <div style="margin-top: 30px;">
+                                <h4 style="margin: 0 0 10px 0; color: #dc2626;">Loss of Pay / Strike Entries</h4>
+                                <div id="incLopContainer"></div>
+                                <button class="btn-mini" onclick="addLopRow('incLopContainer')">+ Add LOP / Strike Dates</button>
+                            </div>
+                        </div>
+                        <div class="calc-card">
+                            <h3 style="color: var(--brand-action);">Ascending Increments</h3>
+                            <div id="incStagesContainer">
+                                <div class="dynamic-row inc-row">
+                                    <input type="date" class="inc-date" title="Original Effective Date" />
+                                    <div style="display:flex; flex-direction:column; width:100%;">
+                                        <input type="number" class="inc-pay validate-pay" value="" placeholder="e.g. 38000" title="New Basic Pay" oninput="validateInputAndCalc(this)" />
+                                        <span class="pay-error-msg" style="text-align:left;">Invalid Matrix Value!</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn-mini" onclick="addIncStage()">+ Add Next Year Increment</button>
+                        </div>
+                    </div>
+
+                    <div class="action-bar">
+                        <button class="btn-primary" onclick="generateAdvancedArrear('inc')" style="flex: 2; margin-top:0;">Calculate Increment Arrear</button>
+                        <select id="exportFormat_inc" style="flex: 1; max-width: 150px;">
+                            <option value="csv">Excel / CSV</option>
+                            <option value="word">Word Doc</option>
+                        </select>
+                        <button class="btn-export" onclick="triggerExport('inc')" style="flex: 1;">⬇ Export Statement</button>
+                    </div>
+
+                    <div id="incWrapper" style="display: none; overflow-x: auto;">
+                        <table id="incTable"></table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Promotion Arrear Calculator -->
             <div class="section">
                 <div class="section-header-flex">
                     <div>
@@ -729,8 +863,8 @@
                         <div style="flex:1; min-width: 200px;"><label style="font-size: 0.85rem; font-weight:bold; color: #c2410c;">END DATE</label><input type="date" id="promoEnd" /></div>
                     </div>
 
-                    <div class="grid-2col" style="margin-bottom: 20px;">
-                        <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #fafaf9;">
+                    <div class="calc-grid">
+                        <div class="calc-card" style="background: #fafaf9;">
                             <h3 style="color: #57534e;">Drawn (Lower Pay)</h3>
                             <div class="form-group">
                                 <label>Basic Pay (₹)</label>
@@ -741,17 +875,14 @@
                             </div>
                             <div class="form-group"><label>HRA (₹)</label><input type="number" id="promoDrawnHRA" class="readonly-highlight" value="0" readonly title="Auto-calc from Matrix" /></div>
                             <div class="form-group"><label>CCA (₹)</label><input type="number" id="promoDrawnCCA" class="readonly-highlight" value="0" readonly title="Auto-calc from Matrix" /></div>
-
                             <div style="margin-top: 20px;">
                                 <h4 style="margin: 0 0 10px 0; color: #dc2626;">Loss of Pay / Strike</h4>
                                 <div id="promoLopContainer"></div>
                                 <button class="btn-mini" onclick="addLopRow('promoLopContainer')">+ Add LOP / Strike Dates</button>
                             </div>
                         </div>
-
-                        <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px;">
+                        <div class="calc-card">
                             <h3 style="color: var(--brand-action);">Due (Higher Pay / Promoted Post)</h3>
-
                             <div class="form-group" style="margin-bottom: 12px;">
                                 <label>Promoted Post Name</label>
                                 <input type="text" id="promoPostName" placeholder="e.g. Superintendent" style="text-align: left;" />
@@ -760,9 +891,7 @@
                                 <label>Pay Level (1-32)</label>
                                 <input type="number" id="promoPayLevel" placeholder="e.g. 18" min="1" max="32" />
                             </div>
-
                             <div class="divider" style="margin: 15px 0;"></div>
-
                             <div class="form-group">
                                 <label>Basic Pay (₹)</label>
                                 <div style="display:flex; flex-direction:column; align-items:flex-end;">
@@ -790,7 +919,7 @@
                 </div>
             </div>
 
-            <!-- FAC Calculator -->
+            <!-- 4. FAC Calculator -->
             <div class="section" style="background-color: #faf5ff;">
                 <div class="section-header-flex">
                     <div>
@@ -806,8 +935,8 @@
                         <div style="flex:1; min-width: 200px;"><label style="font-size: 0.85rem; font-weight:bold; color: #86198f;">FAC END DATE</label><input type="date" id="facEnd" /></div>
                     </div>
 
-                    <div class="grid-2col" style="margin-bottom: 20px;">
-                        <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #ffffff;">
+                    <div class="calc-grid">
+                        <div class="calc-card">
                             <h3 style="color: #57534e;">FAC Parameters</h3>
                             <div class="form-group">
                                 <label>Regular Basic Pay (₹)</label>
@@ -820,15 +949,13 @@
                             <div class="divider"></div>
                             <div class="form-group" style="margin-bottom: 8px;"><label>Additional Post Name</label><input type="text" id="facAddPostName" value="" placeholder="e.g. BDO / Headmaster" style="text-align: left;" /></div>
                             <div class="form-group"><label>Min Pay of Addl. Post (₹)</label><input type="number" id="facMinPay" value="" placeholder="e.g. 36900" /></div>
-
                             <div style="margin-top: 20px;">
                                 <h4 style="margin: 0 0 10px 0; color: #dc2626;">Leave / LOP Entries</h4>
                                 <div id="facLopContainer"></div>
                                 <button class="btn-mini" onclick="addLopRow('facLopContainer')">+ Add Leave / LOP Dates</button>
                             </div>
                         </div>
-
-                        <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #ffffff;">
+                        <div class="calc-card">
                             <h3 style="color: var(--brand-action);">FAC Rules Refresher</h3>
                             <ul style="font-size: 0.85rem; color: var(--text-muted); padding-left: 20px; line-height: 1.6;">
                                 <li style="margin-bottom: 8px;">Calculates the lesser of: <strong>1/5th (20%) of Regular Basic</strong> OR <strong>Half (50%) of Additional Post Min Pay</strong>.</li>
@@ -855,7 +982,7 @@
                 </div>
             </div>
 
-            <!-- Fixation Finder -->
+            <!-- 5. Fixation Finder -->
             <div class="section" style="background-color: #f0fdf4;">
                 <div class="section-header-flex">
                     <div>
@@ -884,7 +1011,7 @@
 
                     <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
                         <h3 style="margin-top: 0; color: #0f172a; margin-bottom: 15px;">Matrix Auto-Fixation Engine</h3>
-                        <div class="grid-2col" style="gap: 20px; align-items: start;">
+                        <div class="calc-grid" style="gap: 20px; align-items: start;">
                             <div>
                                 <div class="form-group">
                                     <label style="color: var(--brand-action); font-weight: bold;">Current Basic Pay (Lower Post)</label>
@@ -898,13 +1025,11 @@
                                     <label style="color: #991b1b; font-weight: bold;">Promoted Pay Level</label>
                                     <input type="number" id="fixPromotedLevel" placeholder="e.g. 18 (1-32)" min="1" max="32" />
                                 </div>
-
                                 <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
                                     <button class="btn-primary" onclick="calculateFR22B()" style="background-color: #166534; flex: 1; min-width: 200px;">⚡ Auto-Calc Option 1 (FR 22B)</button>
                                     <button class="btn-primary" onclick="calculateOption2()" style="background-color: #1d4ed8; flex: 1; min-width: 200px;">⚡ Auto-Calc Option 2 [FR 22(1)(a)(i)]</button>
                                 </div>
                             </div>
-
                             <div style="background: #fff; padding: 15px; border-radius: 6px; border: 1px dashed #cbd5e1; font-size: 0.85rem; color: #475569; min-height: 150px;">
                                 <strong>Engine Execution Log:</strong>
                                 <div id="fr22bLog" style="margin-top: 10px; font-family: monospace; white-space: pre-wrap; line-height: 1.6;">Waiting for calculation trigger...</div>
@@ -912,8 +1037,8 @@
                         </div>
                     </div>
 
-                    <div class="grid-2col" style="margin-bottom: 20px;">
-                        <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #ffffff;">
+                    <div class="calc-grid" style="margin-bottom: 20px;">
+                        <div class="calc-card">
                             <h3 style="color: #57534e; margin-bottom: 5px;">Option 1: Direct FR 22B</h3>
                             <p style="font-size: 0.8rem; color: #6b7280; margin-top:0;">Fixation on the date of promotion itself. DNI shifts.</p>
                             <div class="form-group">
@@ -924,8 +1049,7 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div style="border: 1px solid var(--border-light); padding: 20px; border-radius: 8px; background: #ffffff;">
+                        <div class="calc-card">
                             <h3 style="color: var(--brand-action); margin-bottom: 5px;">Option 2: FR 22(1)(a)(i) + Option</h3>
                             <p style="font-size: 0.8rem; color: #6b7280; margin-top:0;">Initial fixation on promo date, Re-fixation on Normal DNI.</p>
                             <div class="form-group" style="margin-bottom: 10px;">
@@ -1030,6 +1154,20 @@
                 </div>
             `;
             document.getElementById(containerId).appendChild(div);
+        }
+
+        function addIncStage() {
+            const div = document.createElement('div');
+            div.className = 'dynamic-row inc-row';
+            div.innerHTML = `
+                <input type="date" class="inc-date" title="Original Effective Date">
+                <div style="display:flex; flex-direction:column; width:100%;">
+                    <input type="number" class="inc-pay validate-pay" placeholder="e.g. 38000" oninput="validateInputAndCalc(this)">
+                    <span class="pay-error-msg" style="text-align:left;">Invalid Matrix Value!</span>
+                </div>
+                <button class="btn-remove" onclick="this.parentElement.remove(); calculateMainSalary();">X</button>
+            `;
+            document.getElementById('incStagesContainer').appendChild(div);
         }
 
         // ---- Validation + main salary calculation ----
@@ -1151,6 +1289,33 @@
                 document.getElementById('dOther').innerText = "ERROR";
                 document.getElementById('dNet').innerText = "ERROR";
             }
+        }
+
+        // ---- DA Arrear Engine (1-Month Difference) ----
+        function calculateDaArrear() {
+            let basic = parseFloat(document.getElementById('basicPay').value) || 0;
+            document.getElementById('daCalcBasic').value = basic > 0 ? basic : '';
+
+            let oldPct = parseFloat(document.getElementById('daCalcOldPct').value) || 0;
+            let newPct = parseFloat(document.getElementById('daCalcNewPct').value) || 0;
+
+            let oldAmt = Math.round(basic * (oldPct / 100));
+            let newAmt = Math.round(basic * (newPct / 100));
+
+            let grossDiff = newAmt - oldAmt;
+            if (grossDiff < 0) grossDiff = 0;
+
+            let isCPS = document.getElementById('pensionType').value === 'CPS';
+            document.getElementById('daCalcPenLabel').innerText = isCPS ? "CPS Ded (10%)" : "GPF Ded (12%)";
+
+            let penDed = Math.round(grossDiff * (isCPS ? 0.10 : 0.12));
+            let netArrear = grossDiff - penDed;
+
+            document.getElementById('daCalcOldAmt').innerText = `₹${formatCurr(oldAmt)}`;
+            document.getElementById('daCalcNewAmt').innerText = `₹${formatCurr(newAmt)}`;
+            document.getElementById('daCalcGrossDiff').innerText = `₹${formatCurr(grossDiff)}`;
+            document.getElementById('daCalcPenDed').innerText = `- ₹${formatCurr(penDed)}`;
+            document.getElementById('daCalcNetArrear').innerText = `₹${formatCurr(netArrear)}`;
         }
 
         // ---- FAC Calculator ----
@@ -1624,7 +1789,7 @@
             }
         }
 
-        // ---- Promotion Arrear ----
+        // ---- Granular Arrear Engine (Increment & Promotion) ----
         function generateAdvancedArrear(type) {
             if (document.querySelector(`#${type}ArrearPanel .input-error`) || document.getElementById('basicPay').classList
                 .contains('input-error')) {
@@ -1655,9 +1820,29 @@
             });
 
             let stages = [];
-            let oldBasic = parseFloat(document.getElementById('promoDrawnBasic').value) || 0;
-            const dueBasic = parseFloat(document.getElementById('promoDueBasic').value) || 0;
-            stages.push({ date: new Date(start), basic: dueBasic });
+            let oldBasic;
+
+            if (type === 'inc') {
+                oldBasic = parseFloat(document.getElementById('incOldBasic').value) || 0;
+                const stageRows = document.getElementById('incStagesContainer').children;
+                for (let row of stageRows) {
+                    const date = parseLocal(row.querySelector('.inc-date').value);
+                    const pay = parseFloat(row.querySelector('.inc-pay').value) || 0;
+                    if (date && pay > 0) {
+                        let totalLopShift = 0;
+                        lops.forEach(lop => { if (lop.start < date) totalLopShift += lop.days; });
+                        let adjustedDate = new Date(date);
+                        adjustedDate.setDate(adjustedDate.getDate() + totalLopShift);
+                        stages.push({ date: adjustedDate, basic: pay });
+                    }
+                }
+            } else {
+                oldBasic = parseFloat(document.getElementById('promoDrawnBasic').value) || 0;
+                const dueBasic = parseFloat(document.getElementById('promoDueBasic').value) || 0;
+                stages.push({ date: new Date(start), basic: dueBasic });
+            }
+
+            stages.sort((a, b) => a.date - b.date);
 
             const table = document.getElementById(type + 'Table');
             table.innerHTML = `
@@ -1972,6 +2157,10 @@
 
         document.getElementById('facStart').value = `${today.getFullYear()}-04-01`;
         document.getElementById('facEnd').value = `${today.getFullYear()}-06-30`;
+
+        document.getElementById('incStart').value = `${today.getFullYear()}-01-01`;
+        document.getElementById('incEnd').value = `${today.getFullYear()}-12-31`;
+        document.querySelector('.inc-date').value = `${today.getFullYear()}-07-01`;
 
         document.getElementById('promoStart').value = `${today.getFullYear()}-01-15`;
         document.getElementById('promoEnd').value = `${today.getFullYear()}-03-10`;
