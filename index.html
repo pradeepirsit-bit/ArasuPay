@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1175,26 +1175,33 @@
     window.addIncStage = addIncStage;
 
     // ================================================================
-    //  CALCULATE & EXPORT (combined)
+    //  CALCULATE & EXPORT (combined) – FIXED: properly exposed
     // ================================================================
     function calculateAndExport(type) {
-      // Run the appropriate calculation function
-      if (type === 'fac') {
-        generateFacTable();
-      } else {
-        generateAdvancedArrear(type);
+      console.log('calculateAndExport called for type:', type);
+      try {
+        // Run the appropriate calculation function
+        if (type === 'fac') {
+          generateFacTable();
+        } else {
+          generateAdvancedArrear(type);
+        }
+        // Then trigger export
+        triggerExport(type);
+      } catch (e) {
+        console.error('Error in calculateAndExport:', e);
+        alert('An error occurred during calculation or export. Please check the console for details.');
       }
-      // Then trigger export
-      triggerExport(type);
     }
-    window.calculateAndExport = calculateAndExport;
+    window.calculateAndExport = calculateAndExport; // ✅ critical fix
 
     // ================================================================
     //  GENERIC ADVANCED ARREAR (Increment & Promotion)
     // ================================================================
     function generateAdvancedArrear(type) {
       if (document.querySelector(`#${type}ArrearPanel .input-error`) || basicPay.classList.contains('input-error')) {
-        return alert('Cannot calculate: Please correct invalid Basic Pay value(s).');
+        alert('Cannot calculate: Please correct invalid Basic Pay value(s).');
+        return;
       }
 
       const isCPS = $('pensionType').value === 'CPS';
@@ -1203,10 +1210,16 @@
 
       const startStr = $(type + 'Start').value;
       const endStr = $(type + 'End').value;
-      if (!startStr || !endStr) return alert('Please select valid Start and End dates.');
+      if (!startStr || !endStr) {
+        alert('Please select valid Start and End dates.');
+        return;
+      }
       const start = utils.parseLocal(startStr);
       const end = utils.parseLocal(endStr);
-      if (end < start) return alert('End date must be after Start date.');
+      if (end < start) {
+        alert('End date must be after Start date.');
+        return;
+      }
 
       const lops = [];
       document.querySelectorAll(`#${type}LopContainer .lop-row`).forEach(row => {
@@ -1261,6 +1274,7 @@
       `;
       const tbody = $(type + 'Body');
 
+      // Reset export data
       window.arrearExportData[type] = [];
       let totals = {
         days: 0,
@@ -1464,15 +1478,23 @@
     //  FAC CALCULATOR
     // ================================================================
     function generateFacTable() {
-      if (document.querySelector('#facPanel .input-error'))
-        return alert('Cannot calculate: Please correct invalid Basic Pay value.');
+      if (document.querySelector('#facPanel .input-error')) {
+        alert('Cannot calculate: Please correct invalid Basic Pay value.');
+        return;
+      }
 
       const startStr = $('facStart').value;
       const endStr = $('facEnd').value;
-      if (!startStr || !endStr) return alert('Please select valid Start and End dates.');
+      if (!startStr || !endStr) {
+        alert('Please select valid Start and End dates.');
+        return;
+      }
       const start = utils.parseLocal(startStr);
       const end = utils.parseLocal(endStr);
-      if (end < start) return alert('FAC End date must be after Start.');
+      if (end < start) {
+        alert('FAC End date must be after Start.');
+        return;
+      }
 
       const lops = [];
       document.querySelectorAll('#facLopContainer .lop-row').forEach(row => {
@@ -1753,16 +1775,20 @@
     window.calculateOption2 = calculateOption2;
 
     function generateFixationComparison() {
-      if (document.querySelector('#fixationPanel .input-error'))
-        return alert('Cannot compare: Please correct invalid Basic Pay value(s).');
+      if (document.querySelector('#fixationPanel .input-error')) {
+        alert('Cannot compare: Please correct invalid Basic Pay value(s).');
+        return;
+      }
 
       const promoStr = $('fixPromoDate').value;
       const dniMonth = parseInt($('fixNormalDNI').value);
       const o1Pay = parseFloat($('fixOpt1Pay').value);
       const o2Init = parseFloat($('fixOpt2Initial').value);
       const o2Refixed = parseFloat($('fixOpt2Refixed').value);
-      if (!promoStr || !o1Pay || !o2Init || !o2Refixed)
-        return alert('Please fill in Promotion Date and all 3 Basic Pay values.');
+      if (!promoStr || !o1Pay || !o2Init || !o2Refixed) {
+        alert('Please fill in Promotion Date and all 3 Basic Pay values.');
+        return;
+      }
 
       const promoDate = utils.parseLocal(promoStr);
       const startYear = promoDate.getFullYear(),
@@ -1886,7 +1912,10 @@
     // ================================================================
     function triggerExport(type) {
       const data = window.arrearExportData[type];
-      if (!data || data.length === 0) return alert('Please click "Calculate" first to generate data.');
+      if (!data || data.length === 0) {
+        alert('Please click "Calculate" first to generate data.');
+        return;
+      }
 
       const format = document.getElementById('exportFormat_' + type).value;
       const penLabel = $('pensionType').value;
@@ -1979,6 +2008,9 @@
       .forEach(el => el.addEventListener('input', calculateMainSalary));
     document.querySelectorAll('input[name="hraGrade"], input[name="ccaGrade"]')
       .forEach(el => el.addEventListener('change', calculateMainSalary));
+
+    // Expose arrear data store globally for export
+    window.arrearExportData = { inc: [], promo: [], fac: [] };
 
     calculateMainSalary();
   })();
