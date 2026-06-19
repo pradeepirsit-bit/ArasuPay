@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UrudhiFi – TN Govt Salary & Arrear Dashboard</title>
 
+  <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <style>
     /* ============================
@@ -267,6 +268,15 @@
       background: #047857;
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+    }
+    .btn-warning {
+      background: #d97706;
+      color: white;
+    }
+    .btn-warning:hover {
+      background: #b45309;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
     }
     .btn-outline {
       background: transparent;
@@ -540,16 +550,19 @@
 <body>
 <div class="container">
 
+  <!-- Header -->
   <header class="app-header">
     <h1><i class="fas fa-calculator"></i> UrudhiFi</h1>
-    <span class="version"><i class="fas fa-code-branch"></i> v2.0</span>
+    <span class="version"><i class="fas fa-code-branch"></i> v2.1</span>
   </header>
 
+  <!-- Disclaimer -->
   <div class="disclaimer">
     <i class="fas fa-exclamation-triangle"></i>
     <span><strong>Important:</strong> UrudhiFi is a supportive tool for TN Govt employees. Calculations may contain errors – always cross‑check with official G.O.s and your accounts department.</span>
   </div>
 
+  <!-- Navigation Tabs -->
   <nav class="nav-tabs" id="navTabs">
     <button class="nav-tab active" data-tab="tab-salary"><i class="fas fa-wallet"></i> Salary</button>
     <button class="nav-tab" data-tab="tab-da"><i class="fas fa-percentage"></i> DA Arrear</button>
@@ -559,13 +572,18 @@
     <button class="nav-tab" data-tab="tab-fix"><i class="fas fa-balance-scale"></i> Fixation</button>
   </nav>
 
+  <!-- Tab Content -->
   <div class="tab-content">
 
+    <!-- ============================================================ -->
+    <!-- TAB: MONTHLY SALARY -->
+    <!-- ============================================================ -->
     <div id="tab-salary" class="tab-pane active">
       <div class="section-title"><i class="fas fa-user-circle"></i> Monthly Salary Breakdown</div>
       <p class="section-desc">Enter your Basic Pay and select HRA/CCA grades. All other allowances are auto‑calculated.</p>
 
       <div class="grid-2">
+        <!-- Earnings -->
         <div>
           <h3 style="font-size:1rem; margin-bottom:12px;"><i class="fas fa-plus-circle" style="color:#059669;"></i> Earnings</h3>
           <div class="form-group">
@@ -618,6 +636,7 @@
           <div class="form-group"><label>Other Allow (₹)</label><input type="number" id="otherEarnings" value="0" oninput="calculateMainSalary()" /></div>
         </div>
 
+        <!-- Deductions -->
         <div>
           <h3 style="font-size:1rem; margin-bottom:12px;"><i class="fas fa-minus-circle" style="color:#dc2626;"></i> Deductions</h3>
           <div class="form-group"><label>Pension Scheme</label><select id="pensionType" oninput="calculateMainSalary()"><option value="CPS">CPS (10%)</option><option value="GPF">GPF (Min 12%)</option></select></div>
@@ -634,6 +653,7 @@
         </div>
       </div>
 
+      <!-- Summary -->
       <div class="summary-bar">
         <div class="summary-item"><span>Gross Pay</span><strong id="grossTotal">₹0</strong></div>
         <div class="summary-item"><span>Total Deductions</span><strong id="totalDeductions" style="color:#dc2626;">₹0</strong></div>
@@ -658,6 +678,9 @@
       </div>
     </div>
 
+    <!-- ============================================================ -->
+    <!-- TAB: DA ARREAR -->
+    <!-- ============================================================ -->
     <div id="tab-da" class="tab-pane">
       <div class="section-title"><i class="fas fa-percentage"></i> DA Arrear (1‑Month Difference)</div>
       <p class="section-desc">Calculate the additional amount when DA percentage increases. Linked to your main Basic Pay.</p>
@@ -683,6 +706,9 @@
       </div>
     </div>
 
+    <!-- ============================================================ -->
+    <!-- TAB: INCREMENT ARREAR -->
+    <!-- ============================================================ -->
     <div id="tab-inc" class="tab-pane">
       <div class="section-title"><i class="fas fa-arrow-up"></i> Annual Increment Arrear</div>
       <p class="section-desc">Calculate arrears for multiple increments with LOP adjustments. DA, HRA, CCA auto‑fetched.</p>
@@ -714,7 +740,8 @@
         </div>
       </div>
       <div class="action-bar">
-        <button class="btn btn-primary" onclick="generateAdvancedArrear('inc')"><i class="fas fa-calculator"></i> Calculate Arrear</button>
+        <button class="btn btn-primary" onclick="generateAdvancedArrear('inc')"><i class="fas fa-calculator"></i> Calculate</button>
+        <button class="btn btn-warning" onclick="calculateAndExport('inc')"><i class="fas fa-bolt"></i> Calculate &amp; Export</button>
         <select id="exportFormat_inc" style="padding:8px 12px; border:1px solid var(--border); border-radius:6px;">
           <option value="csv">Excel (CSV)</option>
           <option value="word">Word (DOC)</option>
@@ -724,6 +751,9 @@
       <div id="incWrapper" style="display:none; overflow-x:auto; margin-top:16px;"><table id="incTable"></table></div>
     </div>
 
+    <!-- ============================================================ -->
+    <!-- TAB: PROMOTION ARREAR -->
+    <!-- ============================================================ -->
     <div id="tab-promo" class="tab-pane">
       <div class="section-title"><i class="fas fa-user-tie"></i> Promotion Arrear</div>
       <p class="section-desc">Compare drawn (lower) and due (higher) pay with full DA/HRA/CCA automation.</p>
@@ -766,7 +796,9 @@
         </div>
       </div>
       <div class="action-bar">
-        <button class="btn btn-primary" onclick="generateAdvancedArrear('promo')"><i class="fas fa-calculator"></i> Calculate Arrear</button> <select id="exportFormat_promo" style="padding:8px 12px; border:1px solid var(--border); border-radius:6px;">
+        <button class="btn btn-primary" onclick="generateAdvancedArrear('promo')"><i class="fas fa-calculator"></i> Calculate</button>
+        <button class="btn btn-warning" onclick="calculateAndExport('promo')"><i class="fas fa-bolt"></i> Calculate &amp; Export</button>
+        <select id="exportFormat_promo" style="padding:8px 12px; border:1px solid var(--border); border-radius:6px;">
           <option value="csv">Excel (CSV)</option>
           <option value="word">Word (DOC)</option>
         </select>
@@ -775,6 +807,9 @@
       <div id="promoWrapper" style="display:none; overflow-x:auto; margin-top:16px;"><table id="promoTable"></table></div>
     </div>
 
+    <!-- ============================================================ -->
+    <!-- TAB: FAC -->
+    <!-- ============================================================ -->
     <div id="tab-fac" class="tab-pane">
       <div class="section-title"><i class="fas fa-briefcase"></i> Full Additional Charge (FAC)</div>
       <p class="section-desc">Applies the “lesser of” rule, adds DA, prorates, and deducts IT (10%) + Cess (4%).</p>
@@ -814,7 +849,8 @@
         </div>
       </div>
       <div class="action-bar">
-        <button class="btn btn-primary" onclick="generateFacTable()" style="background:#7e22ce;"><i class="fas fa-calculator"></i> Calculate FAC</button>
+        <button class="btn btn-primary" onclick="generateFacTable()" style="background:#7e22ce;"><i class="fas fa-calculator"></i> Calculate</button>
+        <button class="btn btn-warning" onclick="calculateAndExport('fac')" style="background:#7e22ce;"><i class="fas fa-bolt"></i> Calculate &amp; Export</button>
         <select id="exportFormat_fac" style="padding:8px 12px; border:1px solid var(--border); border-radius:6px;">
           <option value="csv">Excel (CSV)</option>
           <option value="word">Word (DOC)</option>
@@ -824,6 +860,9 @@
       <div id="facWrapper" style="display:none; overflow-x:auto; margin-top:16px;"><table id="facTable"></table></div>
     </div>
 
+    <!-- ============================================================ -->
+    <!-- TAB: FIXATION -->
+    <!-- ============================================================ -->
     <div id="tab-fix" class="tab-pane">
       <div class="section-title"><i class="fas fa-balance-scale"></i> Pay Fixation Finder</div>
       <p class="section-desc">Compare FR 22B (direct) vs. FR 22(1)(a)(i) (option) and get a 24‑month projection.</p>
@@ -834,6 +873,7 @@
           <select id="fixNormalDNI" style="width:100%;"><option value="0">Jan 1</option><option value="3">Apr 1</option><option value="6" selected>Jul 1</option><option value="9">Oct 1</option></select>
         </div>
       </div>
+
       <div style="background:#f8fafc; padding:20px; border-radius:8px; border:1px solid var(--border); margin-bottom:20px;">
         <h3 style="font-size:1rem; margin-bottom:12px;">Auto‑Fixation Engine</h3>
         <div class="grid-2">
@@ -848,865 +888,1100 @@
           </div>
           <div style="background:white; padding:12px; border-radius:6px; border:1px dashed #cbd5e1; font-size:0.85rem; color:#475569; min-height:120px;">
             <strong>Engine Log:</strong>
-            <div id="fixationLog" style="margin-top:6px; font-family:monospace; white-space:pre-wrap; max-height:150px; overflow-y:auto; color:#334155;">Ready. Select a fixation path.</div>
+            <div id="fr22bLog" style="margin-top:8px; font-family:monospace; white-space:pre-wrap; line-height:1.5;">Waiting...</div>
           </div>
         </div>
       </div>
-      <div id="fixationWrapper" style="display:none; overflow-x:auto;"><table id="fixationTable"></table></div>
+
+      <div class="grid-2" style="margin-bottom:20px;">
+        <div style="border:1px solid var(--border); padding:16px; border-radius:8px;">
+          <h4>Option 1: Direct FR 22B</h4>
+          <p style="font-size:0.8rem; color:var(--text-muted);">Fixed pay on promotion date.</p>
+          <div class="form-group">
+            <label>Fixed Pay (₹)</label>
+            <div style="display:flex; flex-direction:column; align-items:flex-end;">
+              <input type="number" id="fixOpt1Pay" class="validate-pay manual-highlight" placeholder="e.g. 38000" oninput="validateInputAndCalc(this)" />
+              <span class="pay-error-msg">Invalid Matrix Value!</span>
+            </div>
+          </div>
+        </div>
+        <div style="border:1px solid var(--border); padding:16px; border-radius:8px;">
+          <h4>Option 2: FR 22(1)(a)(i)</h4>
+          <p style="font-size:0.8rem; color:var(--text-muted);">Initial + re‑fixation on DNI.</p>
+          <div class="form-group"><label>Initial Pay (₹)</label><div style="display:flex; flex-direction:column; align-items:flex-end;"><input type="number" id="fixOpt2Initial" class="validate-pay manual-highlight" placeholder="e.g. 36900" oninput="validateInputAndCalc(this)" /><span class="pay-error-msg">Invalid Matrix Value!</span></div></div>
+          <div class="form-group"><label>Re‑fixed Pay (₹)</label><div style="display:flex; flex-direction:column; align-items:flex-end;"><input type="number" id="fixOpt2Refixed" class="validate-pay manual-highlight" placeholder="e.g. 39100" oninput="validateInputAndCalc(this)" /><span class="pay-error-msg">Invalid Matrix Value!</span></div></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-block" onclick="generateFixationComparison()" style="background:#0f172a;"><i class="fas fa-chart-line"></i> Compare &amp; Recommend (24 Months)</button>
+      <div id="fixationResult" style="margin-top:20px; display:none;">
+        <div id="fixationRecommendation" style="padding:16px; border-radius:8px; font-weight:700; text-align:center; font-size:1.1rem; margin-bottom:16px;"></div>
+        <div class="table-wrapper"><table id="fixationTable"></table></div>
+      </div>
     </div>
 
+  </div><!-- /tab-content -->
+
+  <!-- Footer -->
+  <div class="footer">
+    <p><strong>UrudhiFi</strong> is an independent, non‑official utility for TN Govt employees. Always verify with official G.O.s and your Accounts department.</p>
+    <p style="margin-top:4px;"><i class="fas fa-code"></i> Optimised v2.1 · <i class="fas fa-database"></i> Matrices loaded from external file</p>
   </div>
+</div><!-- /container -->
 
-  <footer class="footer">
-    <p>© 2026 <strong>UrudhiFi Pro</strong> – Tailored for TN State Government Employees. Powered by Advanced Financial Logic Tiers.</p>
-  </footer>
-</div>
+<!-- ===== LOAD EXTERNAL MATRICES ===== -->
+<script src="matrices.js"></script>
 
+<!-- ===== MAIN APP ===== -->
 <script>
-  // Global shortcut utilities
-  const $ = id => document.getElementById(id);
+  (function() {
+    'use strict';
 
-  // ==================================================================
-  // STATUTORY MASTER DATA: TAMIL NADU REVISED PAY LEVELS (1 TO 32)
-  // ==================================================================
-  const TN_PAY_MATRIX = {
-    1:  [15700, 16200, 16700, 17200, 17700, 18200, 18700, 19300, 19900, 20500, 21100, 21700, 22400, 23100, 23800, 24500, 25200, 26000, 26800, 27600, 28400, 29300, 30200, 31100, 32000, 33000, 34000, 35000, 36100, 37200, 38300, 39400, 40600, 41800, 43100, 44400, 45700, 47100, 48500, 50000],
-    2:  [15900, 16400, 16900, 17400, 17900, 18400, 19000, 19600, 20200, 20800, 21400, 22000, 22700, 23400, 24100, 24800, 25500, 26300, 27100, 27900, 28700, 29600, 30500, 31400, 32300, 33300, 34300, 35300, 36400, 37500, 38600, 39800, 41000, 42200, 43500, 44800, 46100, 47500, 48900, 50400],
-    3:  [16600, 17100, 17600, 18100, 18600, 19200, 19800, 20400, 21000, 21600, 22200, 22900, 23600, 24300, 25000, 25800, 26600, 27400, 28200, 29000, 29900, 30800, 31700, 32700, 33700, 34700, 35700, 36800, 37900, 39000, 40200, 41400, 42600, 43900, 45200, 46600, 48000, 49400, 50900, 52400],
-    4:  [18000, 18500, 19100, 19700, 20300, 20900, 21500, 22100, 22800, 23500, 24200, 24900, 25600, 26400, 27200, 28000, 28800, 29700, 30600, 31500, 32400, 33400, 34400, 35400, 36500, 37600, 38700, 39900, 41100, 42300, 43600, 44900, 46200, 47600, 49000, 50500, 52000, 53600, 55200, 56900],
-    5:  [18200, 18700, 19300, 19900, 20500, 21100, 21700, 22400, 23100, 23800, 24500, 25200, 26000, 26800, 27600, 28400, 29300, 30200, 31100, 32000, 33000, 34000, 35000, 36100, 37200, 38300, 39400, 40600, 41800, 43100, 44400, 45700, 47100, 48500, 50000, 51500, 53000, 54600, 56200, 57900],
-    6:  [18500, 19100, 19700, 20300, 20900, 21500, 22100, 22800, 23500, 24200, 24900, 25600, 26400, 27200, 28000, 28800, 29700, 30600, 31500, 32400, 33400, 34400, 35400, 36500, 37600, 38700, 39900, 41100, 42300, 43600, 44900, 46200, 47600, 49000, 50500, 52000, 53600, 55200, 56900, 58600],
-    7:  [19000, 19600, 20200, 20800, 21400, 22000, 22700, 23400, 24100, 24800, 25500, 26300, 27100, 27900, 28700, 29600, 29600, 30500, 31400, 32300, 33300, 34300, 35300, 36400, 37500, 38600, 39800, 41000, 42200, 43500, 44800, 46100, 47500, 48900, 50400, 51900, 53500, 55100, 56800, 58500, 60300],
-    8:  [19500, 20100, 20700, 21300, 21900, 22600, 23300, 24000, 24700, 25400, 26200, 27000, 27800, 28600, 29500, 30400, 31300, 32200, 33200, 34200, 35200, 36300, 37400, 38500, 39700, 40900, 42100, 43400, 44700, 46000, 47400, 48800, 50300, 51800, 53400, 55000, 56700, 58400, 60200, 62000],
-    9:  [20000, 20600, 21200, 21800, 22500, 23200, 23900, 24600, 25300, 26100, 26900, 27700, 28500, 29400, 30300, 31200, 32100, 33100, 34100, 35100, 36200, 37300, 38400, 39600, 40800, 42000, 43300, 44600, 45900, 47300, 48700, 50200, 51700, 53300, 54900, 56500, 58200, 59900, 61700, 63600],
-    10: [20600, 21200, 21800, 22500, 23200, 23900, 24600, 25300, 26100, 26900, 27700, 28500, 29400, 30300, 31200, 32100, 33100, 34100, 35100, 36200, 37300, 38400, 39600, 40800, 42000, 43300, 44600, 45900, 47300, 48700, 50200, 51700, 53300, 54900, 56500, 58200, 59900, 61700, 63600, 65500],
-    11: [35400, 36500, 37600, 38700, 39900, 41100, 42300, 43600, 44900, 46200, 47600, 49000, 50500, 52000, 53600, 55200, 56900, 58600, 60400, 62200, 64100, 66000, 68000, 70000, 72100, 74300, 76500, 78800, 81200, 83600, 86100, 88700, 91400, 94100, 96900, 99800, 102800, 105900, 109100, 112400],
-    12: [35600, 36700, 37800, 38900, 40100, 41300, 42500, 43800, 45100, 46500, 47900, 49300, 50800, 52300, 53900, 55500, 57200, 58900, 60700, 62500, 64400, 66300, 68300, 70300, 72400, 74600, 76800, 79100, 81500, 83900, 86400, 89000, 91700, 94500, 97300, 100200, 103200, 106300, 109500, 112800],
-    13: [35900, 37000, 38100, 39200, 40400, 41600, 42800, 44100, 45400, 46800, 48200, 49600, 51100, 52600, 54200, 55800, 57500, 59200, 61000, 62800, 64700, 66600, 68600, 70700, 72800, 75000, 77300, 79600, 82000, 84500, 87000, 89600, 92300, 95100, 98000, 100900, 103900, 107000, 110200, 113500],
-    14: [36200, 37300, 38400, 39600, 40800, 42000, 43300, 44600, 45900, 47300, 48700, 50200, 51700, 53300, 54900, 56500, 58200, 59900, 61700, 63600, 65500, 67500, 69500, 71600, 73800, 76000, 78300, 80600, 83000, 85500, 88100, 90700, 93400, 96200, 99100, 102100, 105200, 108400, 111700, 115100],
-    15: [36400, 37500, 38600, 39800, 41000, 42200, 43500, 44800, 46100, 47500, 48900, 50400, 51900, 53500, 55100, 56800, 58500, 60300, 62100, 64000, 65900, 67900, 69900, 72000, 74200, 76400, 78700, 81100, 83500, 86000, 88600, 91300, 94000, 96800, 99700, 102700, 105800, 109000, 112300, 115700],
-    16: [36700, 37800, 38900, 40100, 41300, 42500, 43800, 45100, 46500, 47900, 49300, 50800, 52300, 53900, 55500, 57200, 58900, 60700, 62500, 64400, 66300, 68300, 70300, 72400, 74600, 76800, 79100, 81500, 83900, 86400, 89000, 91700, 94500, 97300, 100200, 103200, 106300, 109500, 112800, 116200],
-    17: [36900, 38000, 39100, 40300, 41500, 42700, 44000, 45300, 46700, 48100, 49500, 51000, 52500, 54100, 55700, 57400, 59100, 60900, 62700, 64600, 66500, 68500, 70600, 72700, 74900, 77100, 79400, 81800, 84300, 86800, 89400, 92100, 94900, 97700, 100600, 103600, 106700, 109900, 113200, 116600],
-    18: [37700, 38800, 40000, 41200, 42400, 43700, 45000, 46400, 47800, 49200, 50700, 52200, 53800, 55400, 57100, 58800, 60600, 62400, 64300, 66200, 68200, 70200, 72300, 74500, 76700, 79000, 81400, 83800, 86300, 88900, 91600, 94300, 97100, 100000, 103000, 106100, 109300, 112600, 116000, 119500],
-    19: [43100, 44400, 45700, 47100, 48500, 50000, 51500, 53000, 54600, 56200, 57900, 59600, 61400, 63200, 65100, 67100, 69100, 71200, 73300, 75500, 77800, 80100, 82500, 85000, 87600, 90200, 92900, 95700, 98600, 101600, 104600, 107700, 110900, 114200, 117600, 121100, 124700, 128400, 132300, 136300],
-    20: [56100, 57800, 59500, 61300, 63100, 65000, 67000, 69000, 71100, 73200, 75400, 77700, 80000, 82400, 84900, 87400, 90000, 92700, 95500, 98400, 101400, 104400, 107500, 110700, 114000, 117400, 120900, 124500, 128200, 132000, 136000, 140100, 144300, 148600, 153100, 157700, 162400, 167300, 172300, 177500],
-    21: [56300, 58000, 59700, 61500, 63300, 65200, 67200, 69200, 71300, 73400, 75600, 77900, 80200, 82600, 85100, 87700, 90300, 93000, 95800, 98700, 101700, 104800, 107900, 111100, 114400, 117800, 121300, 124900, 128600, 132500, 136500, 140600, 144800, 149100, 153600, 158200, 162900, 167800, 172800, 178000],
-    22: [56900, 58600, 60400, 62200, 64100, 66000, 68000, 70000, 72100, 74300, 76500, 78800, 81200, 83600, 86100, 88700, 91400, 94100, 96900, 99800, 102800, 105900, 109100, 112400, 115800, 119300, 122900, 126600, 130400, 134300, 138300, 142400, 146700, 151100, 155600, 160300, 165100, 170100, 175200, 180500],
-    23: [59300, 61100, 62900, 64800, 66700, 68700, 70800, 72900, 75100, 77400, 79700, 82100, 84600, 87100, 89700, 92400, 95200, 98100, 101000, 104000, 107100, 110300, 113600, 117000, 120500, 124100, 127800, 131600, 135500, 139600, 143800, 148100, 152500, 157100, 161800, 166700, 171700, 176900, 182200, 187700],
-    24: [60000, 61800, 63700, 65600, 67600, 69600, 71700, 73900, 76100, 78400, 80800, 83200, 85700, 88300, 90900, 93600, 96400, 99300, 102300, 105400, 108600, 111900, 115300, 118800, 122400, 126100, 129900, 133800, 137800, 141900, 146200, 150600, 155100, 159800, 164600, 169500, 174600, 179800, 185200, 190800],
-    25: [61900, 63800, 65700, 67700, 69700, 71800, 74000, 76200, 78500, 80900, 83300, 85800, 88400, 91100, 93800, 96600, 99500, 102500, 105600, 108800, 112100, 115500, 119000, 122600, 126300, 130100, 134000, 138000, 142100, 146400, 150800, 155300, 160000, 164800, 169700, 174800, 180000, 185400, 191000, 196700],
-    26: [62200, 64100, 66000, 68000, 70000, 72100, 74300, 76500, 78800, 81200, 83600, 86100, 88700, 91400, 94100, 96900, 99800, 102800, 105900, 109100, 112400, 115800, 119300, 122900, 126600, 130400, 134300, 138300, 142400, 146700, 151100, 155600, 160300, 165100, 170100, 175200, 180500, 185900, 191500, 197200],
-    27: [69700, 71800, 74000, 76200, 78500, 80900, 83300, 85800, 88400, 91100, 93800, 96600, 99500, 102500, 105600, 108800, 112100, 115500, 119000, 122600, 126300, 130100, 134000, 138000, 142100, 146400, 150800, 155300, 160000, 164800, 169700, 174800, 180000, 185400, 191000, 196700, 202600, 208700, 215000, 221500],
-    28: [78800, 81200, 83600, 86100, 88700, 91400, 94100, 96900, 99800, 102800, 105900, 109100, 112400, 115800, 119300, 122900, 126600, 130400, 134300, 138300, 142400, 146700, 151100, 155600, 160300, 165100, 170100, 175200, 180500, 185900, 191500, 197200, 203100, 209200, 215500, 222000, 228700, 235600, 242700, 250000],
-    29: [123100, 126800, 130600, 134500, 138500, 142700, 147000, 151400, 155900, 160600, 165400, 170400, 175500, 180800, 186200, 191800, 197600, 203500, 209600, 215900, 222400, 229100, 236000, 243100, 250400, 257900, 265600, 273600, 281800, 290300, 299000, 308000, 317200, 326700, 336500, 346600, 357000, 367700, 378700, 390100],
-    30: [123400, 127100, 130900, 134800, 138800, 143000, 147300, 151700, 156300, 161000, 165800, 170800, 175900, 181200, 186600, 192200, 198000, 203900, 210000, 216300, 222800, 229500, 236400, 243500, 250800, 258300, 266000, 274000, 282200, 290700, 299400, 308400, 317700, 327200, 337000, 347100, 357500, 368200, 379200, 390600],
-    31: [128900, 132800, 136800, 140900, 145100, 149500, 154000, 158600, 163400, 168300, 173300, 178500, 183900, 189400, 195100, 201000, 207000, 213200, 219600, 226200, 233000, 240000, 247200, 254600, 262200, 270100, 278200, 286500, 295100, 304000, 313100, 322500, 332200, 342200, 352500, 363100, 374000, 385200, 396800, 408700],
-    32: [225000, 231800, 238800, 246000, 253400, 261000, 268800, 276900, 285200, 293800, 302600, 311700, 321100, 330700, 340600, 350800, 361300, 372100, 383300, 394800, 406600, 418800, 431400, 444300, 457600, 471300, 485400, 500000]
-  };
-
-  // Automated historical DA logs mapping standard quarterly timelines
-  const HISTORICAL_DA_TIMELINE = [
-    { start: "2024-01-01", end: "2024-06-30", pct: 46 },
-    { start: "2024-07-01", end: "2024-12-31", pct: 50 },
-    { start: "2025-01-01", end: "2025-06-30", pct: 53 },
-    { start: "2025-07-01", end: "2026-12-31", pct: 56 }
-  ];
-
-  // Helper routine to look up the applicable historical DA % for any given calendar date
-  function getHistoricalDaPct(dateObj) {
-    const checkStr = dateObj.toISOString().split('T')[0];
-    for (let period of HISTORICAL_DA_TIMELINE) {
-      if (checkStr >= period.start && checkStr <= period.end) {
-        return period.pct;
-      }
-    }
-    return 53; // Default fallthrough matching active 2025/2026 tiers
-  }
-
-  // ==================================================================
-  // BUSINESS ENGINE: CORE HRA & CCA GRADED SCALE ENGINE
-  // ==================================================================
-  function computeStatutoryHra(basic, grade) {
-    if (grade === "1A") return Math.min(Math.max(Math.round(basic * 0.10), 3200), 12000);
-    if (grade === "1B") return Math.min(Math.max(Math.round(basic * 0.08), 2500), 10000);
-    if (grade === "2")  return Math.min(Math.max(Math.round(basic * 0.06), 2000), 8000);
-    if (grade === "3")  return Math.min(Math.max(Math.round(basic * 0.04), 1200), 6000);
-    if (grade === "4")  return Math.min(Math.max(Math.round(basic * 0.02), 700),  4000);
-    return 0;
-  }
-
-  function computeStatutoryCca(basic, grade) {
-    if (grade === "none") return 0;
-    if (grade === "chennai") {
-      if (basic < 20000) return 400;
-      if (basic < 40000) return 600;
-      if (basic < 60000) return 800;
-      return 1000;
-    }
-    if (grade === "other") {
-      if (basic < 20000) return 200;
-      if (basic < 40000) return 450;
-      if (basic < 60000) return 600;
-      return 800;
-    }
-    return 0;
-  }
-
-  // Next Stage cell evaluation engine (Exact 3% Index Step Up)
-  function findNextCellInMatrix(currentBasic) {
-    let target = Math.ceil(currentBasic * 1.03);
-    for (let level in TN_PAY_MATRIX) {
-      let arr = TN_PAY_MATRIX[level];
-      if (arr.includes(currentBasic)) {
-        let idx = arr.indexOf(currentBasic);
-        if (idx + 1 < arr.length) return arr[idx + 1];
-      }
-    }
-    // General fallback logic array parsing
-    for (let level in TN_PAY_MATRIX) {
-      let arr = TN_PAY_MATRIX[level];
-      for (let cell of arr) {
-        if (cell >= target) return cell;
-      }
-    }
-    return target;
-  }
-
-  // Simple validation framework checking values against the master array
-  function validateInputAndCalc(inputEl) {
-    let val = parseInt(inputEl.value) || 0;
-    let isValid = false;
-    let errMsg = inputEl.nextElementSibling;
-
-    if (val === 0) {
-      inputEl.classList.remove("input-error");
-      if (errMsg) errMsg.style.display = "none";
-      return;
-    }
-
-    for (let lvl in TN_PAY_MATRIX) {
-      if (TN_PAY_MATRIX[lvl].includes(val)) {
-        isValid = true;
-        break;
-      }
-    }
-
-    if (!isValid) {
-      inputEl.classList.add("input-error");
-      if (errMsg) errMsg.style.display = "block";
-    } else {
-      inputEl.classList.remove("input-error");
-      if (errMsg) errMsg.style.display = "none";
-      // Auto-populate active linked elements across tabs
-      if (inputEl.id === "basicPay") {
-        $("daCalcBasic").value = val;
-        $("incOldBasic").value = val;
-        $("promoDrawnBasic").value = val;
-        $("facBasic").value = val;
-        $("fixLowerBasic").value = val;
-        calculateDaArrear();
-      }
-    }
-    calculateMainSalary();
-  }
-
-  // ==================================================================
-  // BUSINESS ENGINE: MONTHLY PAY breakdown GENERATOR
-  // ==================================================================
-  function calculateMainSalary() {
-    const basic = parseInt($("basicPay").value) || 0;
-    const daPct = parseFloat($("daPercent").value) || 0;
-    const ma = parseInt($("ma").value) || 0;
-    const otherE = parseInt($("otherEarnings").value) || 0;
-
-    const hraSel = document.querySelector('input[name="hraGrade"]:checked')?.value || "2";
-    const ccaSel = document.querySelector('input[name="ccaGrade"]:checked')?.value || "chennai";
-
-    // Dynamic processing
-    const computedHra = computeStatutoryHra(basic, hraSel);
-    const computedCca = computeStatutoryCca(basic, ccaSel);
-
-    $("hra").value = computedHra;
-    $("cca").value = computedCca;
-
-    const daAmount = Math.round(basic * (daPct / 100));
-    $("daAmountDisplay").innerText = `₹ ${daAmount.toLocaleString('en-IN')}`;
-
-    const gross = basic + daAmount + computedHra + computedCca + ma + otherE;
-    $("grossTotal").innerText = `₹${gross.toLocaleString('en-IN')}`;
-
-    // Deduction Tier Logic
-    const pType = $("pensionType").value;
-    let pensionAmt = 0;
-    if (pType === "CPS") {
-      pensionAmt = Math.round((basic + daAmount) * 0.10);
-      $("pensionLabel").innerText = "CPS (10% of Basic+DA)";
-      $("gpfError").style.display = "none";
-    } else {
-      pensionAmt = Math.round(basic * 0.12);
-      $("pensionLabel").innerText = "GPF (Min 12% of Basic)";
-      $("gpfError").style.display = "none";
-    }
-    $("pensionAmount").value = pensionAmt;
-
-    // Festival Advance processing
-    const faTotal = parseInt($("faTotal").value) || 0;
-    const faInst = parseInt($("faInstallment").value) || 0;
-    let faDeduction = 0;
-    if (faInst > 0 && faTotal > 0) {
-      faDeduction = Math.round(faTotal / 10);
-      $("faDeduction").value = `${faDeduction} (Inst. ${faInst}/10)`;
-    } else {
-      $("faDeduction").value = "0";
-    }
-
-    const nhis = parseInt($("nhis").value) || 0;
-    const fbf = parseInt($("fbf").value) || 0;
-    const otherD = parseInt($("otherDeductions").value) || 0;
-
-    const totalDed = pensionAmt + faDeduction + nhis + fbf + otherD;
-    $("totalDeductions").innerText = `₹${totalDed.toLocaleString('en-IN')}`;
-
-    const net = gross - totalDed;
-    $("netPay").innerText = `₹${net.toLocaleString('en-IN')}`;
-
-    // 1-Day Prorated Split Core Calculations
-    const totalDaysInMonth = 31; 
-    $("lblContextDays").innerText = totalDaysInMonth;
-    $("dBasic").innerText = `₹${Math.round(basic / totalDaysInMonth)}`;
-    $("dDA").innerText = `₹${Math.round(daAmount / totalDaysInMonth)}`;
-    $("dHRA").innerText = `₹${Math.round(computedHra / totalDaysInMonth)}`;
-    $("dCCA").innerText = `₹${Math.round(computedCca / totalDaysInMonth)}`;
-    $("dOther").innerText = `₹${Math.round((ma + otherE) / totalDaysInMonth)}`;
-    $("dNet").innerText = `₹${Math.round(net / totalDaysInMonth)}`;
-  }
-
-  // ==================================================================
-  // BUSINESS ENGINE: DA ARREAR CALCULATOR MODULE
-  // ==================================================================
-  function calculateDaArrear() {
-    const basic = parseInt($("daCalcBasic").value) || parseInt($("basicPay").value) || 0;
-    const oldPct = parseFloat($("daCalcOldPct").value) || 0;
-    const newPct = parseFloat($("daCalcNewPct").value) || 0;
-
-    const oldAmt = Math.round(basic * (oldPct / 100));
-    const newAmt = Math.round(basic * (newPct / 100));
-    const grossDiff = newAmt - oldAmt;
-
-    $("daCalcOldAmt").innerText = `₹${oldAmt.toLocaleString('en-IN')}`;
-    $("daCalcNewAmt").innerText = `₹${newAmt.toLocaleString('en-IN')}`;
-    $("daCalcGrossDiff").innerText = `₹${grossDiff.toLocaleString('en-IN')}`;
-
-    const pType = $("pensionType").value;
-    let penDed = 0;
-    if (pType === "CPS") {
-      penDed = Math.round(grossDiff * 0.10);
-      $("daCalcPenLabel").innerText = "CPS Deduction (10%)";
-    } else {
-      penDed = 0; // GPF calculations typically ignore historical DA adjustments unless explicitly added to subscription totals
-      $("daCalcPenLabel").innerText = "GPF Deduction (0%)";
-    }
-
-    $("daCalcPenDed").innerText = `- ₹${penDed.toLocaleString('en-IN')}`;
-    $("daCalcNetArrear").innerText = `₹${(grossDiff - penDed).toLocaleString('en-IN')}`;
-  }
-
-  // ==================================================================
-  // AD-HOC UI UTILITIES: DYNAMIC DATA ROW GENERATORS
-  // ==================================================================
-  function addLopRow(containerId) {
-    const container = $(containerId);
-    const row = document.createElement("div");
-    row.className = "dynamic-row";
-    row.innerHTML = `
-      <label style="font-size:0.8rem; min-width:auto;">From:</label>
-      <input type="date" class="lop-start" oninput="recalcArrearOnFly()"/>
-      <label style="font-size:0.8rem; min-width:auto;">To:</label>
-      <input type="date" class="lop-end" oninput="recalcArrearOnFly()"/>
-      <button class="btn-remove" onclick="this.parentElement.remove(); recalcArrearOnFly();">×</button>
-    `;
-    container.appendChild(row);
-  }
-
-  function addIncStage() {
-    const container = $("incStagesContainer");
-    const row = document.createElement("div");
-    row.className = "dynamic-row inc-row";
-    row.innerHTML = `
-      <input type="date" class="inc-date" title="Effective Date" oninput="recalcArrearOnFly()"/>
-      <div style="display:flex; flex-direction:column; width:100%;">
-        <input type="number" class="inc-pay validate-pay" placeholder="New Basic (₹)" oninput="validateInputAndCalc(this); recalcArrearOnFly();" />
-        <span class="pay-error-msg" style="text-align:left;">Invalid Matrix Value!</span>
-      </div>
-      <button class="btn-remove" onclick="this.parentElement.remove(); recalcArrearOnFly();">×</button>
-    `;
-    container.appendChild(row);
-  }
-
-  function togglePanel(panelId, btnId, defaultText) {
-    const p = $(panelId);
-    const b = $(btnId);
-    if (p.style.display === "block") {
-      p.style.display = "none";
-      b.innerHTML = `<i class="fas fa-calendar-day"></i> Show ${defaultText}`;
-    } else {
-      p.style.display = "block";
-      b.innerHTML = `<i class="fas fa-eye-slash"></i> Hide ${defaultText}`;
-    }
-  }
-
-  function recalcArrearOnFly() {
-    // Small helper trigger hooked into live data states
-  }
-
-  // ==================================================================
-  // ADVANCED CALCULATION ARREAR CORE ENGINE (INCREMENT & PROMOTION)
-  // ==================================================================
-  let globalArrearResults = { inc: [], promo: [], fac: [] };
-
-  function generateAdvancedArrear(type) {
-    const startStr = $(`${type}Start`).value;
-    const endStr = $(`${type}End`).value;
-
-    if (!startStr || !endStr) {
-      alert("Please specify chronological bounding limits.");
-      return;
-    }
-
-    let startDate = new Date(startStr);
-    let endDate = new Date(endStr);
-
-    if (startDate > endDate) {
-      alert("Start limit cannot exceed ending matrix bounding limits.");
-      return;
-    }
-
-    // Load active settings from primary tier panels
-    const hraSel = document.querySelector('input[name="hraGrade"]:checked')?.value || "2";
-    const ccaSel = document.querySelector('input[name="ccaGrade"]:checked')?.value || "chennai";
-    const pType = $("pensionType").value;
-
-    // Parse applicable LOP periods
-    let lopRows = document.querySelectorAll(`#${type}LopContainer .dynamic-row`);
-    let lopPeriods = [];
-    lopRows.forEach(r => {
-      let s = r.querySelector(".lop-start").value;
-      let e = r.querySelector(".lop-end").value;
-      if (s && e) lopPeriods.push({ start: new Date(s), end: new Date(e) });
-    });
-
-    let monthsList = [];
-    let curr = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
-
-    while (curr <= endDate) {
-      monthsList.push(new Date(curr));
-      curr.setMonth(curr.getMonth() + 1);
-    }
-
-    let records = [];
-    let grandGrandTotalDiff = 0;
-    let grandPensionDed = 0;
-    let grandNetArrear = 0;
-
-    // Monthly baseline array iterative processing loops
-    monthsList.forEach(m => {
-      let year = m.getFullYear();
-      let monthIdx = m.getMonth();
-      let totalDays = new Date(year, monthIdx + 1, 0).getDate();
-
-      // Prorate boundaries for start and end limits
-      let activeStartDay = 1;
-      let activeEndDay = totalDays;
-
-      if (year === startDate.getFullYear() && monthIdx === startDate.getMonth()) {
-        activeStartDay = startDate.getDate();
-      }
-      if (year === endDate.getFullYear() && monthIdx === endDate.getMonth()) {
-        activeEndDay = endDate.getDate();
-      }
-
-      // Check against designated LOP structures
-      let activeDaysCount = 0;
-      for (let d = 1; d <= totalDays; d++) {
-        if (d >= activeStartDay && d <= activeEndDay) {
-          let dayDate = new Date(year, monthIdx, d);
-          let isLop = false;
-          for (let lp of lopPeriods) {
-            if (dayDate >= lp.start && dayDate <= lp.end) {
-              isLop = true;
-              break;
-            }
-          }
-          if (!isLop) activeDaysCount++;
+    // ================================================================
+    //  UTILITIES
+    // ================================================================
+    const utils = {
+      formatCurr: (num) => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(num),
+      parseLocal: (dateStr) => {
+        if (!dateStr) return null;
+        const [y, m, d] = dateStr.split('-');
+        return new Date(+y, +m - 1, +d);
+      },
+      getDaPercent: (date) => {
+        if (!date) return 50;
+        const y = date.getFullYear(),
+          m = date.getMonth();
+        if (y > 2025 || (y === 2025 && m >= 6)) return 58;
+        if (y === 2025 && m >= 0) return 55;
+        if (y === 2024 && m >= 6) return 53;
+        if (y === 2024 && m >= 0) return 50;
+        if (y === 2023 && m >= 6) return 46;
+        if (y === 2023 && m >= 0) return 42;
+        if (y === 2022 && m >= 6) return 38;
+        if (y === 2022 && m >= 0) return 34;
+        return 34;
+      },
+      buildValidPayDb: () => {
+        const db = new Set();
+        for (let l = 1; l <= 32; l++) {
+          window.payMatrix[l].forEach(v => db.add(v));
         }
+        return db;
+      }
+    };
+
+    const validPayDb = utils.buildValidPayDb();
+
+    // ================================================================
+    //  DOM REFS (cached)
+    // ================================================================
+    const $ = (id) => document.getElementById(id);
+    const basicPay = $('basicPay');
+    const daPercent = $('daPercent');
+    const grossTotal = $('grossTotal');
+    const totalDeductions = $('totalDeductions');
+    const netPay = $('netPay');
+
+    // ================================================================
+    //  VALIDATION & MAIN SALARY
+    // ================================================================
+    function validateInputAndCalc(el) {
+      const val = parseFloat(el.value);
+      const errorSpan = el.nextElementSibling;
+      if (val && !validPayDb.has(val)) {
+        el.classList.add('input-error');
+        if (errorSpan && errorSpan.classList.contains('pay-error-msg')) errorSpan.style.display = 'block';
+      } else {
+        el.classList.remove('input-error');
+        if (errorSpan && errorSpan.classList.contains('pay-error-msg')) errorSpan.style.display = 'none';
+      }
+      calculateMainSalary();
+    }
+    window.validateInputAndCalc = validateInputAndCalc;
+
+    function calculateMainSalary() {
+      const basic = parseFloat(basicPay.value) || 0;
+
+      if ($('facBasic').value === '' && basic > 0) $('facBasic').value = basic;
+
+      const hraGrade = document.querySelector('input[name="hraGrade"]:checked').value;
+      const ccaGrade = document.querySelector('input[name="ccaGrade"]:checked').value;
+
+      const autoHra = window.getHraAmount(basic, hraGrade);
+      const autoCca = window.getCcaAmount(basic, ccaGrade);
+      $('hra').value = autoHra;
+      $('cca').value = autoCca;
+
+      const promoDrawn = parseFloat($('promoDrawnBasic').value) || 0;
+      $('promoDrawnHRA').value = window.getHraAmount(promoDrawn, hraGrade);
+      $('promoDrawnCCA').value = window.getCcaAmount(promoDrawn, ccaGrade);
+      const promoDue = parseFloat($('promoDueBasic').value) || 0;
+      $('promoDueHRA').value = window.getHraAmount(promoDue, hraGrade);
+      $('promoDueCCA').value = window.getCcaAmount(promoDue, ccaGrade);
+
+      const daPct = parseFloat(daPercent.value) || 0;
+      const daAmt = Math.round(basic * (daPct / 100));
+      $('daAmountDisplay').innerText = `₹ ${utils.formatCurr(daAmt)}`;
+
+      const hra = autoHra;
+      const cca = autoCca;
+      const ma = parseFloat($('ma').value) || 0;
+      const other = parseFloat($('otherEarnings').value) || 0;
+      const gross = basic + daAmt + hra + cca + ma + other;
+
+      const penType = $('pensionType').value;
+      const penInput = $('pensionAmount');
+      const gpfErr = $('gpfError');
+      let penDed = 0,
+        err = false;
+
+      if (basicPay.classList.contains('input-error')) err = true;
+
+      if (penType === 'CPS') {
+        $('pensionLabel').innerText = 'CPS (10% Auto)';
+        penInput.readOnly = true;
+        penInput.classList.add('readonly-highlight');
+        penDed = Math.round((basic + daAmt) * 0.10);
+        penInput.value = penDed;
+        penInput.classList.remove('input-error');
+        gpfErr.style.display = 'none';
+      } else {
+        $('pensionLabel').innerText = 'GPF (Min 12%)';
+        penInput.readOnly = false;
+        penInput.classList.remove('readonly-highlight');
+        const minGpf = Math.round((basic + daAmt) * 0.12);
+        let uGpf = parseFloat(penInput.value) || 0;
+        if (uGpf < minGpf && penInput.value !== '') {
+          gpfErr.innerText = `Minimum 12% Required: ₹${utils.formatCurr(minGpf)}`;
+          gpfErr.style.display = 'block';
+          penInput.classList.add('input-error');
+          err = true;
+        } else {
+          gpfErr.style.display = 'none';
+          penInput.classList.remove('input-error');
+          if (penInput.value === '') { penInput.value = minGpf;
+            uGpf = minGpf; }
+        }
+        penDed = uGpf;
       }
 
-      let monthLabel = m.toLocaleString('en-US', { month: 'short' }) + "-" + year;
+      const faTot = parseFloat($('faTotal').value) || 0;
+      const faInst = parseInt($('faInstallment').value) || 0;
+      const faDed = (faInst > 0 && faInst <= 10 && faTot > 0) ? Math.round(faTot / 10) : 0;
+      $('faDeduction').value = faDed;
 
-      // Extract precise historical DA values based on timeline parameters
-      let activeDaPct = getHistoricalDaPct(m);
+      const nhis = parseFloat($('nhis').value) || 0;
+      const fbf = parseFloat($('fbf').value) || 0;
+      const oDed = parseFloat($('otherDeductions').value) || 0;
 
-      // Initialize defaults for calculation states
-      let dueBasic = 0, drawnBasic = 0;
+      const totDed = penDed + faDed + nhis + fbf + oDed;
+      const net = err ? 0 : gross - totDed;
 
-      if (type === "inc") {
-        drawnBasic = parseInt($("incOldBasic").value) || 0;
-        dueBasic = drawnBasic; // Default baseline state assignment
+      grossTotal.innerText = err ? 'ERROR' : `₹ ${utils.formatCurr(gross)}`;
+      totalDeductions.innerText = err ? 'ERROR' : `₹ ${utils.formatCurr(totDed)}`;
+      netPay.innerText = err ? 'ERROR' : `₹ ${utils.formatCurr(net)}`;
 
-        // Scan dynamically declared increment intervals
-        let incStages = document.querySelectorAll("#incStagesContainer .inc-row");
-        let activeHighestDue = drawnBasic;
-        let highestMatchDate = null;
+      const days = parseInt($('globalMonth').value);
+      $('lblContextDays').innerText = days;
+      if (!err) {
+        $('dBasic').innerText = `₹${utils.formatCurr(Math.round(basic / days))}`;
+        $('dDA').innerText = `₹${utils.formatCurr(Math.round(daAmt / days))}`;
+        $('dHRA').innerText = `₹${utils.formatCurr(Math.round(hra / days))}`;
+        $('dCCA').innerText = `₹${utils.formatCurr(Math.round(cca / days))}`;
+        $('dOther').innerText = `₹${utils.formatCurr(Math.round((ma + other) / days))}`;
+        $('dNet').innerText = `₹${utils.formatCurr(Math.round(net / days))}`;
+      } else {
+        ['dBasic', 'dDA', 'dHRA', 'dCCA', 'dOther', 'dNet'].forEach(id => $(id).innerText = 'ERROR');
+      }
 
-        incStages.forEach(stg => {
-          let dStr = stg.querySelector(".inc-date").value;
-          let pVal = parseInt(stg.querySelector(".inc-pay").value) || 0;
-          if (dStr && pVal > 0) {
-            let stgDate = new Date(dStr);
-            if (m >= stgDate) {
-              if (!highestMatchDate || stgDate >= highestMatchDate) {
-                highestMatchDate = stgDate;
-                activeHighestDue = pVal;
-              }
-            }
+      calculateDaArrear();
+    }
+    window.calculateMainSalary = calculateMainSalary;
+
+    // ================================================================
+    //  DA ARREAR
+    // ================================================================
+    function calculateDaArrear() {
+      const basic = parseFloat(basicPay.value) || 0;
+      $('daCalcBasic').value = basic > 0 ? basic : '';
+
+      const oldPct = parseFloat($('daCalcOldPct').value) || 0;
+      const newPct = parseFloat($('daCalcNewPct').value) || 0;
+      const oldAmt = Math.round(basic * (oldPct / 100));
+      const newAmt = Math.round(basic * (newPct / 100));
+      let grossDiff = newAmt - oldAmt;
+      if (grossDiff < 0) grossDiff = 0;
+
+      const isCPS = $('pensionType').value === 'CPS';
+      $('daCalcPenLabel').innerText = isCPS ? 'CPS Ded (10%)' : 'GPF Ded (12%)';
+      const penDed = Math.round(grossDiff * (isCPS ? 0.10 : 0.12));
+      const netArrear = grossDiff - penDed;
+
+      $('daCalcOldAmt').innerText = `₹${utils.formatCurr(oldAmt)}`;
+      $('daCalcNewAmt').innerText = `₹${utils.formatCurr(newAmt)}`;
+      $('daCalcGrossDiff').innerText = `₹${utils.formatCurr(grossDiff)}`;
+      $('daCalcPenDed').innerText = `- ₹${utils.formatCurr(penDed)}`;
+      $('daCalcNetArrear').innerText = `₹${utils.formatCurr(netArrear)}`;
+    }
+    window.calculateDaArrear = calculateDaArrear;
+
+    // ================================================================
+    //  TOGGLE PANEL (for 1-day)
+    // ================================================================
+    function togglePanel(panelId, btnId, name) {
+      const p = $(panelId);
+      const b = $(btnId);
+      if (p.style.display === 'block') {
+        p.style.display = 'none';
+        b.innerHTML = `<i class="fas fa-calendar-day"></i> Show ${name}`;
+      } else {
+        p.style.display = 'block';
+        b.innerHTML = `<i class="fas fa-calendar-day"></i> Hide ${name}`;
+      }
+    }
+    window.togglePanel = togglePanel;
+
+    // ================================================================
+    //  LOP & INCREMENT ROWS
+    // ================================================================
+    function addLopRow(containerId) {
+      const div = document.createElement('div');
+      div.className = 'dynamic-row lop-row';
+      div.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; width:100%; flex-wrap:wrap;">
+          <input type="date" class="lop-from" title="LOP Start" style="flex:1; min-width:100px;" />
+          <span style="font-size:0.8rem;">to</span>
+          <input type="date" class="lop-to" title="LOP End" style="flex:1; min-width:100px;" />
+          <button class="btn-remove" onclick="this.closest('.dynamic-row').remove()"><i class="fas fa-times"></i></button>
+        </div>
+      `;
+      $(containerId).appendChild(div);
+    }
+    window.addLopRow = addLopRow;
+
+    function addIncStage() {
+      const div = document.createElement('div');
+      div.className = 'dynamic-row inc-row';
+      div.innerHTML = `
+        <input type="date" class="inc-date" title="Effective Date" style="flex:1; min-width:100px;" />
+        <div style="display:flex; flex-direction:column; flex:2; min-width:120px;">
+          <input type="number" class="inc-pay validate-pay" placeholder="New Basic (₹)" oninput="validateInputAndCalc(this)" />
+          <span class="pay-error-msg" style="text-align:left;">Invalid Matrix Value!</span>
+        </div>
+        <button class="btn-remove" onclick="this.closest('.dynamic-row').remove(); calculateMainSalary();"><i class="fas fa-times"></i></button>
+      `;
+      $('incStagesContainer').appendChild(div);
+    }
+    window.addIncStage = addIncStage;
+
+    // ================================================================
+    //  CALCULATE & EXPORT (combined)
+    // ================================================================
+    function calculateAndExport(type) {
+      // Run the appropriate calculation function
+      if (type === 'fac') {
+        generateFacTable();
+      } else {
+        generateAdvancedArrear(type);
+      }
+      // Then trigger export
+      triggerExport(type);
+    }
+    window.calculateAndExport = calculateAndExport;
+
+    // ================================================================
+    //  GENERIC ADVANCED ARREAR (Increment & Promotion)
+    // ================================================================
+    function generateAdvancedArrear(type) {
+      if (document.querySelector(`#${type}ArrearPanel .input-error`) || basicPay.classList.contains('input-error')) {
+        return alert('Cannot calculate: Please correct invalid Basic Pay value(s).');
+      }
+
+      const isCPS = $('pensionType').value === 'CPS';
+      const hraGrade = document.querySelector('input[name="hraGrade"]:checked').value;
+      const ccaGrade = document.querySelector('input[name="ccaGrade"]:checked').value;
+
+      const startStr = $(type + 'Start').value;
+      const endStr = $(type + 'End').value;
+      if (!startStr || !endStr) return alert('Please select valid Start and End dates.');
+      const start = utils.parseLocal(startStr);
+      const end = utils.parseLocal(endStr);
+      if (end < start) return alert('End date must be after Start date.');
+
+      const lops = [];
+      document.querySelectorAll(`#${type}LopContainer .lop-row`).forEach(row => {
+        const f = row.querySelector('.lop-from').value;
+        const t = row.querySelector('.lop-to').value;
+        if (f && t) {
+          const fs = utils.parseLocal(f);
+          const ts = utils.parseLocal(t);
+          if (ts >= fs) lops.push({ start: fs, end: ts, days: Math.ceil((ts - fs) / (1000 * 60 * 60 * 24)) + 1 });
+        }
+      });
+
+      let stages = [];
+      let oldBasic;
+      if (type === 'inc') {
+        oldBasic = parseFloat($('incOldBasic').value) || 0;
+        document.querySelectorAll('#incStagesContainer .inc-row').forEach(row => {
+          const date = utils.parseLocal(row.querySelector('.inc-date').value);
+          const pay = parseFloat(row.querySelector('.inc-pay').value) || 0;
+          if (date && pay > 0) {
+            let totalLopShift = 0;
+            lops.forEach(lop => { if (lop.start < date) totalLopShift += lop.days; });
+            const adjusted = new Date(date);
+            adjusted.setDate(adjusted.getDate() + totalLopShift);
+            stages.push({ date: adjusted, basic: pay });
           }
         });
-        dueBasic = activeHighestDue;
-      } else if (type === "promo") {
-        drawnBasic = parseInt($("promoDrawnBasic").value) || 0;
-        dueBasic = parseInt($("promoDueBasic").value) || 0;
+      } else {
+        oldBasic = parseFloat($('promoDrawnBasic').value) || 0;
+        const dueBasic = parseFloat($('promoDueBasic').value) || 0;
+        stages.push({ date: new Date(start), basic: dueBasic });
       }
+      stages.sort((a, b) => a.date - b.date);
 
-      // Graded allowance tracking configurations
-      let dueDA = Math.round(dueBasic * (activeDaPct / 100));
-      let dueHRA = computeStatutoryHra(dueBasic, hraSel);
-      let dueCCA = computeStatutoryCca(dueBasic, ccaSel);
-      let dueGross = dueBasic + dueDA + dueHRA + dueCCA;
-
-      let drawnDA = Math.round(drawnBasic * (activeDaPct / 100));
-      let drawnHRA = computeStatutoryHra(drawnBasic, hraSel);
-      let drawnCCA = computeStatutoryCca(drawnBasic, ccaSel);
-      let drawnGross = drawnBasic + drawnDA + drawnHRA + drawnCCA;
-
-      // Apply day-level proration metrics
-      let factor = activeDaysCount / totalDays;
-      let pr_dueGross = Math.round(dueGross * factor);
-      let pr_drawnGross = Math.round(drawnGross * factor);
-      let grossDiff = pr_dueGross - pr_drawnGross;
-
-      // Deduct appropriate pension contributions based on selected tier
-      let pensionDed = 0;
-      if (grossDiff > 0) {
-        if (pType === "CPS") {
-          let basicDiff = Math.round((dueBasic - drawnBasic) * factor);
-          let daDiff = Math.round((dueDA - drawnDA) * factor);
-          pensionDed = Math.round((basicDiff + daDiff) * 0.10);
-        } else {
-          pensionDed = 0; // Standard GPF structures map directly to fixed subscription targets
-        }
-      }
-
-      let netArrear = grossDiff - pensionDed;
-
-      grandGrandTotalDiff += grossDiff;
-      grandPensionDed += pensionDed;
-      grandNetArrear += netArrear;
-
-      records.push({
-        month: monthLabel, days: `${activeDaysCount}/${totalDays}`,
-        dueBasic, dueDA, dueHRA, dueCCA, dueGross: pr_dueGross,
-        drawnBasic, drawnDA, drawnHRA, drawnCCA, drawnGross: pr_drawnGross,
-        diffGross: grossDiff, pension: pensionDed, net: netArrear
-      });
-    });
-
-    globalArrearResults[type] = records;
-
-    // Core table presentation markup rendering engines
-    let table = $(`${type}Table`);
-    table.innerHTML = "";
-
-    let headerRow = `
-      <tr>
-        <th rowspan="2">Month</th><th rowspan="2">Active Days</th>
-        <th colspan="5" style="background:#f0fdf4; text-align:center;">DUE STRUCTURE (₹)</th>
-        <th colspan="5" style="background:#fef2f2; text-align:center;">DRAWN STRUCTURE (₹)</th>
-        <th rowspan="2">Gross Diff (₹)</th><th rowspan="2">Pension Ded. (₹)</th><th rowspan="2" style="background:#ecfdf5;">Net Arrear (₹)</th>
-      </tr>
-      <tr>
-        <th>Basic</th><th>DA</th><th>HRA</th><th>CCA</th><th>Gross</th>
-        <th>Basic</th><th>DA</th><th>HRA</th><th>CCA</th><th>Gross</th>
-      </tr>
-    `;
-    table.innerHTML += headerRow;
-
-    records.forEach(r => {
-      let rowHtml = `
-        <tr>
-          <td>${r.month}</td><td><small>${r.days}</small></td>
-          <td>${r.dueBasic}</td><td>${r.dueDA}</td><td>${r.dueHRA}</td><td>${r.dueCCA}</td><td style="font-weight:600;">${r.dueGross}</td>
-          <td>${r.drawnBasic}</td><td>${r.drawnDA}</td><td>${r.drawnHRA}</td><td>${r.drawnCCA}</td><td style="font-weight:600;">${r.drawnGross}</td>
-          <td style="font-weight:700; color:var(--accent);">${r.diffGross}</td>
-          <td class="deduction-cell">${r.pension}</td>
-          <td class="net-cell">${r.net}</td>
-        </tr>
+      const table = $(type + 'Table');
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th rowspan="2" class="th-final">Month</th><th rowspan="2" class="th-final">Days</th>
+            <th colspan="5" class="th-due">Due (Higher Pay)</th>
+            <th colspan="5" class="th-drawn">Drawn (Lower Pay)</th>
+            <th colspan="5" class="th-diff">Difference</th>
+            <th rowspan="2" class="th-final">Pension<br>Ded</th><th rowspan="2" class="th-final">Net<br>Arrear</th>
+          </tr>
+          <tr>
+            <th class="th-due">Basic</th><th class="th-due">DA</th><th class="th-due">HRA</th><th class="th-due">CCA</th><th class="th-due">Gross</th>
+            <th class="th-drawn">Basic</th><th class="th-drawn">DA</th><th class="th-drawn">HRA</th><th class="th-drawn">CCA</th><th class="th-drawn">Gross</th>
+            <th class="th-diff">Basic</th><th class="th-diff">DA</th><th class="th-diff">HRA</th><th class="th-diff">CCA</th><th class="th-diff">Gross</th>
+          </tr>
+        </thead>
+        <tbody id="${type}Body"></tbody>
       `;
-      table.innerHTML += rowHtml;
-    });
+      const tbody = $(type + 'Body');
 
-    // Grand total row markup injection
-    let totalRow = `
-      <tr class="total-row">
-        <td colspan="12">GRAND TOTALS:</td>
-        <td style="color:var(--accent);">₹${grandGrandTotalDiff.toLocaleString('en-IN')}</td>
-        <td class="deduction-cell">₹${grandPensionDed.toLocaleString('en-IN')}</td>
-        <td class="net-cell" style="font-size:1rem; background:#d1fae5;">₹${grandNetArrear.toLocaleString('en-IN')}</td>
-      </tr>
-    `;
-    table.innerHTML += totalRow;
-    $(`${type}Wrapper`).style.display = "block";
-  }
+      window.arrearExportData[type] = [];
+      let totals = {
+        days: 0,
+        dueB: 0,
+        dueDA: 0,
+        dueHRA: 0,
+        dueCCA: 0,
+        dueGross: 0,
+        drawnB: 0,
+        drawnDA: 0,
+        drawnHRA: 0,
+        drawnCCA: 0,
+        drawnGross: 0,
+        diffB: 0,
+        diffDA: 0,
+        diffHRA: 0,
+        diffCCA: 0,
+        diffGross: 0,
+        pen: 0,
+        net: 0
+      };
 
-  // ==================================================================
-  // BUSINESS ENGINE: FULL ADDITIONAL CHARGE (FAC - FR 49) ENGINE
-  // ==================================================================
-  function generateFacTable() {
-    const startStr = $("facStart").value;
-    const endStr = $("facEnd").value;
-    const regularBasic = parseInt($("facBasic").value) || 0;
-    const minPayAddl = parseInt($("facMinPay").value) || 0;
+      let current = new Date(start.getFullYear(), start.getMonth(), 1);
+      const endLimit = new Date(end.getFullYear(), end.getMonth(), 1);
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      let hasRows = false;
 
-    if (!startStr || !endStr || regularBasic === 0 || minPayAddl === 0) {
-      alert("Please ensure all bounding limits, regular pay, and additional post scales are defined.");
-      return;
-    }
+      while (current <= endLimit) {
+        const year = current.getFullYear(),
+          month = current.getMonth();
+        const maxDays = new Date(year, month + 1, 0).getDate();
+        let activeStart = (year === start.getFullYear() && month === start.getMonth()) ? start.getDate() : 1;
+        let activeEnd = (year === end.getFullYear() && month === end.getMonth()) ? end.getDate() : maxDays;
 
-    let startDate = new Date(startStr);
-    let endDate = new Date(endStr);
-
-    let monthsList = [];
-    let curr = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
-    while (curr <= endDate) {
-      monthsList.push(new Date(curr));
-      curr.setMonth(curr.getMonth() + 1);
-    }
-
-    // Dynamic extraction of Leave/LOP models specifically targeted within the active post
-    let leaveRows = document.querySelectorAll("#facLopContainer .dynamic-row");
-    let leavePeriods = [];
-    leaveRows.forEach(r => {
-      let s = r.querySelector(".lop-start").value;
-      let e = r.querySelector(".lop-end").value;
-      if (s && e) leavePeriods.push({ start: new Date(s), end: new Date(e) });
-    });
-
-    // FR 49 Calculation Rule: Lesser of (20% of Regular Basic) OR (50% of Additional Minimum Post Basic Scale)
-    let optBasicFAC = Math.round(regularBasic * 0.20);
-    let optMinPostFAC = Math.round(minPayAddl * 0.50);
-    let statutoryFacMaxCell = Math.min(optBasicFAC, optMinPostFAC);
-
-    let records = [];
-    let totGrossFac = 0, totIt = 0, totCess = 0, totNetFac = 0;
-
-    monthsList.forEach(m => {
-      let year = m.getFullYear();
-      let monthIdx = m.getMonth();
-      let totalDays = new Date(year, monthIdx + 1, 0).getDate();
-
-      let activeStartDay = 1;
-      let activeEndDay = totalDays;
-
-      if (year === startDate.getFullYear() && monthIdx === startDate.getMonth()) activeStartDay = startDate.getDate();
-      if (year === endDate.getFullYear() && monthIdx === endDate.getMonth()) activeEndDay = endDate.getDate();
-
-      let activeDaysCount = 0;
-      for (let d = 1; d <= totalDays; d++) {
-        if (d >= activeStartDay && d <= activeEndDay) {
-          let dayDate = new Date(year, monthIdx, d);
-          let isLeave = false;
-          for (let lp of leavePeriods) {
-            if (dayDate >= lp.start && dayDate <= lp.end) {
-              isLeave = true;
-              break;
-            }
+        let splitDays = [];
+        stages.forEach(st => {
+          if (st.date.getFullYear() === year && st.date.getMonth() === month) {
+            const d = st.date.getDate();
+            if (d > activeStart && d <= activeEnd) splitDays.push(d);
           }
-          if (!isLeave) activeDaysCount++;
+        });
+        let chunks = [];
+        if (splitDays.length) {
+          chunks.push({ s: activeStart, e: splitDays[0] - 1 });
+          chunks.push({ s: splitDays[0], e: activeEnd });
+        } else {
+          chunks.push({ s: activeStart, e: activeEnd });
         }
+
+        chunks.forEach(chunk => {
+          const chunkStart = new Date(year, month, chunk.s);
+          const chunkEnd = new Date(year, month, chunk.e);
+
+          let lopThisChunk = 0;
+          lops.forEach(l => {
+            const overlapStart = l.start > chunkStart ? l.start : chunkStart;
+            const overlapEnd = l.end < chunkEnd ? l.end : chunkEnd;
+            if (overlapStart <= overlapEnd) lopThisChunk += Math.ceil((overlapEnd - overlapStart) / (1000 * 60 *
+              60 * 24)) + 1;
+          });
+          const actualDays = (chunk.e - chunk.s + 1) - lopThisChunk;
+          if (actualDays <= 0) return;
+
+          let dueB = oldBasic;
+          stages.forEach(st => { if (st.date <= chunkStart) dueB = st.basic; });
+
+          const daPct = utils.getDaPercent(chunkStart);
+          const oldDA = Math.round(oldBasic * (daPct / 100));
+          const dueDA = Math.round(dueB * (daPct / 100));
+          const oldHRA = window.getHraAmount(oldBasic, hraGrade);
+          const dueHRA = window.getHraAmount(dueB, hraGrade);
+          const oldCCA = window.getCcaAmount(oldBasic, ccaGrade);
+          const dueCCA = window.getCcaAmount(dueB, ccaGrade);
+
+          const pDrawnB = Math.round((oldBasic / maxDays) * actualDays);
+          const pDrawnDA = Math.round((oldDA / maxDays) * actualDays);
+          const pDrawnHRA = Math.round((oldHRA / maxDays) * actualDays);
+          const pDrawnCCA = Math.round((oldCCA / maxDays) * actualDays);
+          const pDrawnGross = pDrawnB + pDrawnDA + pDrawnHRA + pDrawnCCA;
+
+          const pDueB = Math.round((dueB / maxDays) * actualDays);
+          const pDueDA = Math.round((dueDA / maxDays) * actualDays);
+          const pDueHRA = Math.round((dueHRA / maxDays) * actualDays);
+          const pDueCCA = Math.round((dueCCA / maxDays) * actualDays);
+          const pDueGross = pDueB + pDueDA + pDueHRA + pDueCCA;
+
+          const dDiffB = pDueB - pDrawnB;
+          const dDiffDA = pDueDA - pDrawnDA;
+          const dDiffHRA = pDueHRA - pDrawnHRA;
+          const dDiffCCA = pDueCCA - pDrawnCCA;
+          const dDiffGross = pDueGross - pDrawnGross;
+          if (dDiffB === 0 && dDiffDA === 0 && dDiffHRA === 0 && dDiffCCA === 0) return;
+
+          hasRows = true;
+          const pen = Math.round((dDiffB + dDiffDA) * (isCPS ? 0.10 : 0.12));
+          const netArrear = dDiffGross - pen;
+
+          totals.days += actualDays;
+          totals.dueB += pDueB;
+          totals.dueDA += pDueDA;
+          totals.dueHRA += pDueHRA;
+          totals.dueCCA += pDueCCA;
+          totals.dueGross += pDueGross;
+          totals.drawnB += pDrawnB;
+          totals.drawnDA += pDrawnDA;
+          totals.drawnHRA += pDrawnHRA;
+          totals.drawnCCA += pDrawnCCA;
+          totals.drawnGross += pDrawnGross;
+          totals.diffB += dDiffB;
+          totals.diffDA += dDiffDA;
+          totals.diffHRA += dDiffHRA;
+          totals.diffCCA += dDiffCCA;
+          totals.diffGross += dDiffGross;
+          totals.pen += pen;
+          totals.net += netArrear;
+
+          let label = `${monthNames[month]} ${year}`;
+          if (chunks.length > 1) label += ` (${chunk.s}-${chunk.e})`;
+
+          const tr = document.createElement('tr');
+          if (chunks.length > 1) tr.className = 'split-row';
+          tr.innerHTML = `
+            <td>${label}</td><td>${actualDays}</td>
+            <td>${utils.formatCurr(pDueB)}</td><td>${utils.formatCurr(pDueDA)}</td><td>${utils.formatCurr(pDueHRA)}</td><td>${utils.formatCurr(pDueCCA)}</td><td style="font-weight:bold; color:#065f46;">${utils.formatCurr(pDueGross)}</td>
+            <td>${utils.formatCurr(pDrawnB)}</td><td>${utils.formatCurr(pDrawnDA)}</td><td>${utils.formatCurr(pDrawnHRA)}</td><td>${utils.formatCurr(pDrawnCCA)}</td><td style="font-weight:bold; color:#991b1b;">${utils.formatCurr(pDrawnGross)}</td>
+            <td>${utils.formatCurr(dDiffB)}</td><td>${utils.formatCurr(dDiffDA)}</td><td>${utils.formatCurr(dDiffHRA)}</td><td>${utils.formatCurr(dDiffCCA)}</td><td style="font-weight:bold; color:#b45309;">${utils.formatCurr(dDiffGross)}</td>
+            <td class="deduction-cell">- ${utils.formatCurr(pen)}</td><td class="net-cell">${utils.formatCurr(netArrear)}</td>
+          `;
+          tbody.appendChild(tr);
+
+          window.arrearExportData[type].push({
+            Month: label,
+            Days: actualDays,
+            DueBasic: pDueB,
+            DueDA: pDueDA,
+            DueHRA: pDueHRA,
+            DueCCA: pDueCCA,
+            DueGross: pDueGross,
+            DrawnBasic: pDrawnB,
+            DrawnDA: pDrawnDA,
+            DrawnHRA: pDrawnHRA,
+            DrawnCCA: pDrawnCCA,
+            DrawnGross: pDrawnGross,
+            DiffBasic: dDiffB,
+            DiffDA: dDiffDA,
+            DiffHRA: dDiffHRA,
+            DiffCCA: dDiffCCA,
+            DiffGross: dDiffGross,
+            Pension: pen,
+            Net: netArrear
+          });
+        });
+        current.setMonth(current.getMonth() + 1);
       }
 
-      let monthLabel = m.toLocaleString('en-US', { month: 'short' }) + "-" + year;
-      let activeDaPct = getHistoricalDaPct(m);
+      if (!hasRows) {
+        tbody.innerHTML =
+          `<tr><td colspan="19" style="text-align:center; padding:20px; color:#6b7280;">No arrears found for this period.</td></tr>`;
+        $(type + 'Wrapper').style.display = 'block';
+        return;
+      }
 
-      // Core computations for monthly values
-      let baseFacAllowance = statutoryFacMaxCell;
-      let daFacAllowance = Math.round(baseFacAllowance * (activeDaPct / 100));
-      let grossMonthlyFac = baseFacAllowance + daFacAllowance;
-
-      // Apply active execution window factor adjustments
-      let factor = activeDaysCount / totalDays;
-      let pr_grossFac = Math.round(grossMonthlyFac * factor);
-
-      // Statutory deductions logic: 10% TDS (Income Tax) + 4% Health & Education Cess
-      let itDed = Math.round(pr_grossFac * 0.10);
-      let cessDed = Math.round(itDed * 0.04);
-      let netFacPay = pr_grossFac - (itDed + cessDed);
-
-      totGrossFac += pr_grossFac;
-      totIt += itDed;
-      totCess += cessDed;
-      totNetFac += netFacPay;
-
-      records.push({
-        month: monthLabel, days: `${activeDaysCount}/${totalDays}`,
-        baseFac: Math.round(baseFacAllowance * factor),
-        daFac: Math.round(daFacAllowance * factor),
-        gross: pr_grossFac, it: itDed, cess: cessDed, net: netFacPay
-      });
-    });
-
-    globalArrearResults.fac = records;
-
-    let table = $("facTable");
-    table.innerHTML = `
-      <tr>
-        <th>Month</th><th>Duty Days</th><th>Prorated FAC Basic (₹)</th><th>FAC DA (₹)</th>
-        <th>Gross FAC (₹)</th><th>IT Deduct (10%) (₹)</th><th>Cess (4% of IT) (₹)</th><th style="background:#fdf4ff;">Net FAC Paid (₹)</th>
-      </tr>
-    `;
-
-    records.forEach(r => {
-      table.innerHTML += `
-        <tr>
-          <td>${r.month}</td><td><small>${r.days}</small></td>
-          <td>${r.baseFac}</td><td>${r.daFac}</td>
-          <td style="font-weight:600; color:var(--primary);">${r.gross}</td>
-          <td class="deduction-cell">${r.it}</td><td class="deduction-cell">${r.cess}</td>
-          <td style="font-weight:700; color:#7e22ce;">${r.net}</td>
-        </tr>
+      const trTotal = document.createElement('tr');
+      trTotal.className = 'total-row';
+      trTotal.innerHTML = `
+        <td>GRAND TOTAL</td><td>${totals.days}</td>
+        <td>${utils.formatCurr(totals.dueB)}</td><td>${utils.formatCurr(totals.dueDA)}</td><td>${utils.formatCurr(totals.dueHRA)}</td><td>${utils.formatCurr(totals.dueCCA)}</td><td style="color:#065f46;">${utils.formatCurr(totals.dueGross)}</td>
+        <td>${utils.formatCurr(totals.drawnB)}</td><td>${utils.formatCurr(totals.drawnDA)}</td><td>${utils.formatCurr(totals.drawnHRA)}</td><td>${utils.formatCurr(totals.drawnCCA)}</td><td style="color:#991b1b;">${utils.formatCurr(totals.drawnGross)}</td>
+        <td>${utils.formatCurr(totals.diffB)}</td><td>${utils.formatCurr(totals.diffDA)}</td><td>${utils.formatCurr(totals.diffHRA)}</td><td>${utils.formatCurr(totals.diffCCA)}</td><td style="color:#b45309;">${utils.formatCurr(totals.diffGross)}</td>
+        <td class="deduction-cell">- ${utils.formatCurr(totals.pen)}</td><td class="net-cell" style="font-size:1rem;">${utils.formatCurr(totals.net)}</td>
       `;
-    });
+      tbody.appendChild(trTotal);
 
-    table.innerHTML += `
-      <tr class="total-row">
-        <td colspan="4">GRAND TOTAL CEILINGS:</td>
-        <td style="color:var(--primary);">₹${totGrossFac.toLocaleString('en-IN')}</td>
-        <td class="deduction-cell">₹${totIt.toLocaleString('en-IN')}</td>
-        <td class="deduction-cell">₹${totCess.toLocaleString('en-IN')}</td>
-        <td style="font-size:1rem; background:#faf5ff; color:#7e22ce;">₹${totNetFac.toLocaleString('en-IN')}</td>
-      </tr>
-    `;
+      window.arrearExportData[type].push({
+        Month: 'GRAND TOTAL',
+        Days: totals.days,
+        DueBasic: totals.dueB,
+        DueDA: totals.dueDA,
+        DueHRA: totals.dueHRA,
+        DueCCA: totals.dueCCA,
+        DueGross: totals.dueGross,
+        DrawnBasic: totals.drawnB,
+        DrawnDA: totals.drawnDA,
+        DrawnHRA: totals.drawnHRA,
+        DrawnCCA: totals.drawnCCA,
+        DrawnGross: totals.drawnGross,
+        DiffBasic: totals.diffB,
+        DiffDA: totals.diffDA,
+        DiffHRA: totals.diffHRA,
+        DiffCCA: totals.diffCCA,
+        DiffGross: totals.diffGross,
+        Pension: totals.pen,
+        Net: totals.net
+      });
 
-    $("facWrapper").style.display = "block";
-  }
-
-  // ==================================================================
-  // BUSINESS ENGINE: PAY FIXATION ENGINE (FR 22B VS OPTION 2 COMPLIANCE)
-  // ==================================================================
-  function calculateFR22B() {
-    const lowerBasic = parseInt($("fixLowerBasic").value) || 0;
-    const promotedLevel = parseInt($("fixPromotedLevel").value) || 1;
-    const pDateStr = $("fixPromoDate").value;
-
-    if (lowerBasic === 0 || !pDateStr) {
-      alert("Please ensure your current basic pay and promotion date are defined.");
-      return;
+      $(type + 'Wrapper').style.display = 'block';
     }
+    window.generateAdvancedArrear = generateAdvancedArrear;
 
-    let pDate = new Date(pDateStr);
-    $("fixationLog").innerText = `Executing FR 22B Option 1 Analysis Matrix...\n`;
+    // ================================================================
+    //  FAC CALCULATOR
+    // ================================================================
+    function generateFacTable() {
+      if (document.querySelector('#facPanel .input-error'))
+        return alert('Cannot calculate: Please correct invalid Basic Pay value.');
 
-    // Step 1: Apply immediate conceptual 2 index step-ups within the lower post matrix hierarchy
-    let stage1 = findNextCellInMatrix(lowerBasic);
-    let stage2 = findNextCellInMatrix(stage1);
-    $("fixationLog").innerText += `Step-Up 1 in Lower Scale: ₹${stage1}\nStep-Up 2 in Lower Scale: ₹${stage2}\n`;
+      const startStr = $('facStart').value;
+      const endStr = $('facEnd').value;
+      if (!startStr || !endStr) return alert('Please select valid Start and End dates.');
+      const start = utils.parseLocal(startStr);
+      const end = utils.parseLocal(endStr);
+      if (end < start) return alert('FAC End date must be after Start.');
 
-    // Step 2: Fit perfectly inside the target level matrix mapping row
-    let targetLevelArr = TN_PAY_MATRIX[promotedLevel] || TN_PAY_MATRIX[1];
-    let fixedBasic = targetLevelArr[0];
-    for (let cell of targetLevelArr) {
-      if (cell >= stage2) {
-        fixedBasic = cell;
-        break;
-      }
-    }
-    $("fixationLog").innerText += `Fitted Target Cell in Level ${promotedLevel}: ₹${fixedBasic}\n`;
-
-    renderFixationMatrix(pDate, fixedBasic, "FR 22B (Fixed Instantly on Promotion)");
-  }
-
-  function calculateOption2() {
-    const lowerBasic = parseInt($("fixLowerBasic").value) || 0;
-    const promotedLevel = parseInt($("fixPromotedLevel").value) || 1;
-    const pDateStr = $("fixPromoDate").value;
-    const normalDniMonth = parseInt($("fixNormalDNI").value);
-
-    if (lowerBasic === 0 || !pDateStr) {
-      alert("Please identify lower post configuration boundaries.");
-      return;
-    }
-
-    let pDate = new Date(pDateStr);
-    $("fixationLog").innerText = `Executing FR 22(1)(a)(i) Option 2 Track...\n`;
-
-    // Timeline Phase A: Fix at immediate higher step inside upper matrix level row from Promotion Date to Next DNI
-    let targetLevelArr = TN_PAY_MATRIX[promotedLevel] || TN_PAY_MATRIX[1];
-    let interimFixed = targetLevelArr[0];
-    for (let cell of targetLevelArr) {
-      if (cell > lowerBasic) {
-        interimFixed = cell;
-        break;
-      }
-    }
-    $("fixationLog").innerText += `Phase A Interim Step-Up (Promotion to DNI): ₹${interimFixed}\n`;
-
-    // Timeline Phase B: On reaching DNI, award routine increment first in the lower post, then apply FR 22B index steps
-    let lowerPostWithDniInc = findNextCellInMatrix(lowerBasic);
-    let lowerPostStage1 = findNextCellInMatrix(lowerPostWithDniInc);
-    let lowerPostStage2 = findNextCellInMatrix(lowerPostStage1);
-
-    let finalDniFixedPay = targetLevelArr[0];
-    for (let cell of targetLevelArr) {
-      if (cell >= lowerPostStage2) {
-        finalDniFixedPay = cell;
-        break;
-      }
-    }
-    $("fixationLog").innerText += `Phase B DNI Re-Fixation Step [FR 22(1)(a)(i)] implemented successfully.\nFinal Value on DNI: ₹${finalDniFixedPay}\n`;
-
-    renderFixationMatrix(pDate, interimFixed, "Option 2 [FR 22(1)(a)(i)] Split Tracking", normalDniMonth, finalDniFixedPay);
-  }
-
-  function renderFixationMatrix(promoDate, initialPay, modeLabel, dniMonthIdx = null, postDniPay = null) {
-    let table = $("fixationTable");
-    table.innerHTML = `<tr><th>Month Timeline block</th><th>Designated Basic Pay Level (₹)</th><th>Estimated Gross Variance (₹)</th><th>Strategic Operational Rules Applied</th></tr>`;
-
-    let loopDate = new Date(promoDate.getFullYear(), promoDate.getMonth(), 1);
-    let currentActivePay = initialPay;
-    let dniTriggered = false;
-
-    for (let i = 1; i <= 24; i++) {
-      let mLabel = loopDate.toLocaleString('en-US', { month: 'short' }) + "-" + loopDate.getFullYear();
-      let trackingRuleText = "Asymptotic Fixed Base";
-
-      if (i === 1) {
-        trackingRuleText = `Promotion Execution: ${modeLabel}`;
-      }
-
-      // Check for Option 2 DNI cross-over points
-      if (dniMonthIdx !== null && !dniTriggered && loopDate.getMonth() === dniMonthIdx) {
-        if (loopDate > promoDate || (loopDate.getFullYear() === promoDate.getFullYear() && loopDate.getMonth() === promoDate.getMonth())) {
-          currentActivePay = postDniPay;
-          trackingRuleText = "DNI Re-Fixation Step Awarded";
-          dniTriggered = true;
+      const lops = [];
+      document.querySelectorAll('#facLopContainer .lop-row').forEach(row => {
+        const f = row.querySelector('.lop-from').value;
+        const t = row.querySelector('.lop-to').value;
+        if (f && t) {
+          const fs = utils.parseLocal(f);
+          const ts = utils.parseLocal(t);
+          if (ts >= fs) lops.push({ start: fs, end: ts, days: Math.ceil((ts - fs) / (1000 * 60 * 60 * 24)) + 1 });
         }
-      }
-
-      // Automatically award annual index steps every 12 months after the initial milestone is cleared
-      if (i === 13 && !dniTriggered) {
-        currentActivePay = findNextCellInMatrix(currentActivePay);
-        trackingRuleText = "First Post-Fixation Annual Increment";
-      } else if (i === 24) {
-        currentActivePay = findNextCellInMatrix(currentActivePay);
-        trackingRuleText = "Second Post-Fixation Annual Increment Cycle";
-      }
-
-      let computedDa = Math.round(currentActivePay * (getHistoricalDaPct(loopDate) / 100));
-      let estimatedGross = currentActivePay + computedDa;
-
-      table.innerHTML += `
-        <tr>
-          <td><strong>Month ${i}:</strong> ${mLabel}</td>
-          <td style="color:var(--accent); font-weight:700;">₹${currentActivePay.toLocaleString('en-IN')}</td>
-          <td>₹${estimatedGross.toLocaleString('en-IN')}</td>
-          <td><span class="badge">${trackingRuleText}</span></td>
-        </tr>
-      `;
-
-      loopDate.setMonth(loopDate.getMonth() + 1);
-    }
-
-    $("fixationWrapper").style.display = "block";
-  }
-
-  // ==================================================================
-  // EXPORT ENGINE CORE TIER (UNIVERSAL FILE WRITER HOOKS)
-  // ==================================================================
-  function triggerExport(tabType) {
-    const format = $(`exportFormat_${tabType}`).value;
-    const dataset = globalArrearResults[tabType];
-
-    if (!dataset || dataset.length === 0) {
-      alert("No active matrix blocks to extract. Please execute calculations first.");
-      return;
-    }
-
-    if (format === "csv") {
-      let csvContent = "data:text/csv;charset=utf-8,";
-      csvContent += Object.keys(dataset[0]).join(",") + "\n";
-      dataset.forEach(row => {
-        csvContent += Object.values(row).join(",") + "\n";
       });
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `UrudhiFi_${tabType}_Export.csv`);
-      document.body.appendChild(link);
+
+      const basic = parseFloat($('facBasic').value) || 0;
+      const facPct = parseFloat($('facPercent').value) || 0;
+      const facMinPay = parseFloat($('facMinPay').value) || 0;
+
+      const basic20 = basic * (facPct / 100);
+      const minPay50 = facMinPay * 0.5;
+      const eligibleFacBasic = Math.min(basic20, minPay50);
+
+      const table = $('facTable');
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th class="th-final">Month</th>
+            <th class="th-final">Active Days</th>
+            <th class="th-due">Full Basic<br><span style="font-size:0.7rem;font-weight:normal;">(Prorated)</span></th>
+            <th class="th-due">Eligible FAC Basic<br><span style="font-size:0.7rem;font-weight:normal;">(Lesser)</span></th>
+            <th class="th-due">FAC DA<br><span style="font-size:0.7rem;font-weight:normal;">(Auto %)</span></th>
+            <th class="th-due" style="font-weight:bold;">Prorated<br>Gross FAC</th>
+            <th class="th-drawn deduction-cell">IT (10%)</th>
+            <th class="th-drawn deduction-cell">Cess (4%)</th>
+            <th class="th-drawn deduction-cell" style="font-weight:bold;">Total Deduction</th>
+            <th class="th-final" style="font-weight:bold; color:var(--brand-action);">Net FAC Arrear</th>
+          </tr>
+        </thead>
+        <tbody id="facBody"></tbody>
+      `;
+      const tbody = $('facBody');
+      window.arrearExportData['fac'] = [];
+
+      let totals = { days: 0, fullBasic: 0, basic: 0, da: 0, gross: 0, it: 0, cess: 0, totalDed: 0, net: 0 };
+      let current = new Date(start.getFullYear(), start.getMonth(), 1);
+      const endLimit = new Date(end.getFullYear(), end.getMonth(), 1);
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      let hasRows = false;
+
+      while (current <= endLimit) {
+        const year = current.getFullYear(),
+          month = current.getMonth();
+        const maxDays = new Date(year, month + 1, 0).getDate();
+        let activeStart = (year === start.getFullYear() && month === start.getMonth()) ? start.getDate() : 1;
+        let activeEnd = (year === end.getFullYear() && month === end.getMonth()) ? end.getDate() : maxDays;
+
+        const chunkStart = new Date(year, month, activeStart);
+        const chunkEnd = new Date(year, month, activeEnd);
+        let lopThisChunk = 0;
+        lops.forEach(l => {
+          const overlapStart = l.start > chunkStart ? l.start : chunkStart;
+          const overlapEnd = l.end < chunkEnd ? l.end : chunkEnd;
+          if (overlapStart <= overlapEnd) lopThisChunk += Math.ceil((overlapEnd - overlapStart) / (1000 * 60 * 60 *
+            24)) + 1;
+        });
+        const actualDays = (activeEnd - activeStart + 1) - lopThisChunk;
+        if (actualDays > 0) {
+          hasRows = true;
+          const daPct = utils.getDaPercent(chunkStart);
+          const eligibleFacDa = Math.round(eligibleFacBasic * (daPct / 100));
+
+          const pFullBasic = Math.round((basic / maxDays) * actualDays);
+          const pBasic = Math.round((eligibleFacBasic / maxDays) * actualDays);
+          const pDa = Math.round((eligibleFacDa / maxDays) * actualDays);
+          const proratedGross = pBasic + pDa;
+
+          const itDed = Math.round(proratedGross * 0.10);
+          const cessDed = Math.round(itDed * 0.04);
+          const totalDed = itDed + cessDed;
+          const netFac = proratedGross - totalDed;
+
+          totals.days += actualDays;
+          totals.fullBasic += pFullBasic;
+          totals.basic += pBasic;
+          totals.da += pDa;
+          totals.gross += proratedGross;
+          totals.it += itDed;
+          totals.cess += cessDed;
+          totals.totalDed += totalDed;
+          totals.net += netFac;
+
+          let label = `${monthNames[month]} ${year}`;
+          if (activeStart > 1 || activeEnd < maxDays) label += ` (${activeStart}-${activeEnd})`;
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${label}</td>
+            <td>${actualDays}</td>
+            <td>${utils.formatCurr(pFullBasic)}</td>
+            <td>${utils.formatCurr(pBasic)}</td>
+            <td>${utils.formatCurr(pDa)} <br><span style="font-size:0.75rem; color:#6b7280;">(${daPct}%)</span></td>
+            <td style="font-weight:bold; color:#065f46;">${utils.formatCurr(proratedGross)}</td>
+            <td class="deduction-cell">- ${utils.formatCurr(itDed)}</td>
+            <td class="deduction-cell">- ${utils.formatCurr(cessDed)}</td>
+            <td class="deduction-cell" style="font-weight:bold;">- ${utils.formatCurr(totalDed)}</td>
+            <td class="net-cell" style="font-size:0.95rem;">${utils.formatCurr(netFac)}</td>
+          `;
+          tbody.appendChild(tr);
+
+          window.arrearExportData['fac'].push({
+            Month: label,
+            Days: actualDays,
+            FullBasic: pFullBasic,
+            Basic: pBasic,
+            DA: pDa,
+            Gross: proratedGross,
+            IT: itDed,
+            Cess: cessDed,
+            TotalDed: totalDed,
+            Net: netFac
+          });
+        }
+        current.setMonth(current.getMonth() + 1);
+      }
+
+      if (!hasRows) {
+        tbody.innerHTML =
+          `<tr><td colspan="10" style="text-align:center; padding:20px; color:#6b7280;">No valid active FAC days found.</td></tr>`;
+        $('facWrapper').style.display = 'block';
+        return;
+      }
+
+      const trTotal = document.createElement('tr');
+      trTotal.className = 'total-row';
+      trTotal.innerHTML = `
+        <td>GRAND TOTAL</td><td>${totals.days}</td>
+        <td>${utils.formatCurr(totals.fullBasic)}</td>
+        <td>${utils.formatCurr(totals.basic)}</td>
+        <td>${utils.formatCurr(totals.da)}</td>
+        <td style="color:#065f46;">${utils.formatCurr(totals.gross)}</td>
+        <td class="deduction-cell">- ${utils.formatCurr(totals.it)}</td>
+        <td class="deduction-cell">- ${utils.formatCurr(totals.cess)}</td>
+        <td class="deduction-cell" style="font-weight:bold;">- ${utils.formatCurr(totals.totalDed)}</td>
+        <td class="net-cell" style="font-size:1.1rem;">${utils.formatCurr(totals.net)}</td>
+      `;
+      tbody.appendChild(trTotal);
+
+      window.arrearExportData['fac'].push({
+        Month: 'GRAND TOTAL',
+        Days: totals.days,
+        FullBasic: totals.fullBasic,
+        Basic: totals.basic,
+        DA: totals.da,
+        Gross: totals.gross,
+        IT: totals.it,
+        Cess: totals.cess,
+        TotalDed: totals.totalDed,
+        Net: totals.net
+      });
+
+      $('facWrapper').style.display = 'block';
+    }
+    window.generateFacTable = generateFacTable;
+
+    // ================================================================
+    //  FIXATION ENGINES
+    // ================================================================
+    function calculateFR22B() {
+      const lowerBasic = parseFloat($('fixLowerBasic').value);
+      const promotedLevel = parseInt($('fixPromotedLevel').value);
+      const log = $('fr22bLog');
+      if (!lowerBasic || !promotedLevel || promotedLevel < 1 || promotedLevel > 32) {
+        log.innerHTML =
+        '<span style="color:var(--error-red);">Please enter a valid Lower Post Basic Pay and a Promoted Level (1-32).</span>';
+        return;
+      }
+
+      let currentLevel = -1,
+        currentCell = -1;
+      for (let l = 1; l <= 32; l++) {
+        const idx = window.payMatrix[l].indexOf(lowerBasic);
+        if (idx !== -1) { currentLevel = l;
+          currentCell = idx; break; }
+      }
+      if (currentLevel === -1) {
+        log.innerHTML = `<span style="color:var(--error-red);">Basic Pay ₹${lowerBasic} not found in matrix.</span>`;
+        return;
+      }
+      if (currentCell + 1 >= window.payMatrix[currentLevel].length) {
+        log.innerHTML = `<span style="color:var(--error-red);">Max cell reached at Level ${currentLevel}.</span>`;
+        return;
+      }
+      const notionalPay = window.payMatrix[currentLevel][currentCell + 1];
+      let fixedPay = -1,
+        fixedCell = -1;
+      for (let i = 0; i < window.payMatrix[promotedLevel].length; i++) {
+        if (window.payMatrix[promotedLevel][i] >= notionalPay) { fixedPay = window.payMatrix[promotedLevel][i];
+          fixedCell = i; break; }
+      }
+      if (fixedPay === -1) {
+        log.innerHTML =
+          `<span style="color:var(--error-red);">Notional pay ₹${notionalPay} exceeds max of Level ${promotedLevel}.</span>`;
+        return;
+      }
+
+      $('fixOpt1Pay').value = fixedPay;
+      validateInputAndCalc($('fixOpt1Pay'));
+
+      log.innerHTML = `
+        <span style="color:#166534;">✅ Option 1 (FR 22B) execution:</span>
+        Step 1: Base ₹${lowerBasic} at Level ${currentLevel} (Cell ${currentCell+1})
+        Step 2: 1 increment → ₹${notionalPay}
+        Step 3: Jump to Level ${promotedLevel} → <b>₹${fixedPay}</b> (Cell ${fixedCell+1})
+      `;
+    }
+    window.calculateFR22B = calculateFR22B;
+
+    function calculateOption2() {
+      const lowerBasic = parseFloat($('fixLowerBasic').value);
+      const promotedLevel = parseInt($('fixPromotedLevel').value);
+      const log = $('fr22bLog');
+      if (!lowerBasic || !promotedLevel || promotedLevel < 1 || promotedLevel > 32) {
+        log.innerHTML =
+          '<span style="color:var(--error-red);">Please enter a valid Lower Post Basic Pay and a Promoted Level (1-32).</span>';
+        return;
+      }
+
+      let currentLevel = -1,
+        currentCell = -1;
+      for (let l = 1; l <= 32; l++) {
+        const idx = window.payMatrix[l].indexOf(lowerBasic);
+        if (idx !== -1) { currentLevel = l;
+          currentCell = idx; break; }
+      }
+      if (currentLevel === -1) {
+        log.innerHTML = `<span style="color:var(--error-red);">Basic Pay ₹${lowerBasic} not found in matrix.</span>`;
+        return;
+      }
+
+      let initialPay = -1,
+        initCell = -1;
+      for (let i = 0; i < window.payMatrix[promotedLevel].length; i++) {
+        if (window.payMatrix[promotedLevel][i] >= lowerBasic) { initialPay = window.payMatrix[promotedLevel][i];
+          initCell = i; break; }
+      }
+      if (initialPay === -1) {
+        log.innerHTML = `<span style="color:var(--error-red);">Lower pay exceeds max of Level ${promotedLevel}.</span>`;
+        return;
+      }
+      if (currentCell + 2 >= window.payMatrix[currentLevel].length) {
+        log.innerHTML =
+        `<span style="color:var(--error-red);">Max cell reached at Level ${currentLevel} for 2 increments.</span>`;
+        return;
+      }
+      const notionalPay2 = window.payMatrix[currentLevel][currentCell + 2];
+      let refixedPay = -1,
+        refixCell = -1;
+      for (let i = 0; i < window.payMatrix[promotedLevel].length; i++) {
+        if (window.payMatrix[promotedLevel][i] >= notionalPay2) { refixedPay = window.payMatrix[promotedLevel][i];
+          refixCell = i; break; }
+      }
+      if (refixedPay === -1) {
+        log.innerHTML =
+          `<span style="color:var(--error-red);">Notional pay ₹${notionalPay2} exceeds max of Level ${promotedLevel}.</span>`;
+        return;
+      }
+
+      $('fixOpt2Initial').value = initialPay;
+      $('fixOpt2Refixed').value = refixedPay;
+      validateInputAndCalc($('fixOpt2Initial'));
+      validateInputAndCalc($('fixOpt2Refixed'));
+
+      log.innerHTML = `
+        <span style="color:#1d4ed8;">✅ Option 2 [FR 22(1)(a)(i)] execution:</span>
+        Phase 1: Jump from ₹${lowerBasic} to Level ${promotedLevel} → <b>₹${initialPay}</b> (Cell ${initCell+1})
+        Phase 2: 2 increments in lower scale → ₹${notionalPay2}
+        Re-fixation: Jump to Level ${promotedLevel} → <b>₹${refixedPay}</b> (Cell ${refixCell+1})
+      `;
+    }
+    window.calculateOption2 = calculateOption2;
+
+    function generateFixationComparison() {
+      if (document.querySelector('#fixationPanel .input-error'))
+        return alert('Cannot compare: Please correct invalid Basic Pay value(s).');
+
+      const promoStr = $('fixPromoDate').value;
+      const dniMonth = parseInt($('fixNormalDNI').value);
+      const o1Pay = parseFloat($('fixOpt1Pay').value);
+      const o2Init = parseFloat($('fixOpt2Initial').value);
+      const o2Refixed = parseFloat($('fixOpt2Refixed').value);
+      if (!promoStr || !o1Pay || !o2Init || !o2Refixed)
+        return alert('Please fill in Promotion Date and all 3 Basic Pay values.');
+
+      const promoDate = utils.parseLocal(promoStr);
+      const startYear = promoDate.getFullYear(),
+        startMonth = promoDate.getMonth();
+      let dniYear = startYear;
+      if (dniMonth <= startMonth) dniYear++;
+      const dniDate = new Date(dniYear, dniMonth, 1);
+
+      const table = $('fixationTable');
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th rowspan="2" class="th-final">Month / Year</th>
+            <th rowspan="2" class="th-final">Days</th>
+            <th colspan="3" style="background:#f0fdf4; color:#166534; text-align:center; border:1px solid #bbf7d0;">Option 1: Direct FR 22B</th>
+            <th colspan="3" style="background:#eff6ff; color:#1d4ed8; text-align:center; border:1px solid #bfdbfe;">Option 2: FR 22(1)(a)(i)</th>
+            <th rowspan="2" class="th-diff">Difference<br>(Opt 2 - Opt 1)</th>
+          </tr>
+          <tr>
+            <th style="background:#f0fdf4;">Basic</th><th style="background:#f0fdf4;">DA</th><th style="background:#f0fdf4; font-weight:bold;">Gross</th>
+            <th style="background:#eff6ff;">Basic</th><th style="background:#eff6ff;">DA</th><th style="background:#eff6ff; font-weight:bold;">Gross</th>
+          </tr>
+        </thead>
+        <tbody id="fixationBody"></tbody>
+      `;
+      const tbody = $('fixationBody');
+
+      let current = new Date(promoDate.getFullYear(), promoDate.getMonth(), 1);
+      const endLimit = new Date(promoDate.getFullYear(), promoDate.getMonth() + 23, 1);
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      let totalOpt1 = 0,
+        totalOpt2 = 0,
+        diffOverall = 0;
+
+      while (current <= endLimit) {
+        const year = current.getFullYear(),
+          month = current.getMonth();
+        const maxDays = new Date(year, month + 1, 0).getDate();
+        const activeStart = (year === promoDate.getFullYear() && month === promoDate.getMonth()) ? promoDate.getDate() : 1;
+        const actualDays = (maxDays - activeStart) + 1;
+        const chunkStart = new Date(year, month, activeStart);
+        const daPct = utils.getDaPercent(chunkStart);
+
+        const p1Basic = Math.round((o1Pay / maxDays) * actualDays);
+        const p1Da = Math.round((Math.round(o1Pay * (daPct / 100)) / maxDays) * actualDays);
+        const p1Gross = p1Basic + p1Da;
+
+        let p2Basic, p2Da, p2Gross;
+        if (year === dniDate.getFullYear() && month === dniDate.getMonth() && activeStart === 1) {
+          p2Basic = Math.round((o2Refixed / maxDays) * actualDays);
+          p2Da = Math.round((Math.round(o2Refixed * (daPct / 100)) / maxDays) * actualDays);
+        } else if (chunkStart >= dniDate) {
+          p2Basic = Math.round((o2Refixed / maxDays) * actualDays);
+          p2Da = Math.round((Math.round(o2Refixed * (daPct / 100)) / maxDays) * actualDays);
+        } else {
+          p2Basic = Math.round((o2Init / maxDays) * actualDays);
+          p2Da = Math.round((Math.round(o2Init * (daPct / 100)) / maxDays) * actualDays);
+        }
+        p2Gross = p2Basic + p2Da;
+
+        const diff = p2Gross - p1Gross;
+        totalOpt1 += p1Gross;
+        totalOpt2 += p2Gross;
+        diffOverall += diff;
+
+        let label = `${monthNames[month]} ${year}`;
+        if (activeStart > 1) label += ` (${activeStart}-${maxDays})`;
+        const isDniHit = (year === dniDate.getFullYear() && month === dniDate.getMonth());
+        const dniMarker = isDniHit ? ' <span style="font-size:0.7rem; color:#b45309; font-weight:bold;">(DNI Re-fix)</span>' : '';
+
+        const tr = document.createElement('tr');
+        if (isDniHit) tr.style = 'background-color: #fef9c3;';
+        tr.innerHTML = `
+          <td>${label}${dniMarker}</td>
+          <td>${actualDays}</td>
+          <td>${utils.formatCurr(p1Basic)}</td><td>${utils.formatCurr(p1Da)}</td><td style="font-weight:bold; color:#166534;">${utils.formatCurr(p1Gross)}</td>
+          <td>${utils.formatCurr(p2Basic)}</td><td>${utils.formatCurr(p2Da)}</td><td style="font-weight:bold; color:#1d4ed8;">${utils.formatCurr(p2Gross)}</td>
+          <td style="font-weight:bold; color:${diff > 0 ? '#059669' : (diff < 0 ? '#dc2626' : '#6b7280')};">${diff > 0 ? '+' : ''}${utils.formatCurr(diff)}</td>
+        `;
+        tbody.appendChild(tr);
+
+        current.setMonth(current.getMonth() + 1);
+      }
+
+      const trTotal = document.createElement('tr');
+      trTotal.className = 'total-row';
+      trTotal.innerHTML = `
+        <td colspan="2">24 MONTH TOTAL</td>
+        <td colspan="2"></td><td style="color:#166534; font-size:1.1rem;">${utils.formatCurr(totalOpt1)}</td>
+        <td colspan="2"></td><td style="color:#1d4ed8; font-size:1.1rem;">${utils.formatCurr(totalOpt2)}</td>
+        <td style="color:${diffOverall > 0 ? '#059669' : '#dc2626'}; font-size:1.1rem;">${diffOverall > 0 ? '+' : ''}${utils.formatCurr(diffOverall)}</td>
+      `;
+      tbody.appendChild(trTotal);
+
+      $('fixationResult').style.display = 'block';
+
+      const recDiv = $('fixationRecommendation');
+      if (diffOverall > 0) {
+        recDiv.style.background = '#eff6ff';
+        recDiv.style.color = '#1e40af';
+        recDiv.style.border = '2px solid #bfdbfe';
+        recDiv.innerHTML =
+          `✅ RECOMMENDATION: Go with <strong>Option 2 [FR 22(1)(a)(i)]</strong>.<br><span style="font-size:0.9rem; font-weight:normal;">It yields <strong>₹${utils.formatCurr(diffOverall)}</strong> MORE than Option 1.</span>`;
+      } else if (diffOverall < 0) {
+        recDiv.style.background = '#f0fdf4';
+        recDiv.style.color = '#166534';
+        recDiv.style.border = '2px solid #bbf7d0';
+        recDiv.innerHTML =
+          `✅ RECOMMENDATION: Go with <strong>Option 1 (Direct FR 22B)</strong>.<br><span style="font-size:0.9rem; font-weight:normal;">It yields <strong>₹${utils.formatCurr(Math.abs(diffOverall))}</strong> MORE than Option 2.</span>`;
+      } else {
+        recDiv.style.background = '#f3f4f6';
+        recDiv.style.color = '#374151';
+        recDiv.style.border = '2px solid #e5e7eb';
+        recDiv.innerHTML = `⚖️ Both options yield the same over 24 months. Option 1 provides immediate benefits.`;
+      }
+    }
+    window.generateFixationComparison = generateFixationComparison;
+
+    // ================================================================
+    //  EXPORT ENGINE
+    // ================================================================
+    function triggerExport(type) {
+      const data = window.arrearExportData[type];
+      if (!data || data.length === 0) return alert('Please click "Calculate" first to generate data.');
+
+      const format = document.getElementById('exportFormat_' + type).value;
+      const penLabel = $('pensionType').value;
+
+      if (type === 'fac') {
+        const title = 'FAC_Allowance_Statement';
+        if (format === 'csv') {
+          let csv =
+            'Month,Active Days,Full Basic Pay (Prorated),Eligible FAC Basic,FAC DA Amount,Prorated Gross FAC,Income Tax (10%),IT Cess (4%),Total Deduction,Net FAC Arrear\n';
+          data.forEach(r => { csv +=
+              `"${r.Month}",${r.Days},${r.FullBasic},${r.Basic},${r.DA},${r.Gross},${r.IT},${r.Cess},${r.TotalDed},${r.Net}\n`
+              ; });
+          downloadFile(csv, `${title}.csv`, 'text/csv');
+        } else {
+          let html = `<html><head><meta charset="utf-8"><style>table{border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:12px;} th,td{border:1px solid #000;padding:6px;text-align:right;} th{background-color:#f2f2f2;text-align:center;} th:first-child,td:first-child{text-align:left;}</style></head><body><h2>${title.replace(/_/g,' ')}</h2><table>
+          <tr><th>Month</th><th>Active Days</th><th>Full Basic Pay (Prorated)</th><th>Eligible FAC Basic</th><th>FAC DA Amount</th><th>Prorated Gross FAC</th><th>Income Tax (10%)</th><th>IT Cess (4%)</th><th>Total Deduction</th><th>Net FAC Arrear</th></tr>`;
+          data.forEach(r => {
+            const bold = r.Month === 'GRAND TOTAL' ? 'font-weight:bold; background-color:#f9f9f9;' : '';
+            html +=
+              `<tr style="${bold}"><td>${r.Month}</td><td>${r.Days}</td><td>${r.FullBasic}</td><td>${r.Basic}</td><td>${r.DA}</td><td>${r.Gross}</td><td>${r.IT}</td><td>${r.Cess}</td><td>${r.TotalDed}</td><td>${r.Net}</td></tr>`;
+          });
+          html += `</table></body></html>`;
+          downloadFile('\ufeff' + html, `${title}.doc`, 'application/msword');
+        }
+        return;
+      }
+
+      const title = type === 'inc' ? 'Increment_Arrear_Statement' : 'Promotion_Arrear_Statement';
+      if (format === 'csv') {
+        let csv =
+          `Month,Days,Due Basic,Due DA,Due HRA,Due CCA,Due Gross,Drawn Basic,Drawn DA,Drawn HRA,Drawn CCA,Drawn Gross,Diff Basic,Diff DA,Diff HRA,Diff CCA,Diff Gross,Pension Ded (${penLabel}),Net Arrear\n`;
+        data.forEach(r => { csv +=
+            `"${r.Month}",${r.Days},${r.DueBasic},${r.DueDA},${r.DueHRA},${r.DueCCA},${r.DueGross},${r.DrawnBasic},${r.DrawnDA},${r.DrawnHRA},${r.DrawnCCA},${r.DrawnGross},${r.DiffBasic},${r.DiffDA},${r.DiffHRA},${r.DiffCCA},${r.DiffGross},${r.Pension},${r.Net}\n`
+            ; });
+        downloadFile(csv, `${title}.csv`, 'text/csv');
+      } else {
+        let html = `<html><head><meta charset="utf-8"><style>table{border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:11px;} th,td{border:1px solid #000;padding:4px;text-align:right;} th{background-color:#f2f2f2;text-align:center;} th:first-child,td:first-child{text-align:left;}</style></head><body><h2>${title.replace(/_/g,' ')}</h2><table>
+        <tr><th rowspan="2">Month</th><th rowspan="2">Days</th><th colspan="5">Due (Higher Pay)</th><th colspan="5">Drawn (Lower Pay)</th><th colspan="5">Difference</th><th rowspan="2">Pension (${penLabel})</th><th rowspan="2">Net Arrear</th></tr>
+        <tr><th>Basic</th><th>DA</th><th>HRA</th><th>CCA</th><th>Gross</th><th>Basic</th><th>DA</th><th>HRA</th><th>CCA</th><th>Gross</th><th>Basic</th><th>DA</th><th>HRA</th><th>CCA</th><th>Gross</th></tr>`;
+        data.forEach(r => {
+          const bold = r.Month === 'GRAND TOTAL' ? 'font-weight:bold; background-color:#f9f9f9;' : '';
+          html +=
+            `<tr style="${bold}"><td>${r.Month}</td><td>${r.Days}</td><td>${r.DueBasic}</td><td>${r.DueDA}</td><td>${r.DueHRA}</td><td>${r.DueCCA}</td><td>${r.DueGross}</td><td>${r.DrawnBasic}</td><td>${r.DrawnDA}</td><td>${r.DrawnHRA}</td><td>${r.DrawnCCA}</td><td>${r.DrawnGross}</td><td>${r.DiffBasic}</td><td>${r.DiffDA}</td><td>${r.DiffHRA}</td><td>${r.DiffCCA}</td><td>${r.DiffGross}</td><td>${r.Pension}</td><td>${r.Net}</td></tr>`;
+        });
+        html += `</table></body></html>`;
+        downloadFile('\ufeff' + html, `${title}.doc`, 'application/msword');
+      }
+    }
+    window.triggerExport = triggerExport;
+
+    function downloadFile(content, filename, mime) {
+      const blob = new Blob([content], { type: mime + ';charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
       link.click();
-      document.body.removeChild(link);
-    } else if (format === "word") {
-      let html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><title>UrudhiFi Statement</title><style>table { border-collapse:collapse; width:100%; } th, td { border:1px solid #ccc; padding:6px; font-size:11px; text-align:right; }</style></head><body><h3>UrudhiFi Statement - ${tabType.toUpperCase()}</h3><table>`;
-      html += $(`${tabType}Table`).innerHTML;
-      html += "</table></body></html>";
-
-      let blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-      let url = URL.createObjectURL(blob);
-      let a = document.createElement("a");
-      a.href = url;
-      a.download = `UrudhiFi_${tabType}_Statement.doc`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(link.href), 100);
     }
-  }
 
-  // ==================================================================
-  // INITIALIZATION HANDLERS ON DOCUMENT LOADED
-  // ==================================================================
-  window.addEventListener("DOMContentLoaded", () => {
-    // Standard Tab Controller Setup
+    // ================================================================
+    //  TAB NAVIGATION
+    // ================================================================
     document.querySelectorAll('.nav-tab').forEach(tab => {
       tab.addEventListener('click', function() {
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         this.classList.add('active');
         const target = this.dataset.tab;
         document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-        $(target).classList.add('active');
+        document.getElementById(target).classList.add('active');
       });
     });
 
-    // Populate active calendar dates automatically
+    // ================================================================
+    //  INITIALISE
+    // ================================================================
     const today = new Date();
-    const currentYear = today.getFullYear();
-    
-    $("daPercent").value = 53; // Default historical baseline
-    $("facStart").value = `${currentYear}-04-01`;
-    $("facEnd").value = `${currentYear}-06-30`;
-    $("incStart").value = `${currentYear}-01-01`;
-    $("incEnd").value = `${currentYear}-12-31`;
-    $("promoStart").value = `${currentYear}-01-15`;
-    $("promoEnd").value = `${currentYear}-03-10`;
-    $("fixPromoDate").value = `${currentYear}-05-15`;
+    daPercent.value = utils.getDaPercent(today);
 
-    // Attach basic input recalculation event loops
-    document.querySelectorAll('.grid-2 input[type="number"], .grid-2 select').forEach(el => {
-      el.addEventListener('input', calculateMainSalary);
-    });
-    document.querySelectorAll('input[name="hraGrade"], input[name="ccaGrade"]').forEach(el => {
-      el.addEventListener('change', calculateMainSalary);
-    });
+    const y = today.getFullYear();
+    $('facStart').value = `${y}-04-01`;
+    $('facEnd').value = `${y}-06-30`;
+    $('incStart').value = `${y}-01-01`;
+    $('incEnd').value = `${y}-12-31`;
+    document.querySelector('.inc-date').value = `${y}-07-01`;
+    $('promoStart').value = `${y}-01-15`;
+    $('promoEnd').value = `${y}-03-10`;
+    $('fixPromoDate').value = `${y}-05-15`;
+
+    document.querySelectorAll('.grid-2 input[type="number"], .grid-2 select, #globalMonth')
+      .forEach(el => el.addEventListener('input', calculateMainSalary));
+    document.querySelectorAll('input[name="hraGrade"], input[name="ccaGrade"]')
+      .forEach(el => el.addEventListener('change', calculateMainSalary));
 
     calculateMainSalary();
-  });
+  })();
 </script>
 </body>
 </html>
